@@ -2,7 +2,8 @@
 
 ##### Table of Contents  
 [Purpose](#purpose)  
-[Reasoning](#reasoning)  
+[Features](#features)
+[How Does It Work](how-does-it-work)
 [Concepts](#concepts)  
 [What's Provided](#whats-provided)  
 [Installing](#installing)  
@@ -16,41 +17,44 @@
 
 To facilitate the development of cooperative multicontainer services/applications by extending core Docker CLI commands to operate on related groups of images/containers managed by the local Docker Daemon.  Embodied in facilitation is a desire to accelerate the iterative development loop through the use of simple configuration settings and applying the efficiency of local file and computing resources to avoid the potential complexity of web service interfaces, as well as network and service contention delays inherent to these typically remote centrailized ones.
 
-### Features
-+ Use simple commands like ```dlw build```,```dlw run```, and ```dlw images``` to manage and report on an application/service composed from multiple cooperating containers.
-+ Launch and concurrently attach to the terminal interfaces of multiple containers using the terminal multiplex feature of [GNU screen](http://www.gnu.org/software/screen/).
-+ Combined GNU screen, [linux watch](http://en.wikipedia.org/wiki/Watch_%28Unix%29) and reporting commands like 'top' and 'ps' to actively monitor the status of multiple containers.
-+ Enhance report generation by associating custom attributes to a docker image. 
-+ Track previous versions of docker images and with single command remove all prior versions and their associated containers, ordering their removal to avoid "Conflict" errors issued by the Docker Daemon.
-+ Add custom extensions and repair code without changing existing script source.
-+ Enjoy the benefits of delivering and running this tool within a container.   
-
-### How Does It Work
-In a nutshell, most dlw commands [wrap](http://en.wikipedia.org/wiki/Adapter_pattern) a corresponding Docker CLI command.  The wrapper adapts/transforms the dlw Component and Project abstractions to an equivalent list of targeted images/containers.  These image/container lists are then used, along with a rudimentry command template, to generate a Docker CLI stream consisting of one or more individual Docker CLI commands which implement the original dlw command.  Besides its template generation feature, the dlw, through a 'Dependency' configuration file, applies a directed graph to order the individual Docker CLI commands within the CLI stream according to the declared dependencies, to better ensure the successful execution of the entire stream.  For example, assuming a Project labeled 'sample' contains four Components: dlw_parent, dlw_sshserver, dlw_mysql and dlw_apache.  Further suppose the dlw_parent Component is lexically included ([see FROM](http://docs.docker.io/reference/builder/#from)) in all the other components.  In this situation, 
-executing ```dlw build```
-will generate the following Docker CLI stream:
-```docker build  -t "dlw_parent" "/home/dlw/project/sample/component/dlw_parent/context/build"```
-```docker build  -t "dlw_apache" "/home/dlw/project/sample/component/dlw_apache/context/build"```
-```docker build  -t "dlw_mysql" "/home/dlw/project/sample/component/dlw_mysql/context/build"```
-```docker build  -t "dlw_sshserver" "/home/dlw/project/sample/component/dlw_sshserver/context/build"```
-Notice, the placement of the Docker dlw_parent build request before the other build requests, as dlw_parent must exist/be current in order to correctly build the deriviative Components. 
-
-Automate the construction, update, and removal of statically dependent docker images, including their associated containers, within the scope of a local docker daemon.  A statically dependent docker image relies on components (packages/features) provided by a base image during its construction via a docker build command ([see FROM](http://docs.docker.io/reference/builder/#from)).  A dependent image is analogous to a derived class, in languages such as C++, Java, ... which inherits from a particular base class. 
-
-### Reasoning
-
 Although docker provides [Compose](https://docs.docker.com/compose/), a Trusted Build cluster and GitHub integration that conceptually provide this functionality, some may adopt this tool to:
 + Avoid implementing a private registry and Trusted Build cluster, especially for small projects.
 + Potentially improve the responsiveness of the development cycle, as all Docker commands are executed by the local Docker Daemon, especially, in situations when the public Trusted Build cluster performance slows due to congestion of build requests or network connectivity issues.
 + Verify the construction of statically dependent images and execution of cooperative containers before committing them to the public index/registry.
 + Maintain a level of (free privacy), as Trusted Builds currently operate on docker's public index/repository and multiple private repositories incurr a monthly fee.
 
+### Features
++ Use simple commands like ```dlw build```,```dlw run```, and ```dlw images``` to manage and report on an application/service composed from multiple cooperating containers.
++ Launch and concurrently attach to the terminal interfaces of multiple containers using the terminal multiplex feature of [GNU screen](http://www.gnu.org/software/screen/).
++ Combined GNU screen, [linux watch](http://en.wikipedia.org/wiki/Watch_%28Unix%29) and reporting commands like 'top' and 'ps' to actively monitor the status of multiple containers.
++ Generate Docker CLI stream from command line arguments stored in a file, using a rudimentry command template.
++ Enhance report generation by associating custom attributes to a docker image. 
++ Track previous versions of docker images and with single command remove all prior versions and their associated containers, ordering their removal to avoid "Conflict" errors issued by the Docker Daemon.
++ Enjoy the benefits of delivering and running this tool within a container.   
++ Add custom dlw extensions and repair code without changing existing script source.
+
+### How Does It Work
+In a nutshell, most dlw commands [wrap](http://en.wikipedia.org/wiki/Adapter_pattern) a corresponding Docker CLI command.  The wrapper adapts/transforms the dlw <a href=#ConceptsComponent>Component</a> and <a href=#ConceptsProject>Project</a> abstractions to an equivalent list of targeted images/containers.  These image/container lists are then used, along with a rudimentry command template, to generate a Docker CLI stream consisting of one or more individual Docker commands which implement the original dlw command.  Besides its template generation feature, the dlw, through a 'Dependency' configuration file, applies a directed graph to order the individual Docker commands within the CLI stream according to the declared dependencies, to better ensure the successful execution of the entire stream.
+
+For example, assuming a Project labeled 'sample' contains four Components: dlw_parent, dlw_sshserver, dlw_mysql and dlw_apache and dlw_parent Component is lexically included in all the other components.  In this situation, executing ```dlw build```will generate the following Docker CLI stream:
+```
+   docker build  -t "dlw_parent" "/home/dlw/project/sample/component/dlw_parent/context/build"```
+   docker build  -t "dlw_apache" "/home/dlw/project/sample/component/dlw_apache/context/build"```
+   docker build  -t "dlw_mysql" "/home/dlw/project/sample/component/dlw_mysql/context/build"```
+   docker build  -t "dlw_sshserver" "/home/dlw/project/sample/component/dlw_sshserver/context/build"```
+```
+Notice, the placement of the Docker dlw_parent build request before the other build requests, as dlw_parent must exist/be current in order to correctly build the deriviative Components. 
+
 ### Concepts
 
-+ **Component**:  A widget that contributes one or more elemental services to a cooperative pod of other Components.  Component's offer their service(s) through either lexical inclusion, statically inheriting a base Component's implementation,   in   or dynamically, as individually executing entities that coordinate their activity through some protocol mechanism,  The static definition of a Component is anologous to 
-  
-An object that defines a docker image build context.  It is implemented as a directory whose name reflects the image's name in the local repository.  This directory contains the Dockerfile needed to build a specific docker image and any resources referenced by this Dockerfile included in the resulting image.
-+ **Image GUID List**:  An object that maintains a list of docker image GUIDs generated when building a specific Component.  The different GUIDs in this list represent various image versions generated due to alterations applied to resources, like a Dockerfile, that comprise a Component's (image's) build context.   A standard text file is used to implement each Image GUID List.  The text file is assigned the same name as the Component (image) name.  The image GUIDs in the file are ordered from the oldest, which appears as the first line in the text file to the most recent GUID that occupies its last line.
++ **Component**<a id="ConceptsComponent">:  A widget that contributes one or more elemental services to a cooperative pod of other Components.  Component's offer their service(s) through either lexical inclusion, statically inheriting a base Component's implementation ([see FROM](http://docs.docker.io/reference/builder/#from)), or dynamically, as individually executing entities that coordinate their activity through some protocol mechanism.
+
+    The dlw implements a Component as a directory whose name reflects the image's name in the local repository.  This directory contains a subdirectory called "context" which represents the resources required to execute a particular dlw command.  "context" is further subdivided by subdirectories whose names reflect a dlw command.  These command-context subdirectories contain resources, like command line options, required to execute the particular command.  They also identify which commands apply to a particular Component, as certain Components may support some but not all dlw commands. For example, a statically included Component might not support the ```dlw run``` command.
++ **Component Catalog**<a id="ConceptsComponentCatalog">: A pod of directly interacting Components from which desired group behavior emerges.
+    A directory called "component" implements catalog.  One or more Component directores exist as subdirectories within "component".  dlw commands that operate on individual images and their derived containers iterate over this catalog.
++ **Image GUID List**<a id="ConceptsImageGUIDList">:  An object that maintains a list of docker image GUIDs generated when building a specific Component.  The different GUIDs in this list represent various image versions generated due to alterations applied to resources, like a Dockerfile, that comprise a Component's (image's) build context.
+
+A standard text file is used to implement each Image GUID List.  The text file is assigned the same name as the Component (image) name.  The image GUIDs in the file are ordered from the oldest, which appears as the first line in the text file to the most recent GUID that occupies its last line.
 + **Image Catalog**:  An object that encapsulates all Image GUID Lists.  It's implemented as a directory named "image". 
 + **Root Resource Directory**:  An object, implemented as a directory, that encapsulates all the aforementioned objects.  It also contains the makefile and bash script directory called "scripts".
 
