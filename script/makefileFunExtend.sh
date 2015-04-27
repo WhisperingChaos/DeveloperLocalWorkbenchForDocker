@@ -75,11 +75,21 @@ function TimeStampTripIs () {
 ##  Output:
 ##    When Successful:
 ##      A single line of all subdirectories.
+##    When Failure:
+##      Issue message to STDERR and return "BuildContextEmpty" as a prerequsite
+##      via STDOUT.
 ## 
 ###############################################################################
 function DirectoryRecurse () {
   local dirPathList
   local fileEntry
+  if [ -z "$(ls -A "$1")" ]; then
+    ScriptError "Empty build context: '$1'.  Needs at least 'Dockerfile'."
+    # generate a prerequsite that references a target that will result in
+    # a failure detected by make.
+    echo "BuildContextEmpty"
+    return 1
+  fi
   # use while - read instead of for loop because file name can contain spaces.
   # However, newlines in file names will break this code. 
   while read fileEntry; do
