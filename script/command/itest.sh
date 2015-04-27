@@ -370,7 +370,7 @@ function ImageCreate (){
 #
 ###############################################################################
 function ImageContainerRemove (){
-  if ! dlw.sh rmi --dlwrm $2 ;then #> /dev/null 2> /dev/null; then 
+  if ! dlw.sh rmi --dlwrm $2 > /dev/null 2> /dev/null; then 
     ScriptUnwind $1 "$FUNCNAME failed: parameters: '$2'."
   fi
   return 0
@@ -390,7 +390,7 @@ function ImageContainerRemove (){
 #
 ###############################################################################
 function ImageRemoveAssert (){
-  if ! dlw.sh rmi $2 > /dev/null; then # 2> /dev/null; then 
+  if ! dlw.sh rmi $2 > /dev/null; then 
     ScriptUnwind $1 "$FUNCNAME failed: parameters: '$2'."
   fi
   return 0
