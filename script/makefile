@@ -158,6 +158,14 @@ all.build: componentBuildLst
 %.rmi:    %.build
 	@
 
+# The rule below provides a target that terminates the any %.build when the build
+# context directory is empty.  This is needed during prerequiste generation 
+# in order to issue a failure as a non zero return code by this process doesn't
+# result in a make failure that stops the build or any other command mapped to
+# build from executing.
+BuildContextEmpty :
+	@exit 1
+	
 ###############################################################################
 ##
 ##    Section: 'build' Command Ignoring Dependency Processing
