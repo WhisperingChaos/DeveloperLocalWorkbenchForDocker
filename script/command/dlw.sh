@@ -96,7 +96,9 @@ function VirtCmmdConfigSetDefault() {
   export MAKEFILE_DIR="$makefileDir"
   # Define a temp file location within the Project's directory.
   export TMPDIR="$PROJECT_DIR/tmp"
+  TmpDirRemove
   mkdir "$TMPDIR" >/dev/null 2>/dev/null
+  
   return 0;
 }
 ###############################################################################
@@ -223,6 +225,30 @@ function VirtCmmdExecute () {
   eval local -r subCommandName=\"\$\{$2\[\'Arg1\']\}\.sh\"
   OptionsArgsRemove 'Arg1' "$1" "$2" 'optArgSubCommandLst' 'optArgSubCommandMap'
   eval $subCommandName `OptionsArgsGen 'optArgSubCommandLst' 'optArgSubCommandMap'`
+  if [ "$?" -eq '0' ]; then TmpDirRemove; fi 
 }
+##############################################################################
+##
+##  Purpose:
+##    Remove the temporary directory deleting all its contents.
+##
+##  Assumption:
+##    TMPDIR has been properly assigned before calling.
+##
+##  Inputs:
+##    TMPDIR - Variable name specifying the directory being removed.
+## 
+##  Outputs:
+##    Silently fail or succeed 
+##
+###############################################################################
+function TmpDirRemove () {
+  if [ "$TMPDIR" != "$PROJECT_DIR/tmp" ]; then
+    ScriptUnwind "$LINENO" "Expected temporary files to be within project directory: '$PROJECT_DIR/tmp' but it was: '$TMPDIR'."
+  fi
+  rm -f -r "$TMPDIR" >/dev/null 2>/dev/null
+  return 0
+}
+
 FunctionOverrideCommandGet
 source "ArgumentsMainInclude.sh";
