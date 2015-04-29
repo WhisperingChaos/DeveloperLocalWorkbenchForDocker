@@ -35,9 +35,7 @@ USER root
 # PATH variable.
 ADD .bash_aliases /home/dlw/
 # Establish dlw account as owner if its own aliases
-RUN chown    dlw /home/dlw/.bash_aliases \
-    # modify user's home directory to point to project area.
-    && usermod --home /home/dlw/project -- dlw
+RUN chown    dlw /home/dlw/.bash_aliases
 # Create an entry point to automatically login dlw user.
 # Login properly establishes /dev permissions and 
 # sets correct home directory. 
