@@ -11,9 +11,7 @@
 if [ -z "$1" ]; then echo "Error: ${FUNCNAME}: Expects package name as first argument.">&2; fi
 # Script is coupled with versionSpecifiers.sh to load environment
 # variables that specify the package's version.
-#SCRIPT_DIR_INSTALLATION="`dirname "${BASH_SOURCE[0]}"`"
-#source "$SCRIPT_DIR_INSTALLATION/versionSpecifiers.sh"
-versionSpecifiers.sh
+source versionSpecifiers.sh
 # Certain installs may require preprocessing to prepare the package library
 # for their inclusion.
 if which "installPrep_${1}.sh"; then
