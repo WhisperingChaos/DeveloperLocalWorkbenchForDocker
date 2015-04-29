@@ -45,6 +45,10 @@ if ! grep "${SCRIPT_DIR}:" < <( echo "$PATH" ) >/dev/null; then
   # to the command name.  Ex. Command: 'rmi' generates a 
   # corresponding override file named: 'rmiInclude.sh'. 
   export PATH="$SCRIPT_DIR/command/override:$PATH"
+  SCRIPT_RECURSIVE='false'
+else
+  # recursive call detected 
+  SCRIPT_RECURSIVE='true'
 fi
 source "MessageInclude.sh";
 source "ArgumentsGetInclude.sh";
@@ -233,7 +237,9 @@ function VirtCmmdExecute () {
 ##    Remove the temporary directory deleting all its contents.
 ##
 ##  Assumption:
-##    TMPDIR has been properly assigned before calling.
+##    1. TMPDIR has been properly assigned before calling.
+##    2. TMPDIR must be preserved during recursive calls, as the execution
+##       context for certain functions relies on temporarily stored state.
 ##
 ##  Inputs:
 ##    TMPDIR - Variable name specifying the directory being removed.
@@ -243,6 +249,13 @@ function VirtCmmdExecute () {
 ##
 ###############################################################################
 function TmpDirRemove () {
+  # Determine if top of potentially recursive call stack
+  if $SCRIPT_RECURSIVE; then
+    # Not at top of recursive call stack :: don't delete temporary files
+    # Note temporary files will remain in situations where some utility called
+    # the initiating dlw session.
+    return 0;
+  fi
   if [ "$TMPDIR" != "$PROJECT_DIR/tmp" ]; then
     ScriptUnwind "$LINENO" "Expected temporary files to be within project directory: '$PROJECT_DIR/tmp' but it was: '$TMPDIR'."
   fi
