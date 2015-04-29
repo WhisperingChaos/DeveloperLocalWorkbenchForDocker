@@ -40,7 +40,7 @@ source "MessageInclude.sh";
 function main () {
   cat <<COMMAND_HELP
 
-Docker Local Workbench extends specific Docker commands to incorporate
+Docker Local Workbench extends specific Docker commands incorporating
 "Project" and "Component" abstractions within the local Docker environment.
 Many dlw commands wrap existing Docker ones while some are dlw specific.
 
@@ -72,6 +72,8 @@ dlw specific:
     watch     Execute a dlw command in a linux watch terminal.
 
 Specify: 'help COMMAND' to display [ARG...] help for that command.
+
+For more help: https://github.com/WhisperingChaos/DockerLocalWorkbench#ToC
 
 COMMAND_HELP
   return 0
