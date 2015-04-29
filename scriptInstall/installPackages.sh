@@ -25,6 +25,7 @@
   done
   # make install helper scripts invisible from this layer forward
   if [ -d "$SCRIPT_DIR_INSTALLATION" ] && [ "$SCRIPT_DIR_INSTALLATION" != '/' ]; then
-    rm -f -r "$SCRIPT_DIR_INSTALLATION"
+    if ! rm -f -r "$SCRIPT_DIR_INSTALLATION"; then exit; fi
   fi
+  
 
