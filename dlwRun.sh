@@ -17,25 +17,49 @@
 #      Either the error code from failed install process or rm failure code
 #
 ###############################################################################
-if [ -z "$1" ]; then
-  echo "Abort: must specify desired dlw Docker Hub tag name.">&2
-  exit 1;
-fi
+function helpText () {
+cat <<COMMAND_HELP
+
+Pull, create and run a new dlw container and connect it to Project files located
+on the current host's file system. Pull occurs iff dlw isn't cached.
+
+Usage: dlwRun.sh <HubTagName> [<ProjectDirectory>]
+
+OPTIONS:
+    <HubTagName>        Docker Hub Tag associated to desired dlw image.
+                        dlw tag name concatenates: <dlw-version>_<DockerDaemon-version>
+                        see: https://registry.hub.docker.com/u/whisperingchaos/dlw/tags/manage/
+    <ProjectDirectory>  Existing host directory containing one or more
+                        dlw Projects as subdirectories.
+
+For more help: https://github.com/WhisperingChaos/DockerLocalWorkbench#ToC
+
+COMMAND_HELP
+}
+###############################################################################
+function hostDirWarningText () {
+cat <<HOST_DIR_WARN
+
+  Warning!
+
+  Host directory unspecified.  All project files will be located within the started container.
+  To continue developing Projects within this container, you must find and restart it.
+  This script doesn't restart an existing container, it only creates new ones from
+  the downloaded dlw image.
+  
+HOST_DIR_WARN
+}
+###############################################################################
+if [ -z "$1" ] || [ "$1" == "--help" ]; then helpText; exit 0; fi
 if [ -z "$2" ]; then
-  echo
-  echo  'Warning!'
-  echo
-  echo "Host directory unspecified.  All project files will be located within the started container."
-  echo "To continue developing code projects within this container, you must find and start"
-  echo "this container. This script cannot start an existing container, it only creates a"
-  echo "new one from the downloaded dlw image."
-  echo
+  hostDirWarningText
   read -p "Confirm: Project files are local to the started container (Y/n):" -N 1 -- Yn
   if [ "$Yn" != 'Y' ]; then
     echo
     echo "Abort: Please specify an existing host directory as second argument.">&2
     exit 1;
   fi
+  echo
   unset HOST_PROJECT_DIR
 elif ! [ -d "$2" ]; then
   echo "Abort: Second argument doesn't resolve to an existing host directory: '$2'.">&2
