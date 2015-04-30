@@ -62,6 +62,7 @@ COMMAND_HELP_Purpose
   HelpComponentVersion
   echo "    --dlwrm=false         Stop and remove associated containers."
   HelpComponentOrder 'false' 'deletions'
+  HelpNoExecuteDocker 'false'
   HelpShowDocker 'false'
   HelpHelpDisplay 'false'
   DockerOptionsFormat 'rmi'
