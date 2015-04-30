@@ -49,25 +49,6 @@ function VirtDockerReportingHeadingRegex () {
 ##
 ###############################################################################
 ##
-##############################################################################
-##
-##  Purpose:
-##    Override virtual function to set default configuration options to do 
-##    nothing for reporting commands. 
-##
-##  Input:
-##    $0 - Name of running script that included this configuration interface.
-##
-##  Output:
-##    When Failure: 
-##      SYSERR - Reflect message indicating reason for error
-##
-#################################################################################
-function VirtCmmdConfigSetDefault () {
-  if ! [ -d  "$COMPONENT_CAT_DIR" ]; then
-    ScriptUnwind $LINENO "Missing Component directory: '$COMPONENT_CAT_DIR'."
-  fi
-}
 ###############################################################################
 ##
 ##  Purpose:

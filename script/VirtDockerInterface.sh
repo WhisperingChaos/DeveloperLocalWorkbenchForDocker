@@ -337,6 +337,12 @@ function VirtDockerCmmdProcessOutput () {
 ##
 ###############################################################################
 ##
+function VirtCmmdOptionsArgsVerify () {
+  if ! [ -d  "$COMPONENT_CAT_DIR" ]; then
+    ScriptUnwind $LINENO "Missing Component directory: '$COMPONENT_CAT_DIR'."
+  fi
+  OptionsArgsVerify  'VirtCmmdOptionsArgsDef' "$1" "$2"
+}
 ###############################################################################
 ##
 ##  Purpose:
