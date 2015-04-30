@@ -337,7 +337,40 @@ function VirtDockerCmmdProcessOutput () {
 ##
 ###############################################################################
 ##
+###############################################################################
+##
+##  Purpose:
+##    Examine command line options/arguments to ensure reasonable values
+##    were provided.
+##
+##  Assumption:
+##    Since bash variable names are passed to this routine, these names
+##    cannot overlap the variable names locally declared within the
+##    scope of this routine or its decendents.
+##
+##  Input:
+##    $1 - Variable name to an array whose values contain the label names
+##         of the options and agruments appearing on the command line in the
+##         order specified by it.
+##    $2 - Variable name to an associative array whose key is either the
+##         option or argument label and whose value represents the value
+##         associated to that label.
+##    'VirtCmmdOptionsArgsDef' - A callback function that supplies a table
+##         containing constraint information used, for example, to
+##         verify the values of the arguments/options.
+## 
+##  Output:
+##    When Successful:
+##      All the arguments/options passes a "sniff' test.
+##    When Failure: 
+##      SYSERR - Contains a message that specifically indicates why the
+##               option/argument failed its verification.
+##
+###############################################################################
 function VirtCmmdOptionsArgsVerify () {
+  # COMPONENT_CAT_DIR is considered an "argument".  At this point, immediately
+  # before validating options/argurment, it must point to a valid Component
+  # directory, otherwise, certain validation functions will fail.
   if ! [ -d  "$COMPONENT_CAT_DIR" ]; then
     ScriptUnwind $LINENO "Missing Component directory: '$COMPONENT_CAT_DIR'."
   fi
