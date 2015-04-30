@@ -73,7 +73,7 @@ dlw specific:
 
 Specify: 'help COMMAND' to display [ARG...] help for that command.
 
-For more help: https://github.com/WhisperingChaos/DockerLocalWorkbench#ToC
+For more help: https://github.com/WhisperingChaos/DockerLocalWorkbench#toc
 
 COMMAND_HELP
   return 0
