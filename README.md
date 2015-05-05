@@ -3,10 +3,10 @@
 ##### ToC  
 [Purpose](#purpose)  
 [How Does It Work](#how-does-it-work)  
-Installing
-+ [Pulling Image](#installing-pulling-image)  
-+ [Sample Project & Testing](#installing-sample-project-testing)  
-
+[Installing](#installing)  
+<br>&nbsp;&nbsp;&nbsp;&nbsp;[Pulling Image](#installing-pulling-image)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Sample Project & Testing](#installing-sample-project-testing)  
+[Project Tutorial](#project-tutorial)  
 [Exploring Commands](#exploring-commands)
 [Features](#features)  
 [Concepts](#concepts)  
@@ -19,9 +19,9 @@ Installing
 
 ### Purpose
 
-To facilitate the development of cooperative multicontainer services/applications by extending core Docker CLI commands to operate on related groups of images/containers managed by the local Docker Daemon.  Embodied in facilitation is a desire to accelerate the iterative development loop through the use of simple configuration settings and applying the efficiency of local file and computing resources to avoid the potential complexity of web service interfaces, as well as network and service contention delays inherent to these typically remote centrailized ones.
+To facilitate the development of cooperative multicontainer services by extending core Docker CLI commands to operate on related groups of images/containers managed by the local Docker Daemon.  Embodied in facilitation is a desire to accelerate the iterative development loop through the use of simple configuration settings and applying the efficiency of local file and computing resources to avoid the potential complexity of web service interfaces, as well as network and service contention delays inherent to these typically remote centrailized ones.
 
-Although docker provides [Compose](https://docs.docker.com/compose/), a Trusted Build cluster and GitHub integration that conceptually provide this functionality, some may adopt this tool to:
+Although docker provides [Compose](https://docs.docker.com/compose/), a Trusted Build cluster, and GitHub integration that conceptually provide this functionality, some may adopt this tool to:
 + Avoid implementing a private registry and Trusted Build cluster, especially for small projects.
 + Potentially improve the responsiveness of the development cycle, as all Docker commands are executed by the local Docker Daemon, especially, in situations when the public Trusted Build cluster performance slows due to congestion of build requests or network connectivity issues.
 + Verify the construction of statically dependent images and execution of cooperative containers before committing them to the public index/registry.
@@ -29,7 +29,7 @@ Although docker provides [Compose](https://docs.docker.com/compose/), a Trusted 
 
 ### How Does It Work
 
-In a nutshell, most dlw commands [wrap](http://en.wikipedia.org/wiki/Adapter_pattern) a corresponding Docker CLI command.  The wrapper adapts/transforms the dlw <a href=#ConceptsComponent>Component</a> and <a href=#ConceptsProject>Project</a> abstractions to an equivalent list of targeted images/containers.  These image/container lists are then used, along with a rudimentry command template, to generate a Docker CLI stream consisting of one or more individual Docker commands which implement the original dlw command.  Besides its template generation feature, the dlw, through a <a href=#ConceptsDependencySpecification>Dependency Specification</a>, applies a directed graph to order the individual Docker commands within the CLI stream to better ensure the successful execution of the entire stream.
+In a nutshell, most dlw commands [wrap](http://en.wikipedia.org/wiki/Adapter_pattern) a corresponding Docker CLI command.  The wrapper transforms the dlw <a href=#ConceptsComponent>Component</a> and <a href=#ConceptsProject>Project</a> abstractions to an equivalent list of targeted images/containers.  These image/container lists are then used, along with a rudimentry command template, to generate a Docker CLI stream consisting of one or more individual Docker commands which implement the original dlw command.  Besides its template generation feature, the dlw, through a <a href=#ConceptsDependencySpecification>Dependency Specification</a>, applies a directed graph to order the individual Docker commands within the CLI stream to better ensure the successful execution of the entire stream.
 
 For example, suppose a Project labeled 'sample' contains four Components: dlw_parent, dlw_sshserver, dlw_mysql, and dlw_apache.  Furthermore, the Components: dlw_sshserver, dlw_mysql, and dlw_apache lexically include dlw_parent.  In this situation, executing ```dlw build```will generate the following Docker CLI stream:
 ```
@@ -66,7 +66,7 @@ Notice, the placement of the Docker dlw_parent build request before the other bu
     dlw@a1d8390a5a8d:~$ 
 ```
 ##### Determine Docker Tag <a id="InstallingTagVersionPull"></a>
-Since the dlw issues Docker CLI commands, its image contains a copy of Docker.  This embedded Docker instance acts as a client to communicate with the locally running Docker Daemon by forwarding Docker CLI commands generated by dlw.  Therefore, the embedded Docker instance version must be compatible with the locally running Docker Daemon.  To facilitate selecting the correct dlw version, its image tag consists of two version numbers.  The first one represents the dlw version, while the second specifies the Docker Daemon version.  Tag generation appends the first version to an underscore ('_') then appends the second one.  For example, a dlw version of 0.50 and Docker Daemon version of 1.3.3 produces an image tag of '0.50_1.3.3'.
+Since the dlw issues Docker CLI commands, its image contains a copy of Docker.  This embedded Docker instance acts as a client to communicate with the locally running Docker Daemon by forwarding, [via socket](https://docs.docker.com/articles/basics/#bind-docker-to-another-hostport-or-a-unix-socket), Docker CLI commands generated by dlw.  Therefore, the embedded Docker instance version must be compatible with the locally running Docker Daemon.  To facilitate selecting the correct dlw version, its [image tag](https://docs.docker.com/userguide/dockerimages/#setting-tags-on-an-image) consists of two version numbers.  The first one represents the dlw version, while the second specifies the Docker Daemon version.  Tag generation appends the first version to an underscore ('_') then appends the second one.  For example, a dlw version of 0.50 and Docker Daemon version of 1.3.3 produces an image tag of '0.50_1.3.3'.
 
 ##### Download dlwRun.sh <a id="#InstallingDownloaddlwRunsh"></a>
 dlwRun.sh wraps Docker CLI requests to pull and then run a newly created container from the desired dlw image.  It also mounts a host directory to store dlw <a href="#ConceptsProject">Projects</a> to the appropriate mount point within the newly created dlw container.
@@ -86,18 +86,22 @@ Most likely, dlw <a href="#ConceptsProject">Projects</a>, which consist of sourc
 + Assumes successful completion of: [Installing: Pulling Image](#installing-pulling-image) and current terminal session connected to running dlw container.
 + ```mkdir -p /home/dlw/project/sample/component```
 + ```cd /home/dlw/project/sample```
-+ Execute ```dlw itest``` to install project called 'sample' and executes integration tests.
++ Execute ```dlw itest``` to install a project called 'sample' and perform integration tests.
 
-Once integration testing successfully completes, a Project called 'sample' will exist in the + <a href="#InstallingCreateHostProjectDirectory">host directory</a> specified by the ```dlwRun.sh``` script.  The Project through its Components, provides examples demonstrating various aspects of the dlw.  For example, specifying a Component's command line arguments for a particular command like build or run to avoid having to constantly repeat static argument values on the dlw command line (see: "../sample/component/dlw_apache/context/run")
+Once testing successfully completes, a Project called 'sample' will exist in the + <a href="#InstallingCreateHostProjectDirectory">host directory</a> specified by the ```dlwRun.sh``` script.  The Project through its Components, provides examples demonstrating various aspects of the dlw.  For example, specifying a Component's command line arguments for a particular command like build or run to avoid having to constantly repeat static argument values on the dlw command line (see: "../sample/component/dlw_apache/context/run")
 
 + Use 'sample' as a sandbox to expolore various dlw options and their effects before applying these options to your own Project's Components.
 + The contents of the 'sample' project and local [Docker Registry](https://docs.docker.com/registry/) can be reverted at any time by running ```dlw itest```.
 
-### Creating a Project
+### Project Tutorial
+
+##### Project: Creation
+
+Create a minimal viable Project that builds a single Component.  
 
 + Assumes successful completion of: [Installing: Pulling Image](#installing-pulling-image) and current terminal session connected to running dlw container.
 + Create a <a id="ConceptsProject">"Project" directory assigning it the desired Project's name.
-  + Ex: ```mkdir ~/project/sample``` given Project name of 'sample'. 
+  + Ex: ```mkdir ~/project/xproject``` given Project name of 'xproject'. 
 + Create the <a id="ConceptsComponentCatalog">Component Catalog</a> directory named "component" to manage a Project's Components.
   + Ex: ```mkdir ~/project/xproject/component```
 + Create one or more <a id="ConceptsComponent">Component</a> instance directories with the desired Component's name.
@@ -106,37 +110,50 @@ Once integration testing successfully completes, a Project called 'sample' will 
   + Ex: ```mkdir ~/project/xproject/component/ycomponent/context``` given Component name of 'ycomponent'.
 + Create a Component's build context directory directory.  A build context directory encapsulates all the resources required to successfully build a docker image.
   + Ex: ```mkdir ~/project/xproject/component/ycomponent/context/build```
-+ Create and save a Dockerfile to a Component's build context directory.
-  + Ex:
++ Create and save a Dockerfile to a Component's build context directory.  
+  + Ex: Produces a Component that's slightly different from ubuntu:12:04. 
+
         ```
-        echo "FROM ubuntu:12.04"        > ~/project/xproject/component/ycomponent/context/build/Dockerfile
+        echo 'FROM ubuntu:12.04'        > ~/project/xproject/component/ycomponent/context/build/Dockerfile
         echo "ENV DIFF 'MakeItUnique'" >> ~/project/xproject/component/ycomponent/context/build/Dockerfile
-        echo "ENTRYPOINT [/bin/bash]"  >> ~/project/xproject/component/ycomponent/context/build/Dockerfile
-        ``` 
-        Creates a component named ycomponent that's slightly different from ubuntu:12:04. 
-+ Build a Component's image:
+        echo 'ENTRYPOINT [/bin/bash]'  >> ~/project/xproject/component/ycomponent/context/build/Dockerfile
+        ```
+
+##### Project: Build
+
++ Build all Components associated to the Project:
   + Ex:
+
         ```
         cd ~/project/xproject
         dlw build
         ```
-The above satisifies the minimal effort to define a viable Project that builds a single component.
 
-+ Report on a Component's related images:
-  + Ex:
-        ```
-        dlw images
-        ```
-        Should return an extended form of the ```docker images``` report with only a single row of 'ycomponent' information.
+##### Project: Report
 
-To run a Component and attach to its tty:
++ Report on a Project's related images:
+  + Ex: ```dlw images``` Should return an extended form of the ```docker images``` report with only a single row of 'ycomponent' information.
+
+##### Project: Run
+
+Create new containers for all Components then run and attach to their ttys.
 
 + Add the 'run' 'context' directory to the Component's definition.
   + Ex: ```mkdir ~/project/xproject/component/ycomponent/context/run```
++ Create the file named DOCKER_CMMDLINE_OPTION and populate it with run options of '-i --tty'.  This file preserves these options to ensure a terminal can be attached to the Component's derivative container and reflect a tty interface without having to specify them on every ```dlw run``` command.
+  + Ex: ```echo '-i --tty' > ~/project/xproject/component/ycomponent/context/run/DOCKER_CMMDLINE_OPTION```
++ Create containers for all Components and run them deferring terminal attachment.
+  + Ex: ```dlw run -d``` Constructs a container from the ycomponent image and runs it.  Should output the Docker GUID for the newly constructed and running container.
++ Attach a Project's active container terminal instances to either a new or an existing screen session.
+  + Ex: ```dlw screen``` Creates a screen session named 'xproject' with a single active tty session for container derived from 'ycomponent'.
++ Use [GNU screen](http://www.gnu.org/software/screen/) command to screen
+  + Ex: ```screen -r``` Attaches the current GNU screen session named ```<PID>.xproject```.
 
+##### Project: Remove Images
 
+Removes all Images and derivative Containers associated to a Project from the Local Docker Registry. However, data maintained in the Project's Component Catalog remains untouched.
 
-+ Run a Component's container
++ ```dlw rmi -f --dlwrm --dlwcomp-ver=all -- all```
 
 ### Exploring Commands
 
@@ -174,16 +191,6 @@ Notes:
 + Specifying a boolean option without a value negates its default value. Ex. "--dlwno-parent -- ..." --dlwno-parent negated from 'false' to 'true'.
 + Docker array options [], like '-v', aren't directly supported by the dlw command line.  These recurring options should be specified within the context   
 
-### Features
-+ Use simple commands like ```dlw build```,```dlw run```, and ```dlw images``` to manage and report on an application/service composed from multiple cooperating containers.
-+ Launch and concurrently attach to the terminal interfaces of multiple containers using the terminal multiplex feature of [GNU screen](http://www.gnu.org/software/screen/).
-+ Combined GNU screen, [linux watch](http://en.wikipedia.org/wiki/Watch_%28Unix%29) and reporting commands like 'top' and 'ps' to actively monitor the status of multiple containers.
-+ Generate Docker CLI stream from command line arguments stored in a file, using a rudimentry command template.
-+ Enhance report generation by associating custom propertys to a docker image. 
-+ Track previous versions of docker images and with single command remove all prior versions and their associated containers, ordering their removal to avoid "Conflict" errors issued by the Docker Daemon.
-+ Enjoy the benefits of delivering and running this tool within a container.   
-+ Add custom dlw extensions and repair code without changing existing script source.
-
 ### Concepts
 
 + **Component**<a id="ConceptsComponent"></a>:  A widget that contributes one or more elemental services to a cooperative pod of other Components.  Component's offer their service(s) through either lexical inclusion, statically inheriting a base Component's implementation ([see FROM](http://docs.docker.io/reference/builder/#from)), or dynamically, as individually executing entities that coordinate their activity through some protocol mechanism ([see LINK](https://docs.docker.com/userguide/dockerlinks/)).
@@ -218,6 +225,16 @@ Notes:
 
     Implemented as a directory whose name reflects the one assgined to the Project.  The dlw command will assume the current working directory contains the Project that should be affected by it.  Project may also contain a temporary directory named "tmp" if the current dlw command failes providing state information that may be important to debugging the its cause. 
 
+### Features
+
++ Use simple commands like ```dlw build```,```dlw run```, and ```dlw images``` to manage and report on an application/service composed from multiple cooperating containers.
++ Launch and concurrently attach to the terminal interfaces of multiple containers using the terminal multiplex feature of [GNU screen](http://www.gnu.org/software/screen/).
++ Combined GNU screen, [linux watch](http://en.wikipedia.org/wiki/Watch_%28Unix%29) and reporting commands like 'top' and 'ps' to actively monitor the status of multiple containers.
++ Generate Docker CLI stream from command line arguments stored in a file, using a rudimentry command template.
++ Enhance report generation by associating custom propertys to a docker image. 
++ Track previous versions of docker images and with single command remove all prior versions and their associated containers, ordering their removal to avoid "Conflict" errors issued by the Docker Daemon.
++ Enjoy the benefits of delivering and running this tool within a container.   
++ Add custom dlw extensions and repair code without changing existing script source.
 
 ##### What's Provided
 
