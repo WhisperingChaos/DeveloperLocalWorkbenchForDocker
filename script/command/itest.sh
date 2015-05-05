@@ -899,6 +899,10 @@ function ComponentDependencyCreate () {
 # one would encode a makefile dependency rule that associates a Component's
 # ancestor (parent, See Docker FROM statement) as a prerequisite for the
 # targeted child Component when processing a Docker build command.
+#
+# A Project that defines interdependent components, must encode this 'Dependency'
+# file in the Project's Compnent directory.  Ex: '.../sample/component/Dependency'
+# where 'sample' reflects the name assigned to the Project.  
 # 
 # Although distinct dependency graphs can be specified for each Docker command,
 # so far, the makefile rules categorized a Docker command as a member of either
@@ -910,6 +914,14 @@ function ComponentDependencyCreate () {
 # 'build' command for these components would be expressed as:
 #
 #  Child.build : Parent.build
+#
+# In an analogous way, run-time dependencies, for example, the requirement to 
+# start one container before another would be encoded as:
+#
+#  RequiresServices.run : OffersService_1.run OffersService_2.run
+#
+# Where containers derived from the images OffersService_1 and OffersService_2
+# must be started before initiating a container derived from RequiresServices.
 #
 # Note, only rules that define dependencies should be specified.  Root (independent)
 # Components are automatically deduced by examining the Component Catalog.
