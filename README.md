@@ -2,11 +2,15 @@
 
 ##### ToC  
 [Purpose](#purpose)  
-[Features](#features)  
 [How Does It Work](#how-does-it-work)  
+Installing
++ [Pulling Image](#installing-pulling-image)  
++ [Sample Project & Testing](#installing-sample-project-testing)  
+
+[Exploring Commands](#exploring-commands)
+[Features](#features)  
 [Concepts](#concepts)  
 [What's Provided](#whats-provided)  
-[Installing: Pulling Image](#installing-pulling-image)  
 [How to Add Components to the makefile](#how-to-add-components-to-the-makefile)  
 [How to Run make](#how-to-run-make)  
 [Sample makefile](#sample-makefile)  
@@ -23,17 +27,8 @@ Although docker provides [Compose](https://docs.docker.com/compose/), a Trusted 
 + Verify the construction of statically dependent images and execution of cooperative containers before committing them to the public index/registry.
 + Maintain a level of (free privacy), as Trusted Builds currently operate on docker's public index/repository and multiple private repositories incurr a monthly fee.
 
-### Features
-+ Use simple commands like ```dlw build```,```dlw run```, and ```dlw images``` to manage and report on an application/service composed from multiple cooperating containers.
-+ Launch and concurrently attach to the terminal interfaces of multiple containers using the terminal multiplex feature of [GNU screen](http://www.gnu.org/software/screen/).
-+ Combined GNU screen, [linux watch](http://en.wikipedia.org/wiki/Watch_%28Unix%29) and reporting commands like 'top' and 'ps' to actively monitor the status of multiple containers.
-+ Generate Docker CLI stream from command line arguments stored in a file, using a rudimentry command template.
-+ Enhance report generation by associating custom propertys to a docker image. 
-+ Track previous versions of docker images and with single command remove all prior versions and their associated containers, ordering their removal to avoid "Conflict" errors issued by the Docker Daemon.
-+ Enjoy the benefits of delivering and running this tool within a container.   
-+ Add custom dlw extensions and repair code without changing existing script source.
-
 ### How Does It Work
+
 In a nutshell, most dlw commands [wrap](http://en.wikipedia.org/wiki/Adapter_pattern) a corresponding Docker CLI command.  The wrapper adapts/transforms the dlw <a href=#ConceptsComponent>Component</a> and <a href=#ConceptsProject>Project</a> abstractions to an equivalent list of targeted images/containers.  These image/container lists are then used, along with a rudimentry command template, to generate a Docker CLI stream consisting of one or more individual Docker commands which implement the original dlw command.  Besides its template generation feature, the dlw, through a <a href=#ConceptsDependencySpecification>Dependency Specification</a>, applies a directed graph to order the individual Docker commands within the CLI stream to better ensure the successful execution of the entire stream.
 
 For example, suppose a Project labeled 'sample' contains four Components: dlw_parent, dlw_sshserver, dlw_mysql, and dlw_apache.  Furthermore, the Components: dlw_sshserver, dlw_mysql, and dlw_apache lexically include dlw_parent.  In this situation, executing ```dlw build```will generate the following Docker CLI stream:
@@ -45,41 +40,9 @@ docker build  -t "dlw_sshserver" "/home/dlw/project/sample/component/dlw_sshserv
 ```
 Notice, the placement of the Docker dlw_parent build request before the other build requests, as dlw_parent must exist/be current to correctly build the deriviative Components. 
 
-### Concepts
+### Installing
 
-+ **Component**<a id="ConceptsComponent"></a>:  A widget that contributes one or more elemental services to a cooperative pod of other Components.  Component's offer their service(s) through either lexical inclusion, statically inheriting a base Component's implementation ([see FROM](http://docs.docker.io/reference/builder/#from)), or dynamically, as individually executing entities that coordinate their activity through some protocol mechanism ([see LINK](https://docs.docker.com/userguide/dockerlinks/)).
-
-    The dlw implements a Component as a directory whose name reflects the image's name in the local repository.  This directory contains a subdirectory called "context" which represents the resources required to execute a particular dlw command.  "context" is further subdivided by subdirectories whose names reflect a dlw command.  These command-context subdirectories contain resources, like command line options, required to execute the particular command.  They also identify which commands apply to a particular Component, as certain Components may support some but not all dlw commands. For example, a statically included Component might not support the ```dlw run``` command.
-+ **Dependency Specification**<a id="ConceptsDependencySpecification"></a>: A declarative mechanism to encode dlw command dependencies between Components.  Component dependencies can be independenly specified for any dlw command, permitting for example, separate dependency graphs for build-time, ```dlw build``` vs. run-time concerns, ```dlw run```.  In general, nearly all dlw commands mirror either build-time or run-time dependencies.  For example, ```dlw start``` shares the same dependency graph as ```dlw run```.  In these cases, individual dlw commands can share an existing command's dependency graph.  Specified dependencies will order the dlw generated Docker Daemon CLI stream to more fully ensure its successful completion (see [How Does It Work](#how-does-it-work)).  Dependency Specification maybe optional, as weakly coupled Components, a pod whose ordering doesn't affect the outcome of any dlw command, eliminate its encoding.
-
-    A file named "Dependency" captures [GNU make rules](http://www.gnu.org/software/make/manual/html_node/Rule-Introduction.html#Rule-Introduction) for each Component name and dlw command pair. A rule should only specify a target and its prerequiste(s).  In all cases, a provided default recipie triggers an appropriate process chain to implement the specified dlw command.  As indicated above, this file should not exist in situations involving weakly coupled Components, as it will be empty.
-+ **Component Catalog**<a id="ConceptsComponentCatalog"></a>: Defines the pod of directly interacting Components from which desired group behavior emerges and optionally contains a Dependency Specification.
-
-    A directory called "component" implements a Component Catalog.  One or more Component directores exist as subdirectories within "component".  dlw commands that operate on individual images and their derived containers iterate over "component".
-
-+ **Image GUID List**<a id="ConceptsImageGUIDList"></a>:  An object that maintains a list of Docker image GUIDs generated when building a specific Component.  The different GUIDs in this list represent various image versions generated due to alterations applied to resources, like a Dockerfile, that comprise a Component's (image's) build context.  Associated to each GUID, a column property bag enables extending the metadata for an image to include an arbitrary set of attribures/columns.  These columns can appear in the reporting generated by the ```dlw ps``` and ```dlw image``` commands.
-
-  A standard text file implements each Image GUID List.  The text file is assigned the same name as the Component (image) name with a suffix of ".GUIDlist".  The image GUIDs in the file are ordered from the oldest, which appears as the first line in the text file, to the most recent GUID that occupies its last line.  The column property bag appears space prefixed after the GUID.  It's implemented as a [bash associative array](http://www.linuxjournal.com/content/bash-associative-arrays) named "componentPropBag".  Simply update this column property bag with the custom property names and values you wish displayed as reporting columns.
-+ **Build Target**<a id="ConceptsBuildTarget"></a>: An implementation level object whose timestamp represents a Component's last successful ```dlw build```.  This timestamp enables build-time optimization by only executing a ```dlw build``` for a given Component iff at least one of the Component's resources reflects a more recent date than the Build Target.  In this case, ```dlw build``` considers the Component changed since the last ```dlw build``` request causing ```dlw build``` to construct a new Component version.
-
-    A Build Target implements itself as a file whose name concatenates the Component name with the suffix ".build".
-
-+ **Build Catalog**<a id="ConceptsBuildCatalog"></a>: An implementation level object that encapsulates one or more Build Targets.
-
-    A Build Catalog appears as a directory called "build".
-+ **Image Catalog**<a id="ConceptsImageCatalog"></a>:  An object that encapsulates all Image GUID Lists and Build Targets.
-
-    It's implemented as a directory named "image".
-
-+ **Script Catalog**<a id="ConceptsScriptCatalog"></a>: A repository comprised almost entirely of bash scripts.  The bash scripts can be categorized as either "framework" or "command" scripts.  Framework scripts generically encode the behavior to support dlw commands, while command scripts override the necessary functions within framework modules to support a particular command, such as ```dlw build``` or ```dlw run```.  Script Catalogs can exist on two levels: Installation and Project.  An Installation Script Catalog organizes scripts so a single instance of the Catalog can be shared among several dlw Projects.  In constrast, a Project Script Catalog exists within a particular Project, is inaccessible/isolated from other Projects, and can override any portion of or the entire Installation Script Catalog.
-
-  A directory named 'script' implements a Script Catalog.  The Installation Script Catalog resides in the "/usr/bin/dlw/" while a Project Script Catalog, if desired, dwells within a specific Project.
-
-+ **Project**<a id="ConceptsProject"></a>:  An object encapsulating a Component Catalog, an Image Catalog, and potentially a Project Script Catalog.  A Project's Component Catalog defines the complete scope of Components addressable by a dlw command.  A viable Project minimally contains a Component Catalog consisting of at least one buildable/runnable Component.  
-
-    Implemented as a directory whose name reflects the one assgined to the Project.  The dlw command will assume the current working directory contains the Project that should be affected by it.  Project may also contain a temporary directory named "tmp" if the current dlw command failes providing state information that may be important to debugging the its cause. 
-
-### Installing: Pulling Image
+#### Installing: Pulling Image
 
 + <a href="#InstallingTagVersionPull">Determine dlw tagged version to pull.</a>  View avaliable [dlw Docker Hub tags](https://registry.hub.docker.com/u/whisperingchaos/dlw/tags/manage/).
 + <a href="#InstallingDownloaddlwRunsh">Download dlwRun.sh and make it runnable.</a>
@@ -118,15 +81,65 @@ Other methods to download dlwRun.sh exist [see stackoverflow.com](http://stackov
 ##### Create Host Project Directory <a id="InstallingCreateHostProjectDirectory"></a>
 Most likely, dlw <a href="#ConceptsProject">Projects</a>, which consist of source artifacts to construct <a href="#ConceptsComponent">Component(s)</a>, will reside in the host's more "permanent" file system.  Although Projects can be encapsulated within a container running the dlw or stored in an associated [Docker Data Volume](http://docs.docker.com/userguide/dockervolumes/), at this time, it just feels "safer" for Projects to exist within a "traditional" file system, as opposed to a cellular one. Given this guidance, create a subdirectory to group one or more Projects within it.  Mounting this directory into the dlw container will omit the group directory name from the running dlw container, however, its contents will be accessible.  The absolute path to this directory must not contain spaces or colons (':') in any directory name.
 
-### Installing: Sample Project
+#### Installing: Sample Project & Testing
 
 + Assumes successful completion of: [Installing: Pulling Image](#installing-pulling-image) and current terminal session connected to running dlw container.
 + ```mkdir -p /home/dlw/project/sample/component```
 + ```cd /home/dlw/project/sample```
-+ Execute ```dlw itest```.
-  + It will install a project called 'sample' used to execute dlw integration tests, then execute the integration tests.
++ Execute ```dlw itest``` to install project called 'sample' and executes integration tests.
 
-### Exploring dlw Commands
+Once integration testing successfully completes, a Project called 'sample' will exist in the + <a href="#InstallingCreateHostProjectDirectory">host directory</a> specified by the ```dlwRun.sh``` script.  The Project through its Components, provides examples demonstrating various aspects of the dlw.  For example, specifying a Component's command line arguments for a particular command like build or run to avoid having to constantly repeat static argument values on the dlw command line (see: "../sample/component/dlw_apache/context/run")
+
++ Use 'sample' as a sandbox to expolore various dlw options and their effects before applying these options to your own Project's Components.
++ The contents of the 'sample' project and local [Docker Registry](https://docs.docker.com/registry/) can be reverted at any time by running ```dlw itest```.
+
+### Creating a Project
+
++ Assumes successful completion of: [Installing: Pulling Image](#installing-pulling-image) and current terminal session connected to running dlw container.
++ Create a <a id="ConceptsProject">"Project" directory assigning it the desired Project's name.
+  + Ex: ```mkdir ~/project/sample``` given Project name of 'sample'. 
++ Create the <a id="ConceptsComponentCatalog">Component Catalog</a> directory named "component" to manage a Project's Components.
+  + Ex: ```mkdir ~/project/xproject/component```
++ Create one or more <a id="ConceptsComponent">Component</a> instance directories with the desired Component's name.
+  + Ex: ```mkdir ~/project/xproject/component/ycomponent``` given Component name of 'ycomponent'.
++ Create a Component's "context' directory.
+  + Ex: ```mkdir ~/project/xproject/component/ycomponent/context``` given Component name of 'ycomponent'.
++ Create a Component's build context directory directory.  A build context directory encapsulates all the resources required to successfully build a docker image.
+  + Ex: ```mkdir ~/project/xproject/component/ycomponent/context/build```
++ Create and save a Dockerfile to a Component's build context directory.
+  + Ex:
+        ```
+        echo "FROM ubuntu:12.04"        > ~/project/xproject/component/ycomponent/context/build/Dockerfile
+        echo "ENV DIFF 'MakeItUnique'" >> ~/project/xproject/component/ycomponent/context/build/Dockerfile
+        echo "ENTRYPOINT [/bin/bash]"  >> ~/project/xproject/component/ycomponent/context/build/Dockerfile
+        ``` 
+        Creates a component named ycomponent that's slightly different from ubuntu:12:04. 
++ Build a Component's image:
+  + Ex:
+        ```
+        cd ~/project/xproject
+        dlw build
+        ```
+The above satisifies the minimal effort to define a viable Project that builds a single component.
+
++ Report on a Component's related images:
+  + Ex:
+        ```
+        dlw images
+        ```
+        Should return an extended form of the ```docker images``` report with only a single row of 'ycomponent' information.
+
+To run a Component and attach to its tty:
+
++ Add the 'run' 'context' directory to the Component's definition.
+  + Ex: ```mkdir ~/project/xproject/component/ycomponent/context/run```
+
+
+
++ Run a Component's container
+
+### Exploring Commands
+
 + Assumes successful completion of: [Installing: Pulling Image](#installing-pulling-image).
 + dlw provides typical help information:
   + Run ```dlw help``` to display a summary of all commands.
@@ -161,6 +174,51 @@ Notes:
 + Specifying a boolean option without a value negates its default value. Ex. "--dlwno-parent -- ..." --dlwno-parent negated from 'false' to 'true'.
 + Docker array options [], like '-v', aren't directly supported by the dlw command line.  These recurring options should be specified within the context   
 
+### Features
++ Use simple commands like ```dlw build```,```dlw run```, and ```dlw images``` to manage and report on an application/service composed from multiple cooperating containers.
++ Launch and concurrently attach to the terminal interfaces of multiple containers using the terminal multiplex feature of [GNU screen](http://www.gnu.org/software/screen/).
++ Combined GNU screen, [linux watch](http://en.wikipedia.org/wiki/Watch_%28Unix%29) and reporting commands like 'top' and 'ps' to actively monitor the status of multiple containers.
++ Generate Docker CLI stream from command line arguments stored in a file, using a rudimentry command template.
++ Enhance report generation by associating custom propertys to a docker image. 
++ Track previous versions of docker images and with single command remove all prior versions and their associated containers, ordering their removal to avoid "Conflict" errors issued by the Docker Daemon.
++ Enjoy the benefits of delivering and running this tool within a container.   
++ Add custom dlw extensions and repair code without changing existing script source.
+
+### Concepts
+
++ **Component**<a id="ConceptsComponent"></a>:  A widget that contributes one or more elemental services to a cooperative pod of other Components.  Component's offer their service(s) through either lexical inclusion, statically inheriting a base Component's implementation ([see FROM](http://docs.docker.io/reference/builder/#from)), or dynamically, as individually executing entities that coordinate their activity through some protocol mechanism ([see LINK](https://docs.docker.com/userguide/dockerlinks/)).
+
+    The dlw implements a Component as a directory whose name reflects the image's name in the local repository.  This directory contains a subdirectory called "context" which represents the resources required to execute a particular dlw command.  "context" is further subdivided by subdirectories whose names reflect a dlw command.  These command-context subdirectories contain resources, like command line options, required to execute the particular command.  They also identify which commands apply to a particular Component, as certain Components may support some but not all dlw commands. For example, a statically included Component might not support the ```dlw run``` command.
++ **Dependency Specification**<a id="ConceptsDependencySpecification"></a>: A declarative mechanism to encode dlw command dependencies between Components.  Component dependencies can be independenly specified for any dlw command, permitting for example, separate dependency graphs for build-time, ```dlw build``` vs. run-time concerns, ```dlw run```.  In general, nearly all dlw commands mirror either build-time or run-time dependencies.  For example, ```dlw start``` shares the same dependency graph as ```dlw run```.  In these cases, individual dlw commands can share an existing command's dependency graph.  Specified dependencies will order the dlw generated Docker Daemon CLI stream to more fully ensure its successful completion (see [How Does It Work](#how-does-it-work)).  Dependency Specification maybe optional, as weakly coupled Components, a pod whose ordering doesn't affect the outcome of any dlw command, eliminate its encoding.
+
+    A file named "Dependency" captures [GNU make rules](http://www.gnu.org/software/make/manual/html_node/Rule-Introduction.html#Rule-Introduction) for each Component name and dlw command pair. A rule should only specify a target and its prerequiste(s).  In all cases, a provided default recipie triggers an appropriate process chain to implement the specified dlw command.  As indicated above, this file should not exist in situations involving weakly coupled Components, as it will be empty.
++ **Component Catalog**<a id="ConceptsComponentCatalog"></a>: Defines the pod of directly interacting Components from which desired group behavior emerges and optionally contains a Dependency Specification.
+
+    A directory called "component" implements a Component Catalog.  One or more Component directores exist as subdirectories within "component".  dlw commands that operate on individual images and their derived containers iterate over "component".
+
++ **Image GUID List**<a id="ConceptsImageGUIDList"></a>:  An object that maintains a list of Docker image GUIDs generated when building a specific Component.  The different GUIDs in this list represent various image versions generated due to alterations applied to resources, like a Dockerfile, that comprise a Component's (image's) build context.  Associated to each GUID, a column property bag enables extending the metadata for an image to include an arbitrary set of attribures/columns.  These columns can appear in the reporting generated by the ```dlw ps``` and ```dlw image``` commands.
+
+  A standard text file implements each Image GUID List.  The text file is assigned the same name as the Component (image) name with a suffix of ".GUIDlist".  The image GUIDs in the file are ordered from the oldest, which appears as the first line in the text file, to the most recent GUID that occupies its last line.  The column property bag appears space prefixed after the GUID.  It's implemented as a [bash associative array](http://www.linuxjournal.com/content/bash-associative-arrays) named "componentPropBag".  Simply update this column property bag with the custom property names and values you wish displayed as reporting columns.
++ **Build Target**<a id="ConceptsBuildTarget"></a>: An implementation level object whose timestamp represents a Component's last successful ```dlw build```.  This timestamp enables build-time optimization by only executing a ```dlw build``` for a given Component iff at least one of the Component's resources reflects a more recent date than the Build Target.  In this case, ```dlw build``` considers the Component changed since the last ```dlw build``` request causing ```dlw build``` to construct a new Component version.
+
+    A Build Target implements itself as a file whose name concatenates the Component name with the suffix ".build".
+
++ **Build Catalog**<a id="ConceptsBuildCatalog"></a>: An implementation level object that encapsulates one or more Build Targets.
+
+    A Build Catalog appears as a directory called "build".
++ **Image Catalog**<a id="ConceptsImageCatalog"></a>:  An object that encapsulates all Image GUID Lists and Build Targets.
+
+    It's implemented as a directory named "image".
+
++ **Script Catalog**<a id="ConceptsScriptCatalog"></a>: A repository comprised almost entirely of bash scripts.  The bash scripts can be categorized as either "framework" or "command" scripts.  Framework scripts generically encode the behavior to support dlw commands, while command scripts override the necessary functions within framework modules to support a particular command, such as ```dlw build``` or ```dlw run```.  Script Catalogs can exist on two levels: Installation and Project.  An Installation Script Catalog organizes scripts so a single instance of the Catalog can be shared among several dlw Projects.  In constrast, a Project Script Catalog exists within a particular Project, is inaccessible/isolated from other Projects, and can override any portion of or the entire Installation Script Catalog.
+
+  A directory named 'script' implements a Script Catalog.  The Installation Script Catalog resides in the "/usr/bin/dlw/" while a Project Script Catalog, if desired, dwells within a specific Project.
+
++ **Project**<a id="ConceptsProject"></a>:  An object encapsulating a Component Catalog, an Image Catalog, and potentially a Project Script Catalog.  A Project's Component Catalog defines the complete scope of Components addressable by a dlw command.  A viable Project minimally contains a Component Catalog consisting of at least one buildable/runnable Component.  
+
+    Implemented as a directory whose name reflects the one assgined to the Project.  The dlw command will assume the current working directory contains the Project that should be affected by it.  Project may also contain a temporary directory named "tmp" if the current dlw command failes providing state information that may be important to debugging the its cause. 
+
+
 ##### What's Provided
 
 + Docker's OS image: [Ubuntu 12.04](https://github.com/tianon/docker-brew-ubuntu-core/blob/7fef77c821d7f806373c04675358ac6179eaeaf3/precise/Dockerfile)
@@ -169,21 +227,6 @@ Notes:
 + [GNU make](http://www.gnu.org/software/make/manual/html_node/index.html): [3.81-8.1ubuntu1.1](http://packages.ubuntu.com/precise/make)
 + [GNU screen](http://www.gnu.org/software/screen/): [4.0.3-14ubuntu8](http://packages.ubuntu.com/precise/screen)
 + [Docker Local Workbench](https://github.com/WhisperingChaos/DockerLocalWorkbench)
-
-
-
-
-### Creating a Project
-+ Create a <a id="ConceptsProject">"Project" directory assigning it the desired Project's name.
-  + Ex: ```mkdir ~/Desktop/sample``` given Project name of 'sample'. 
-+ Create the <a id="ConceptsComponentCatalog">Component Catalog</a> directory named "component" to manage a Project's Components
-  + Ex: ```mkdir ~/Desktop/sample/component```
-+ Create one or more <a id="ConceptsComponent">Component</a> instance directories with the desired Component's name.
-  + Ex: ```mkdir ~/Desktop/sample/component/dlw_sshserver``` given Component name of 'dlw_sshserver'.
-+ Create a Component's <a id="ConceptsComponent">Component</a> "context' directory.
-  + Ex: ```mkdir ~/Desktop/sample/component/dlw_sshserver/context``` given Component name of 'dlw_sshserver'.
-+ Create a Component's build context directory directory.  A build context directory encapsulates all the resources required to successfully build a docker image.
-  + Ex: ```mkdir ~/Desktop/sample/component/dlw_sshserver/context/build``` given Component name of 'dlw_sshserver'.
 
 
 
