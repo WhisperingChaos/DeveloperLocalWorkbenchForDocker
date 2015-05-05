@@ -19,7 +19,7 @@ source "PacketInclude.sh";
 ###############################################################################
 function VirtDockerCmmdOptionsArgsDef () {
   echo 'Arg1 single "$PROJECT_NAME" "" required ""'
-  echo '--dlwc single "watch --dlwc=ps" "" required ""'
+  echo '--dlwc single "attach" "" required ""'
 }
 ###############################################################################
 ##
@@ -40,7 +40,7 @@ or a new one specified by SESSION_NAME.
 
 Usage: dlw $commandName [OPTIONS] DLW_COMMAND SESSION_NAME
 
-  DLW_COMMAND: --dlwc={'watch --dlwc=ps'|'<dlwCommand>'}
+  DLW_COMMAND: --dlwc={'attach'|'<dlwCommand>'}
           '<dlwCommand>'  Replace <dlwCommand> with one that keeps SYSIN open,
                             like 'start', 'run', 'attach', 'watch' ....  Should 
                             be enclosed in single/double quotes with appropriate 
