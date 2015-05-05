@@ -1,31 +1,40 @@
-## Building, Running, & Reporting on Image/Container Pods
+### Building, Running, & Reporting on Image/Container Pods
 
 ##### ToC  
+
 [Purpose](#purpose)  
 [How Does It Work](#how-does-it-work)  
+[Features](#features)  
 [Installing](#installing)  
-<br>&nbsp;&nbsp;&nbsp;&nbsp;[Pulling Image](#installing-pulling-image)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Pulling Image](#installing-pulling-image)  
 &nbsp;&nbsp;&nbsp;&nbsp;[Sample Project & Testing](#installing-sample-project-testing)  
 [Project Tutorial](#project-tutorial)  
-[Exploring Commands](#exploring-commands)
-[Features](#features)  
+[Exploring Commands](#exploring-commands)  
+[Declaring Dependencies](#declaring-dependencies)  
 [Concepts](#concepts)  
 [What's Provided](#whats-provided)  
-[How to Add Components to the makefile](#how-to-add-components-to-the-makefile)  
-[How to Run make](#how-to-run-make)  
-[Sample makefile](#sample-makefile)  
-[Test Script](#test-script)  
 [License](#license)  
 
 ### Purpose
 
-To facilitate the development of cooperative multicontainer services by extending core Docker CLI commands to operate on related groups of images/containers managed by the local Docker Daemon.  Embodied in facilitation is a desire to accelerate the iterative development loop through the use of simple configuration settings and applying the efficiency of local file and computing resources to avoid the potential complexity of web service interfaces, as well as network and service contention delays inherent to these typically remote centrailized ones.
+To facilitate the development of cooperative multicontainer services by extending core Docker CLI commands to operate on related groups of images/containers managed by the local Docker Daemon.  Facilitation embodies a desire to accelerate the iterative development loop through the efficiency of local file and computing resources, thereby, avoiding the network and service contention delays inherent to remote web interfaces.
 
 Although docker provides [Compose](https://docs.docker.com/compose/), a Trusted Build cluster, and GitHub integration that conceptually provide this functionality, some may adopt this tool to:
 + Avoid implementing a private registry and Trusted Build cluster, especially for small projects.
 + Potentially improve the responsiveness of the development cycle, as all Docker commands are executed by the local Docker Daemon, especially, in situations when the public Trusted Build cluster performance slows due to congestion of build requests or network connectivity issues.
 + Verify the construction of statically dependent images and execution of cooperative containers before committing them to the public index/registry.
-+ Maintain a level of (free privacy), as Trusted Builds currently operate on docker's public index/repository and multiple private repositories incurr a monthly fee.
++ Maintain a level of "free privacy", as Trusted Builds currently operate on docker's public index/repository and multiple private repositories incurr a monthly fee.
+
+### Features
+
++ Use simple commands like ```dlw build```,```dlw run```, and ```dlw images``` to manage and report on an service composed from multiple cooperating containers.
++ Launch and concurrently attach to the terminal interfaces of multiple containers using the terminal multiplex feature of [GNU screen](http://www.gnu.org/software/screen/).
++ Combined GNU screen, [linux watch](http://en.wikipedia.org/wiki/Watch_%28Unix%29) and reporting commands like 'top' and 'ps' to actively monitor the status of multiple containers.
++ Generate Docker CLI stream from command line arguments stored in a file, using a rudimentry command template.
++ Enhance report generation by associating custom properties to a docker image. 
++ Track previous versions of docker images and with single command remove all prior versions and their associated containers, ordering their removal to avoid "Conflict" errors issued by the Docker Daemon.
++ Enjoy the benefits of delivering and running this tool within a container.   
++ Add custom dlw extensions and repair code without changing existing script source.
 
 ### How Does It Work
 
@@ -84,9 +93,9 @@ Most likely, dlw <a href="#ConceptsProject">Projects</a>, which consist of sourc
 #### Installing: Sample Project & Testing
 
 + Assumes successful completion of: [Installing: Pulling Image](#installing-pulling-image) and current terminal session connected to running dlw container.
-+ ```mkdir -p /home/dlw/project/sample/component```
-+ ```cd /home/dlw/project/sample```
-+ Execute ```dlw itest``` to install a project called 'sample' and perform integration tests.
++ ```mkdir -p /home/dlw/project/sample/component``` Ensure existence of 'sample''s Project directory and <a href="#ComponentCatalog">Component Catalog</a>.
++ ```cd /home/dlw/project/sample``` Establish 'sample' as target Project directory for dlw commands.
++ ```dlw itest``` Installs a Project called 'sample' and performs integration tests.
 
 Once testing successfully completes, a Project called 'sample' will exist in the + <a href="#InstallingCreateHostProjectDirectory">host directory</a> specified by the ```dlwRun.sh``` script.  The Project through its Components, provides examples demonstrating various aspects of the dlw.  For example, specifying a Component's command line arguments for a particular command like build or run to avoid having to constantly repeat static argument values on the dlw command line (see: "../sample/component/dlw_apache/context/run")
 
@@ -147,13 +156,13 @@ Create new containers for all Components then run and attach to their ttys.
 + Attach a Project's active container terminal instances to either a new or an existing screen session.
   + Ex: ```dlw screen``` Creates a screen session named 'xproject' with a single active tty session for container derived from 'ycomponent'.
 + Use [GNU screen](http://www.gnu.org/software/screen/) command to screen
-  + Ex: ```screen -r``` Attaches the current GNU screen session named ```<PID>.xproject```.
+  + Ex: ```screen -r``` Attaches the current GNU screen session named ```\<PID\>.xproject```.
 
 ##### Project: Remove Images
 
 Removes all Images and derivative Containers associated to a Project from the Local Docker Registry. However, data maintained in the Project's Component Catalog remains untouched.
 
-+ ```dlw rmi -f --dlwrm --dlwcomp-ver=all -- all```
++ ```dlw rmi -f --dlwrm --dlwcomp-ver=all all```
 
 ### Exploring Commands
 
@@ -191,6 +200,29 @@ Notes:
 + Specifying a boolean option without a value negates its default value. Ex. "--dlwno-parent -- ..." --dlwno-parent negated from 'false' to 'true'.
 + Docker array options [], like '-v', aren't directly supported by the dlw command line.  These recurring options should be specified within the context   
 
+#### Example Remove Commands
+
++ **Remove All Component Versions for All Components:**
+  Deletes all images, their versions, and all associated containers even if the containers are running at the time of this request:  
+  ```
+> make Remove idscope=All complist=All
+```
++ **Remove just the Current Component Version for All Components:**
+  Deletes the most recently built image for every Component and all associated containers, even if the containers are running at the time of this request:  
+  ```
+> make Remove idscope=Current complist=All
+```
++ **Remove All the containers for Current Component Version of sshserver.img:**
+  Deletes every container associated to the most recently built Component named "sshserver".  
+  ```
+> make Remove restrict=OnlyContainers idscope=Current complist=sshserver.img
+```
++ **Remove All containers and All Components except for the Current ones.**
+  Deletes every container and every image version except for the most recent version.  
+  ```
+> make Remove idscope=AllExceptCurrent complist=All
+```
+
 ### Concepts
 
 + **Component**<a id="ConceptsComponent"></a>:  A widget that contributes one or more elemental services to a cooperative pod of other Components.  Component's offer their service(s) through either lexical inclusion, statically inheriting a base Component's implementation ([see FROM](http://docs.docker.io/reference/builder/#from)), or dynamically, as individually executing entities that coordinate their activity through some protocol mechanism ([see LINK](https://docs.docker.com/userguide/dockerlinks/)).
@@ -225,16 +257,6 @@ Notes:
 
     Implemented as a directory whose name reflects the one assgined to the Project.  The dlw command will assume the current working directory contains the Project that should be affected by it.  Project may also contain a temporary directory named "tmp" if the current dlw command failes providing state information that may be important to debugging the its cause. 
 
-### Features
-
-+ Use simple commands like ```dlw build```,```dlw run```, and ```dlw images``` to manage and report on an application/service composed from multiple cooperating containers.
-+ Launch and concurrently attach to the terminal interfaces of multiple containers using the terminal multiplex feature of [GNU screen](http://www.gnu.org/software/screen/).
-+ Combined GNU screen, [linux watch](http://en.wikipedia.org/wiki/Watch_%28Unix%29) and reporting commands like 'top' and 'ps' to actively monitor the status of multiple containers.
-+ Generate Docker CLI stream from command line arguments stored in a file, using a rudimentry command template.
-+ Enhance report generation by associating custom propertys to a docker image. 
-+ Track previous versions of docker images and with single command remove all prior versions and their associated containers, ordering their removal to avoid "Conflict" errors issued by the Docker Daemon.
-+ Enjoy the benefits of delivering and running this tool within a container.   
-+ Add custom dlw extensions and repair code without changing existing script source.
 
 ##### What's Provided
 
@@ -244,113 +266,6 @@ Notes:
 + [GNU make](http://www.gnu.org/software/make/manual/html_node/index.html): [3.81-8.1ubuntu1.1](http://packages.ubuntu.com/precise/make)
 + [GNU screen](http://www.gnu.org/software/screen/): [4.0.3-14ubuntu8](http://packages.ubuntu.com/precise/screen)
 + [Docker Local Workbench](https://github.com/WhisperingChaos/DockerLocalWorkbench)
-
-
-
-
-
-
-
-
-
-
-GNU makefile with two custom rules for docker.  The "build" rule encodes a prerequisite wildcard pattern match which interprets all files specified in a given Component (directory), as a required dependency for that Component.  It also provides a recipe to execute the docker build command and then, if successful, will add the newly minted image's GUID to the appropriate Image GUID List.  The use of the wildcard pattern dynamically adapts the dependency list, therefore, unless an exception exists, the only dependencies that must be specified are Component (image) level ones, as adding to or updating files in a Component (directory) will automatically trigger the default recipe without altering the makefile.
-
-  The other custom rule implements a "Remove" ("clean") request.  A remove operation, depending on its scope, deletes one or more local docker images and/or their associated containers (whether currently running or stopped) under the management of the local docker daemon.  After each successful image delete, the recipe continues by eliminating the image's GUID from the appropriate Image GUID List.
-+ A small number of bash scripts that manage the GUIDs stored in the Image GUID List and when requested, delete containers created from these managed GUIDs.
-+ Create a Component (directory) within the Root Resource Directory.  A Component (directory) must contain at least a Dockerfile.
-+ Edit or create a file called "Component" within Root Resource Directory (same directory as the makefile) and add a target, at the bottom of this file with either an empty prerequisite list, in situations where the target can be independently built without referring to other Components or one that reflects an immediate reference to another Component which becomes the statically included base for this one.  The target name must be identical to the Component name with an added suffix of ".img".
-
-  Ex: Given Component name of: "sshserver" that is independent of other project Components, its makefile rule would be:
-
-      sshserver.img    :
-
-  Ex: Given Component name of: "mysql" that depends on the "sshserver" Component for secure administrative access, the "mysql" makefile rule would be:
-
-      mysql.img    : sshserver.img
-
-+ After inserting a new rule to manufacture a Component, the "COMPONENT_LST:=" macro near the top of the "Component" file must also be altered to reflect this name.  When adding a new entry to this list, insert the new target name before any other Component it relies on.  The make "remove" commands, to be explained below, consume this Component list and remove the docker images adhering to the list's order.  If the list is properly maintained and ordered, then a "Remove All" request will likely succeed.
-
-  Ex: After adding the "sshserver.img" target above, the COMPONENT_LST macro should resemble:
-
-      COMPONENT_LST:=sshserver.img
-
-  Ex: Next, add the "mysql.img" target that relies on "sshserver.img":
-
-      COMPONENT_LST:=mysql.img sshserver.img
-
-  Note: "mysql.img" appears before "sshserver.img" in the list due to "mysql.img" static reliance on "sshserver.img".  Separate entries using a space character.
-
-+ ">" represents the command line prompt.
-
-#### Build All Components
-      > make
-#### Remove options
-+ Remove:  Required to initiate physical deletion of containers and/or their progenitor images.
-+ idscope=: Determines if either all GUIDs recorded in an Image GUID List or only a single GUID within this List, identifying the most recent Component version, will be processed by the Remove operation.
-  + All - Process every GUID enumerated in the Image GUID List.
-  + Current - Process only the most recent GUID from the Image GUID List.
-  + AllExceptCurrent - Process every GUID in Image GUID List other than Current.
-+ restrict=: Alters the default behavior of the Remove command.  The default behavior removes both an image and its associated container(s).  
-  + OnlyContainers - Remove only the containers associated to an image while preserving the image.  
-+ complist=: Defines a list of Components to be processed by the Remove operation.   
-  + complist='\<ComponentName1\>.img[ \<ComponentName2\>.img ...]'   
-    Replace \<ComponentNameN\> with one of the project's Component names. 
-Encapsulate the list, if more than one Component, in single or double quotes.  Use a space to separate list elements.  
-    ```
-> make Remove idscope=All complist=sshserver.img
-> make Remove idscope=All complist='mysql.img sshserver.img'
-```
-#### Example Remove Commands
-
-+ **Remove All Component Versions for All Components:**
-  Deletes all images, their versions, and all associated containers even if the containers are running at the time of this request:  
-  ```
-> make Remove idscope=All complist=All
-```
-+ **Remove just the Current Component Version for All Components:**
-  Deletes the most recently built image for every Component and all associated containers, even if the containers are running at the time of this request:  
-  ```
-> make Remove idscope=Current complist=All
-```
-+ **Remove All the containers for Current Component Version of sshserver.img:**
-  Deletes every container associated to the most recently built Component named "sshserver".  
-  ```
-> make Remove restrict=OnlyContainers idscope=Current complist=sshserver.img
-```
-+ **Remove All containers and All Components except for the Current ones.**
-  Deletes every container and every image version except for the most recent version.  
-  ```
-> make Remove idscope=AllExceptCurrent complist=All
-```
-
-#### Help
-
-To display makefile help simply: 
-  ```
-> make help
-```
-### Sample makefile
-
-A sample makefile project containing a makefile, the Component file and Component directories supplying simple Dockerfiles, implementing a project based on the sshserver and mysql Components used as examples above, exists in the archive called ["sample.tar.gz"](https://github.com/WhisperingChaos/DockerLocalBuild/blob/master/sample.tar.gz).  
-+ Extract its contents, preserving the directory structure, to some directory.
-+ Start a command line console.
-+ Make the "sample" directory current.
-+ Before running the sample build for the first time, consider executing the [test script](#test-script).  A successful test will likely ensure the reliability of the build.
-+ Run the Build using the directions [above](#how-to-run-make).
-
-### Test Script
-
-The test script named: ["MakefileTest.sh"](https://github.com/WhisperingChaos/DockerLocalBuild/blob/master/scripts/MakefileTest.sh) exercises a limited number of scenarios to better guarantee the proper operation of the makefile script.  "MakefileTest.sh" exists in the Root Resource Directory along with the "makefile" within the archive file containing the [Sample makefile](#sample-makefile).  Assuming the sample makefile has been downloaded, extracted, and account being employed to run the script is a member of the docker group:
-
-+ Start a command line console.
-+ Make the "sample" directory current.
-+ Run the testscript:
-  ```
-> ./MakefileTest.sh
-```
-
-The test script finishes within a minute.  A final message of:"Testing Complete & Successful!" indicates the makefile script should run correctly within your environment.
 
 ### License
 
