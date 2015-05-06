@@ -1,32 +1,20 @@
 ###############################################################################
 #
 #  Purpose
-#    Automate the construction, update, and removal of statically dependent
-#    docker images, including their associated containers, within the scope
-#    of a local docker daemon.  A statically dependent docker image relies
-#    on components (packages/features) provided by a base image during its
-#    construction via a docker build command ([see FROM](http://docs.docker.io/reference/builder/#from)).
-#    A dependent image is analogous to a derived class, in languages such
-#    as C++, Java, ... which inherits from a particular base class. 
+#    To primarily inject dependency ordering while generating the
+#    Docker CLI commands required to implement its corresponding 'dlw'
+#    command.  Also, this makefile validates the Component names
+#    targeted by the dlw command.
 #
-#  Reasoning
-#    Although docker provides a Trusted Build system and GitHub integration
-#    that conceptually provide this functionality, some may adopt this makefile
-#    approach to:
-#    > Maintain a level of privacy, as Trusted Builds currently operate on
-#      docker's public index/repository.
-#    > Avoid implementing a private registry and Trusted Build cluster, especially
-#      for small projects.
-#    > Potentially improve the responsiveness of the development cycle, as the
-#      build process runs locally,  especially, in situations when the public
-#      Trusted Build cluster performance slows due to congestion of build
-#      requests or network connectivity issues.
-#    > Verify the successful construction of statically dependent containers
-#      before committing them to the public index/registry.
-#    > Easily delete all the containers associated to a given image version.
-#    > Delete all docker image versions for a given image name.
-#
-#  Additional information can be found in the README.md file.
+#    There are only three recipies:
+#    1.  The primary recipe generates a 'packet' containing properties
+#        required by the dlw command generation pipeline to produce
+#        Docker CLI commands and process their output.
+#    2.  A secondary recipe simply provides a list of Component names
+#        specified for a particular dlw command context like 'build' or 'run'.
+#    3.  Mapping recipies.  A recipe mapping one dlw command context to
+#        another.  For example, the dlw 'start' command context is mapped
+#        to 'run' as they share identical dependency definitions.
 #
 ###############################################################################
 # Ensure that the shell has been defined as bash, as a number of
@@ -122,7 +110,7 @@ vpath %.build $(IMAGE_BUILD_TIMESTAMP_DIR)
 # and simply writes the Component names to SYSOUT.
 #
 # Note - secondary expansion of the rule is required in order to substitute '%' below
-# for its, stem, component name, within the shell call.  It's necessary to
+# for its stem, component name, within the shell call.  It's necessary to
 # call the DirectoryRecurse function so all files in the build context are included
 # as prerequsites for the component's build.
 # 
