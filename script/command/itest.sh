@@ -1307,7 +1307,7 @@ function SampleProject_Component_dlw_mysql  () {
     ContextCreate)
       local -r compCmmdContextDirName="$3"
       if [ "$commandName" == 'run' ]; then
-        echo '-i --name dlw_mysql'>"$compCmmdContextDirName/DOCKER_CMMDLINE_OPTION"
+        echo '-i --tty --name dlw_mysql'>"$compCmmdContextDirName/DOCKER_CMMDLINE_OPTION"
         if ! [ -f "$compCmmdContextDirName/DOCKER_CMMDLINE_OPTION" ]; then
           ScriptError "Failed to initialize Command Context for Component: 'dlw_msql' Command: '$commandName' Content: '$compCmmdContextDirName/DOCKER_CMMDLINE_OPTION'."
           return 1
@@ -1415,7 +1415,7 @@ function SampleProject_Component_dlw_apache  () {
     ContextCreate)
       local -r compCmmdContextDirName="$3"
       if [ "$commandName" == 'run' ]; then
-        echo '-i --name dlw_apache --link dlw_mysql:mysql'>"$compCmmdContextDirName/DOCKER_CMMDLINE_OPTION"
+        echo '-i --tty --name dlw_apache --link dlw_mysql:mysql'>"$compCmmdContextDirName/DOCKER_CMMDLINE_OPTION"
         if ! [ -f "$compCmmdContextDirName/DOCKER_CMMDLINE_OPTION" ]; then
           ScriptError "Failed to initialize Command Context for Component: 'dlw_apache' Command: '$commandName' Content: '$compCmmdContextDirName/DOCKER_CMMDLINE_OPTION'."
           return 1
