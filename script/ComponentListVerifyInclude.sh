@@ -33,7 +33,7 @@ function ComponentNmListVerify (){
   while [ $# -ne 0 ]; do
     if [ "${componentSetAll["$1"]}" != "$1" ]; then
       errorTripped=true
-      componentMissingList="$componentMissingList $1"
+      componentMissingList="$componentMissingList '$1'"
     fi
   shift
   done
