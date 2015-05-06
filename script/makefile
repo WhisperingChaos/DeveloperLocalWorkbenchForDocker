@@ -189,7 +189,7 @@ componentBuildNodepLst: $(COMPONENT_BUILD_NODEP_LST)
 # dependency tree, generate a packet for only the identified Component.
 ifeq ($(BUILD_FORCED),false)
 define testPrecondition
-'makefileFunExtend.sh' 'TimeStampTripIs' "$(IMAGE_CAT_DIR)/$*.build" "$(COMPONENT_CAT_DIR)/$*/context/build"; echo $$?;
+'makefileFunExtend.sh' 'TimeStampTripIs' "$(IMAGE_BUILD_TIMESTAMP_DIR)/$*.build" "$(COMPONENT_CAT_DIR)/$*/context/build"; echo $$?;
 endef
 else
 define testPrecondition
@@ -214,37 +214,16 @@ endef
 # dependency tree.
 all.build.nodep: componentBuildNodepLst
 	@
-%.attach.nodep:  %.build.nodep
+
+%.diff.nodep:   %.build.nodep
 	@
-%.create.nodep:  %.build.nodep
+%.images.nodep: %.build.nodep
 	@
-%.diff.nodep:    %.build.nodep
+%.ps.nodep:     %.build.nodep
 	@
-%.images.nodep:  %.build.nodep
+%.rm.nodep:     %.build.nodep
 	@
-%.kill.nodep:    %.build.nodep
-	@
-%.pause.nodep:   %.build.nodep
-	@
-%.port.nodep:    %.build.nodep
-	@
-%.ps.nodep:      %.build.nodep
-	@
-%.restart.nodep: %.build.nodep
-	@
-%.rm.nodep:      %.build.nodep
-	@
-%.rmi.nodep:     %.build.nodep
-	@
-%.run.nodep:     %.build.nodep
-	@
-%.start.nodep:   %.build.nodep
-	@
-%.stop.nodep:    %.build.nodep
-	@
-%.top.nodep:     %.build.nodep
-	@
-%.unpause.nodep: %.build.nodep
+%.rmi.nodep:    %.build.nodep
 	@
 
 ###############################################################################
@@ -304,7 +283,7 @@ all.run: componentRunLst
 
 ###############################################################################
 ##
-##    Section: 'build' Command Ignoring Dependency Processing
+##    Section: All 'run' Commands that Ignoring Dependency Processing
 ##
 ###############################################################################
 #
@@ -313,31 +292,36 @@ all.run: componentRunLst
 # request.  Analogous to COMPONENT_BUILD_NODEP_LST.
 COMPONENT_RUN_NODEP_LST:=$(shell 'makefileFunExtend.sh' 'ContextTargetGen' "$(COMPONENT_CAT_DIR)" "$(COMPONENT_CAT_DIR)/<ComponentName>/context/run" '.run.nodep' )
 componentRunNodepLst: $(COMPONENT_RUN_NODEP_LST)
-# These commands (start, stop, restart,...) share runtime dependencies of the '%.run' command.
-# Translate a request to perform a command over all Components
-# without regarding dependencies into one that uses the dependency list and
-# notion of a 'forced' make to generate this list
+%.run.nodep:
+	@source 'PacketIncludeMakefile.sh'; \
+	PacketCreateFromStrings 'ComponentContextPath' "$(COMPONENT_CAT_DIR)/$*/context/$(COMMAND_CURRENT_MAP)" 'ComponentName' "$*" 'ImageGUIDFileName' "$(IMAGE_CAT_DIR)/$*.GUIDlist" 'packet'; \
+	echo "$$packet"
+
 all.run.nodep: componentRunNodepLst
 	@
-all.attach.nodep:  all.run.nodep
+
+# These commands (start, stop, restart,...) share runtime dependencies of the '%.run' command.
+# Translate a request for individual Component or 'all' to perform 'run' mapped command
+# without using the 'run' dependency list.
+%.attach.nodep:  %.run.nodep
 	@
-all.create.nodep:  all.run.nodep 
+%.create.nodep:  %.run.nodep 
 	@
-all.kill.nodep:    all.run.nodep
+%.kill.nodep:    %.run.nodep
 	@
-all.pause.nodep:   all.run.nodep
+%.pause.nodep:   %.run.nodep
 	@
-all.port.nodep:    all.run.nodep
+%.port.nodep:    %.run.nodep
 	@
-all.restart.nodep: all.run.nodep
+%.restart.nodep: %.run.nodep
 	@
-all.start.nodep:   all.run.nodep
+%.start.nodep:   %.run.nodep
 	@
-all.stop.nodep:    all.run.nodep
+%.stop.nodep:    %.run.nodep
 	@
-all.top.nodep:     all.run.nodep
+%.top.nodep:     %.run.nodep
 	@
-all.upause.nodep:  all.run.nodep
+%.unpause.nodep: %.run.nodep
 	@
 # Customize this makefile by placing all rules defining prerequisites 
 # in a file named "Dependency".  This "Dependency" file separates the
