@@ -93,8 +93,8 @@ Most likely, dlw <a href="#ConceptsProject">Projects</a>, which consist of sourc
 #### Installing: Sample Project & Testing
 
 + Assumes successful completion of: [Installing: Pulling Image](#installing-pulling-image) and current terminal session connected to running dlw container.
-+ ```mkdir -p /home/dlw/project/sample/component``` Ensure existence of 'sample''s <a href="#ConceptsComponentCatalog">Project,</a> directory and <a href="#ConceptsComponentCatalog">Component Catalog</a>.
-+ ```cd /home/dlw/project/sample``` Establish 'sample' as target Project directory for dlw commands.
++ ```mkdir -p ~/project/sample/component``` Ensure existence of 'sample''s <a href="#ConceptsProject">Project,</a> directory and <a href="#ConceptsComponentCatalog">Component Catalog</a>.
++ ```cd ~/project/sample``` Establish 'sample' as target Project directory for dlw commands.
 + ```dlw itest``` Installs a Project called 'sample' and performs integration tests.
 
 Once testing successfully completes, a Project called 'sample' will exist in the <a href="#InstallingCreateHostProjectDirectory">host directory</a> specified by the ```dlwRun.sh``` script.  The Project provides examples demonstrating various aspects of the dlw.  For example, specifying a Component's command line arguments for a particular command like build or run to avoid having to constantly repeat static argument values on the dlw command line (see: "../sample/component/dlw_apache/context/run")
@@ -111,13 +111,13 @@ Create a minimal viable Project that builds a single Component.
 + Assumes successful completion of: [Installing: Pulling Image](#installing-pulling-image) and current terminal session connected to running dlw container.
 + Create a <a href="#ConceptsProject">Project</a> directory assigning it the desired Project's name.
   + Ex: ```mkdir ~/project/xproject``` given Project name of 'xproject'. 
-+ Create the <a href="#ConceptsComponentCatalog">Component Catalog</a> directory named "component" to manage a Project's Components.
++ Create the <a href="#ConceptsComponentCatalog">Component Catalog</a> directory named "component" to manage a Project's  <a href="#ConceptsComponent">Components</a>.
   + Ex: ```mkdir ~/project/xproject/component```
 + Create one or more <a id="ConceptsComponent">Component</a> instance directories with the desired Component's name.
   + Ex: ```mkdir ~/project/xproject/component/ycomponent``` given Component name of 'ycomponent'.
 + Create a Component's "context' directory.
   + Ex: ```mkdir ~/project/xproject/component/ycomponent/context``` given Component name of 'ycomponent'.
-+ Create a Component's build context directory directory.  A build context directory encapsulates all the resources required to successfully build a docker image.
++ Create a Component's build context directory directory.  A build context directory encapsulates all the resources required to successfully build a Docker image.
   + Ex: ```mkdir ~/project/xproject/component/ycomponent/context/build```
 + Create and save a Dockerfile to a Component's build context directory.
   + Ex: Produces a Component that's slightly different from ubuntu:12:04.
