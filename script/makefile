@@ -81,6 +81,14 @@ endif
 ifndef COMPONENT_CAT_DEPENDENCY
   $(error Command context did not specify COMPONENT_CAT_DEPENDENCY)
 endif
+# All final recipies generate a packet.  Since the packet's form is identical in all cases
+# create a macro to manage the redundancy.
+define packetCreate
+source 'PacketIncludeMakefile.sh'; \
+PacketCreateFromStrings 'ComponentContextPath' "$(COMPONENT_CAT_DIR)/$*/context/$(COMMAND_CURRENT_MAP)" 'ComponentName' "$*" 'ImageGUIDFileName' "$(IMAGE_CAT_DIR)/$*.GUIDlist" 'packet'; \
+echo "$$packet"
+endef
+
 ###############################################################################
 ##
 ##    Section: 'build' Command Adhering to Dependency Processing
@@ -121,9 +129,7 @@ vpath %.build $(IMAGE_BUILD_TIMESTAMP_DIR)
 .SECONDEXPANSION:
 %.build: $$(shell 'makefileFunExtend.sh' 'DirectoryRecurse' "$$(COMPONENT_CAT_DIR)/%/context/build" )
 ifndef COMP_NAME_ONLY
-	@source 'PacketIncludeMakefile.sh'; \
-	PacketCreateFromStrings 'ComponentContextPath' "$(COMPONENT_CAT_DIR)/$*/context/$(COMMAND_CURRENT_MAP)" 'ComponentName' "$*" 'ImageGUIDFileName' "$(IMAGE_CAT_DIR)/$*.GUIDlist" 'packet'; \
-	echo "$$packet"
+	@$(packetCreate)
 else
 	echo "$*"
 endif
@@ -199,10 +205,7 @@ endif
 
 define makeTargetNoDepGeneric
 @if [ "$(BUILD_FORCED)" == 'false' ] && [ "$(TRIPPED)" -eq '0' ]; then echo "make: \`$@\' is up to date."; exit 0; fi;\
-source 'PacketIncludeMakefile.sh';\
-COMPONENT_NAME="$*";\
-PacketCreateFromStrings 'ComponentContextPath' "$(COMPONENT_CAT_DIR)/$$COMPONENT_NAME/context/$(COMMAND_CURRENT_MAP)" 'ComponentName' "$$COMPONENT_NAME" 'ImageGUIDFileName' "$(IMAGE_CAT_DIR)/$${COMPONENT_NAME}.GUIDlist" 'packet';\
-echo "$$packet"
+$(packetCreate)
 endef
 # Processes a given specific Component escewing a specific Component's
 # dependency tree.
@@ -247,9 +250,7 @@ COMPONENT_RUN_LST:=$(shell 'makefileFunExtend.sh' 'ContextTargetGen' "$(COMPONEN
 componentRunLst: $(COMPONENT_RUN_LST)
 %.run:
 ifndef COMP_NAME_ONLY
-	@source 'PacketIncludeMakefile.sh'; \
-	PacketCreateFromStrings 'ComponentContextPath' "$(COMPONENT_CAT_DIR)/$(*F)/context/$(COMMAND_CURRENT_MAP)" 'ComponentName' "$*" 'ImageGUIDFileName' "$(IMAGE_CAT_DIR)/$*.GUIDlist" 'packet'; \
-	echo "$$packet"
+	@$(packetCreate)
 else
 	@echo "$*"
 endif
@@ -293,9 +294,7 @@ all.run: componentRunLst
 COMPONENT_RUN_NODEP_LST:=$(shell 'makefileFunExtend.sh' 'ContextTargetGen' "$(COMPONENT_CAT_DIR)" "$(COMPONENT_CAT_DIR)/<ComponentName>/context/run" '.run.nodep' )
 componentRunNodepLst: $(COMPONENT_RUN_NODEP_LST)
 %.run.nodep:
-	@source 'PacketIncludeMakefile.sh'; \
-	PacketCreateFromStrings 'ComponentContextPath' "$(COMPONENT_CAT_DIR)/$*/context/$(COMMAND_CURRENT_MAP)" 'ComponentName' "$*" 'ImageGUIDFileName' "$(IMAGE_CAT_DIR)/$*.GUIDlist" 'packet'; \
-	echo "$$packet"
+	@$(packetCreate)
 
 all.run.nodep: componentRunNodepLst
 	@
