@@ -65,16 +65,16 @@ function TimeStampTripIs () {
 ##
 ##  Purpose:
 ##    Given a directory, recursively retrive all its subdirectories and 
-##    create one long prerequsite line, which also includes the given directory.
-##    The wildcard '*' specification is appended to each directory to include
-##    every file in the directory as a prerequsite too.
+##    create one long prerequsite line.  The prerequsite includes all
+##    nonempty directories and their associated files via the wildcard,
+##   '*', specification.
 ##    
 ##  Input:
 ##    $1  - Directory to recurse and return all other directories.
 ## 
 ##  Output:
 ##    When Successful:
-##      A single line of all subdirectories.
+##      A single line of all nonempty subdirectories appended with wildcard.
 ##    When Failure:
 ##      Issue message to STDERR and return "BuildContextEmpty" as a prerequsite
 ##      via STDOUT.
@@ -93,10 +93,14 @@ function DirectoryRecurse () {
   # use while - read instead of for loop because file name can contain spaces.
   # However, newlines in file names will break this code. 
   while read fileEntry; do
-    # Escape spaces in the directory name.
+    # Escape spaces in the directory name. Vaccinates make from spaces within
+    # prequsite names.
     fileEntry="${fileEntry// /\\ }"
-    # include directory and all its files as prerequsites.
-    dirPathList+="$fileEntry $fileEntry/* "
+    # An empty directory causes make to fail as it doesn't know how to build
+    # nothing, therefore, if a directory is empty ignore it.
+    if [ -z "$(ls -A $fileEntry)" ]; then continue; fi
+    # Include directory and all its files as prerequsites.
+    dirPathList+="$fileEntry/* "
   done < <( find "$1" -type d )
   echo "$dirPathList"
   return 0
