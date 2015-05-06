@@ -96,10 +96,14 @@ function DirectoryRecurse () {
     # Escape spaces in the directory name. Vaccinates make from spaces within
     # prequsite names.
     fileEntry="${fileEntry// /\\ }"
+    # include a reference to the directory, as a change to it may reflect
+    # a deletion of a subdirectory or file that would not be detected by 
+    # simply including its contents appending '/*' wildcard.
+    dirPathList+="$fileEntry "
     # An empty directory causes make to fail as it doesn't know how to build
     # nothing, therefore, if a directory is empty ignore it.
     if [ -z "$(ls -A $fileEntry)" ]; then continue; fi
-    # Include directory and all its files as prerequsites.
+    # Include all the current directory's files as prerequsites.
     dirPathList+="$fileEntry/* "
   done < <( find "$1" -type d )
   echo "$dirPathList"
