@@ -184,7 +184,6 @@ VirtDockerCmmdAssembleTemplateResolvePacketField () {
 ###############################################################################
 function VirtDockerCmmdAssembleTemplate () {
   echo '-S "`AssociativeMapAssignIndirect "$optsArgMapNm" 'Arg1'`" -X screen $DOCKER_CMMDLINE_OPTION -t "`if [ -n "$PACKET_COMPONENT_NAME" ]; then echo "$PACKET_COMPONENT_NAME"; else echo '"\'"'$( QuoteSingleReplace "$PACKET_DOCKER_COMMAND" ' ' )'"\'"'; fi`"  $PACKET_DOCKER_COMMAND'
-#  echo '-S "`AssociativeMapAssignIndirect "$optsArgMapNm" 'Arg1'`" -X screen $DOCKER_CMMDLINE_OPTION -t $PACKET_COMPONENT_NAME  $PACKET_DOCKER_COMMAND'
   return 0
 }
 ###############################################################################
