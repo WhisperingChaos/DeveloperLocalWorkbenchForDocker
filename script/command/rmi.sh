@@ -302,7 +302,7 @@ function RMIoutputFilterPerCmmd () {
       echo "$rmiOutput"
       continue
     fi
-    if [[ $rmiOutput =~ ^Error.*No.such.image:.*|^Error.*No.such.id:.* ]]; then 
+    if [[ $rmiOutput =~ ^Error.*No.such.image:.* ]]; then
       # Image GUID was already deleted, continue with other deletes.
       # Signal delete for image GUID targeted by the rmi command.
       eval $REMOVE_REQ_TEMPLATE>>"$RMI_REMOVE_GUID_TARGET_LIST"
