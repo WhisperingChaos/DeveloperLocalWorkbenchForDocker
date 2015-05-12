@@ -543,22 +543,22 @@ function OptionsArgsDefTbl () {
   while read defRec; do
     eval set -- $defRec
     if [ -n "`declare -p ${tableName}_optArgName 2>/dev/null`" ]; then
-      eval "${tableName}_optArgName['$1']='$1'"
+      eval ${tableName}_optArgName\[\"\$1\"\]\=\"\$1\"
     fi
     if [ -n "`declare -p ${tableName}_cardinality 2>/dev/null`" ]; then
-      eval "${tableName}_cardinality['$1']='$2'"
+      eval ${tableName}_cardinality\[\"\$1\"\]\=\"\$2\"
     fi
     if [ -n "`declare -p ${tableName}_default 2>/dev/null`" ]; then 
-      eval "${tableName}_default['$1']='$3'"
+      eval ${tableName}_default\[\"\$1\"]\=\"\$3\"
     fi
     if [ -n "`declare -p ${tableName}_verifyFunction 2>/dev/null`" ]; then 
-      eval "${tableName}_verifyFunction['$1']='$4'"
+      eval ${tableName}_verifyFunction\[\"\$1\"\]=\"\$4\"
     fi
     if [ -n "`declare -p ${tableName}_presence 2>/dev/null`" ]; then 
-      eval "${tableName}_presence['$1']='$5'"
+      eval ${tableName}_presence\[\"\$1\"\]\=\"\$5\"
     fi
     if [ -n "`declare -p ${tableName}_aliases 2>/dev/null`" ]; then 
-      eval "${tableName}_aliases['$1']='$6'"
+      eval ${tableName}_aliases\[\"$1\"]=\"\$6\"
     fi
   done < <( $callbackFunctionName )
 }
