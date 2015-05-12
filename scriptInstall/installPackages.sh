@@ -23,9 +23,5 @@
     if ! install.sh "$1"; then exit; fi
     shift
   done
-  # make install helper scripts invisible from this layer forward
-  if [ -d "$SCRIPT_DIR_INSTALLATION" ] && [ "$SCRIPT_DIR_INSTALLATION" != '/' ]; then
-    if ! rm -f -r "$SCRIPT_DIR_INSTALLATION"; then exit; fi
-  fi
   
 
