@@ -98,6 +98,18 @@ function VirtCmmdConfigSetDefault() {
     fi
   fi
   export MAKEFILE_DIR="$makefileDir"
+  # Define a socket directory for terminal muliplexers
+  if [ -z "$TERM_MULTI_SOCKET" ]; then
+    # Not already specified by either user or recursive call,
+    # set it to the value of TMPDIR.  Note - this assignment
+    # must preceed TMPDIR as it will inherit TMPDIR's global/initial value
+    # as set by initiating bash CLI terminal.  Using this value, 
+    # matches tmux's default value when executed from the command line,
+    # so a user doesn't need to specify -S switch in order to properly attach
+    # to the correct server that is listening on this socket.
+    TERM_MULTI_SOCKET="$TMPDIR"
+    export TERM_MULTI_SOCKET="$TMPDIR"
+  fi
   # Define a temp file location within the Project's directory.
   export TMPDIR="$PROJECT_DIR/tmp"
   TmpDirRemove

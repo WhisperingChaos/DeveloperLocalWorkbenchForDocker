@@ -36,9 +36,9 @@ function ScriptError (){
 ##
 ###############################################################################
 function ScriptDebug () {
-  local messText="#2"
+  local messText="$2"
   if [ -z "$messText" ]; then messText="Debug message not supplied."; fi
-  ScriptMessageBasic "$1" "$0" 'Debug' "$2"
+  ScriptMessageBasic "$1" "$0" 'Debug' "$messText"
   return 0
 }
 ###############################################################################
