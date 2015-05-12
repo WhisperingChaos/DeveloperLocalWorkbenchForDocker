@@ -67,7 +67,7 @@ COMMAND:
 dlw specific:
     help      Display a list of commands or the command syntax of a specific command
     itest     Run dlw integration tests using 'sample' project.
-    screen    Redirect each generated Docker command to its own terminal window.
+    tmux      Redirect each generated Docker command to its own terminal window.
     version   Display the version of this command processor.
     watch     Execute a dlw command in a linux watch terminal.
 
