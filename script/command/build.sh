@@ -18,6 +18,7 @@ function VirtDockerCmmdOptionsArgsDef () {
 cat <<OPTIONARGS
 --dlwno-parent single false=EXIST=true  "OptionsArgsBooleanVerify \\<--dlwno-parent\\>" required ""
 --dlwforce single false=EXIST=true  "OptionsArgsBooleanVerify \\<--dlwforce\\>" required ""
+--dlwm single "" "" optional ""
 OPTIONARGS
 ComponentNmListArgument 'build' 'all'
 return 0
@@ -41,6 +42,7 @@ Usage: dlw build [OPTIONS] TARGET
 COMMAND_HELP_Purpose
   HelpCommandTarget
   HelpOptionHeading
+  echo '    --dlwm                Specify a description for the targeted Component(s).'
   echo '    --dlwno-parent=false  Build only the targeted Component(s). Exclude prerequisite parent one(s).'
   echo "    --dlwforce=false      Force build even when Component Resources haven't changed." 
   HelpNoExecuteDocker 'false'
@@ -154,7 +156,10 @@ function VirtDockerCmmdExecute () {
 
   eval local \-\r imageGUIDfilename\=\$\{$targetMapNm\[\'ImageGUIDFileName\'\]\}
   eval local \-\r componentName\=\$\{$targetMapNm\[\'ComponentName\'\]\}
-  if ! "ImageGUIDlist.sh" 'Add' "$imageGUIDfilename" "$componentName"; then return 1; fi
+  # provide component description
+  local -r componentDesc="`AssociativeMapAssignIndirect "$optsArgMapNm" '--dlwm'`"
+  
+  if ! "ImageGUIDlist.sh" 'Add' "$imageGUIDfilename" "$componentName" "$componentDesc"  ; then return 1; fi
 }
 function VirtDockerCmmdExecutePacketForward () {
   echo 'false'
