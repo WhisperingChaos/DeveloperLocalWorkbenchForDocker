@@ -28,8 +28,8 @@ Although docker provides [Compose](https://docs.docker.com/compose/), a Trusted 
 ### Features
 
 + Use simple commands like ```dlw build```,```dlw run```, and ```dlw images``` to manage and report on an service composed from multiple cooperating containers.
-+ Launch and concurrently attach to the terminal interfaces of multiple containers using the terminal multiplex feature of [GNU screen](http://www.gnu.org/software/screen/).
-+ Combined GNU screen, [linux watch](http://en.wikipedia.org/wiki/Watch_%28Unix%29) and reporting commands like 'top' and 'ps' to actively monitor the status of multiple containers.
++ Launch and concurrently attach to the terminal interfaces of multiple containers using the terminal multiplex feature of [tmux](http://tmux.sourceforge.net/).
++ Combined tmux, [linux watch](http://en.wikipedia.org/wiki/Watch_%28Unix%29) and reporting commands like 'top' and 'ps' to actively monitor the status of multiple containers.
 + Generate Docker CLI stream from command line arguments stored in a file, using a rudimentry command template.
 + Enhance report generation by associating custom properties to a docker image. 
 + Track previous versions of docker images and with single command remove all prior versions and their associated containers, ordering their removal to avoid "Conflict" errors issued by the Docker Daemon.
@@ -120,7 +120,7 @@ Create a minimal viable Project that builds a single Component.
 + Create a Component's build context directory directory.  A build context directory encapsulates all the resources required to successfully build a Docker image.
   + Ex: ```mkdir ~/project/xproject/component/ycomponent/context/build```
 + Create and save a Dockerfile to a Component's build context directory.
-  + Ex: Produces a Component that's slightly different from ubuntu:12:04.
+  + Ex: Produces a Component that's slightly different from ubuntu:12:04 and starts bash when executing ```dlw run```.
 
         ```
         echo 'FROM ubuntu:12.04'        > ~/project/xproject/component/ycomponent/context/build/Dockerfile
@@ -153,16 +153,16 @@ Create new containers for all Components then run and attach to their ttys.
   + Ex: ```echo '-i --tty' > ~/project/xproject/component/ycomponent/context/run/DOCKER_CMMDLINE_OPTION```
 + Create containers for all Components and run them deferring terminal attachment.
   + Ex: ```dlw run -d``` Constructs a container from the ycomponent image and runs it.  Should output the Docker GUID for the newly constructed and running container.
-+ Attach a Project's active container terminal instances to either a new or an existing screen session.
-  + Ex: ```dlw screen``` Creates a screen session named 'xproject' with a single active tty session for container derived from 'ycomponent'.
-+ Use [GNU screen](http://www.gnu.org/software/screen/) command to screen
-  + Ex: ```screen -r``` Attaches the current GNU screen session named ```<PID>.xproject```.
++ Attach a Project's active container terminal instances to either a new or an existing tmux session.
+  + Ex: ```dlw tmux``` Creates a tmux session named 'xproject' with a single active tty session for container derived from 'ycomponent'.
++ Use [tmux](http://tmux.sourceforge.net/) attach command to connect to tmux session.
+  + Ex: ```tmux attach``` Attaches the current tmux session named ```xproject```.
 
 ##### Project Turorial: Remove Images
 
 Removes all Images and derivative Containers associated to a Project from the Local Docker Registry. However, data maintained in the Project's Component Catalog remains untouched.
 
-+ ```dlw rmi -f --dlwrm --dlwcomp-ver=all all```
++ ```dlw rmi --dlwrm --dlwcomp-ver=all all```
 
 ### Exploring Commands
 
@@ -198,9 +198,13 @@ Notes:
 + Options always consume the subsequent command line token, except when the token represents another option or is ' -- ': the argument separator.
 + The assignment operator, '=', can be omitted. Ex: "--dlwno-parent true" == "--dlwno-parent=true"
 + Specifying a boolean option without a value negates its default value. Ex. "--dlwno-parent -- ..." --dlwno-parent negated from 'false' to 'true'.
++ Most commands like ```dlw rmi``` and ```dlw rm``` are <a href="#ConceptsComponentVersioning">image version</a> aware.  Use the option ```--dlwcomp-ver``` to specifyin a target version.  Most non-destructive dlw commands will assume the default version of *Current* ```--dlwcomp-ver=cur```.
++ Nearly all commands permit specifying a set of target component names as arguments.  The 'all' name value is reserved as it specifies a shorthand represent the entire set of Components defined for the Project.
++ Nearly all commands support the ```--dlwshow``` option.  This option outputs the generated Docker CLI stream to STDOUT.
++ Nearly all commands support the ```--dlwno-exec``` option.  This option bypasses the execution of the generated CLI stream.  Use both ```--dlwshow``` and ```--dlwno-exec``` options to display the Docker CLI stream for the command.  Helps with debugging problems.
 + Docker array options [], like '-v', aren't directly supported by the dlw command line.  These recurring options should be specified within the context   
 
-#### Example Remove Commands
+#### Exploring Commands: Remove 
 
 + **Remove All Component Versions for All Components:**
   Deletes all images, their versions, and all associated containers even if the containers are running at the time of this request:  
@@ -237,7 +241,7 @@ Notes:
 + **Image GUID List**<a id="ConceptsImageGUIDList"></a>:  An object that maintains a list of Docker image GUIDs generated when building a specific Component.  The different GUIDs in this list represent various image versions generated due to alterations applied to resources, like a Dockerfile, that comprise a Component's (image's) build context.  Associated to each GUID, a column property bag enables extending the metadata for an image to include an arbitrary set of attribures/columns.  These columns can appear in the reporting generated by the ```dlw ps``` and ```dlw image``` commands.
 
   A standard text file implements each Image GUID List.  The text file is assigned the same name as the Component (image) name with a suffix of ".GUIDlist".  The image GUIDs in the file are ordered from the oldest, which appears as the first line in the text file, to the most recent GUID that occupies its last line.  The column property bag appears space prefixed after the GUID.  It's implemented as a [bash associative array](http://www.linuxjournal.com/content/bash-associative-arrays) named "componentPropBag".  Simply update this column property bag with the custom property names and values you wish displayed as reporting columns.
-+ **Component Versioning**<a id="ConceptsComponentVersioning"></a>: A changed to a Component's build context results in a new version of the compiled image.  This newly compiled image is automatically assigned a docker repository name mirroring the Component's name and a docker tag name of 'latest'.  An existing and now prior version of the Component will loose these names reverting to repository and tag names of '<none>'. dlw maintains a list of these prior versions (see <a id="ConceptsImageGUIDList">Image GUID List</a>) and offers a means of indicating a category specifier for a number of its commands.  The dlw supports the following category specifiers: *Current*: the most recent image version, *All*: every known image version, *All But Current*: All image versions excluding  the *current* one.  Since the development process typically focuses on evolving the *Current* version, dlw omits a means to select a particular previous version.
++ **Component Versioning**<a id="ConceptsComponentVersioning"></a>: A changed to a Component's build context results in a new version of the compiled image.  This newly compiled image is automatically assigned a docker repository name mirroring the Component's name and a docker tag name of 'latest'.  An existing and now prior version of the Component will loose these names reverting to repository and tag names of '<none>'. dlw maintains a list of these prior versions (see <a id="ConceptsImageGUIDList">Image GUID List</a>) and offers a means of indicating a category specifier for a number of its commands.  The dlw supports the following category specifiers: *Current*(=cur): the most recent image version, *All*(=all): every known image version, *All But Current*:(=allButCur) All image versions excluding  the *current* one.  Since the development process typically focuses on evolving the *Current* version, dlw omits a means to select a particular previous version.
 + **Build Target**<a id="ConceptsBuildTarget"></a>: An implementation level object whose timestamp represents a Component's last successful ```dlw build```.  This timestamp enables build-time optimization by only executing a ```dlw build``` for a given Component iff at least one of the Component's resources reflects a more recent date than the Build Target.  In this case, ```dlw build``` considers the Component changed since the last ```dlw build``` request causing ```dlw build``` to construct a new Component version.
 
     A Build Target implements itself as a file whose name concatenates the Component name with the suffix ".build".
@@ -264,7 +268,7 @@ Notes:
   + [GNU bash](https://www.gnu.org/software/bash/): [4.2.25(1)-release](http://manpages.ubuntu.com/manpages/precise/man1/bash.1.html)
 + [Docker Daemon (Client)](https://docs.docker.com/reference/commandline/cli/): lxc-docker-?.?.?
 + [GNU make](http://www.gnu.org/software/make/manual/html_node/index.html): [3.81-8.1ubuntu1.1](http://packages.ubuntu.com/precise/make)
-+ [GNU screen](http://www.gnu.org/software/screen/): [4.0.3-14ubuntu8](http://packages.ubuntu.com/precise/screen)
++ [tmux](http://tmux.sourceforge.net/): [1.9a-1~ppa1~p](https://launchpad.net/~pi-rho/+archive/ubuntu/dev/+index?field.series_filter=precise)
 + [Docker Local Workbench](https://github.com/WhisperingChaos/DockerLocalWorkbench)
 
 ### License
