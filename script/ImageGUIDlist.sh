@@ -30,11 +30,14 @@
 ##  Input:
 ##    $1 - File path name to the Image GUID List.
 ##    $2 - Docker image name.
+##    $3 - Optional Component description.
 ##
 ###############################################################################
 function Add () {
   if [ "$1" == "" ]; then Unwind $LINENO "Missing file path to Image GUID List."; fi 
   if [ "$2" == "" ]; then Unwind $LINENO "Missing Docker image name."; fi
+  local -r componentDesc="$3"
+  echo "Debug: componentDesc: '$componentDesc' '$3'" >&2 
   local dockerImageKey  
   if ! dockerImageKey=`docker inspect --format="{{.Id}}" $2`; then Unwind $LINENO; fi
   # create Image GUID Catalog if it doesn't already exist
@@ -65,7 +68,7 @@ function Add () {
     #  image, so save this new GUID.
     break;
   done
-  if ! echo "$dockerImageKey componentPropBag='([ComponentDescription]=\"\")'" >> "$1"; then Unwind $LINENO; fi
+  if ! echo "$dockerImageKey componentPropBag='([ComponentDescription]=\"$componentDesc\")'" >> "$1"; then Unwind $LINENO; fi
   return 0;
 }
 ###############################################################################
@@ -319,18 +322,18 @@ function Unwind (){
 ## 
 ###############################################################################
   case "$1" in
-    Add)	            Add                    "$2" "$3" ;; 
-    Current)                Current                "$2"      ;;
-    cur)                    Current                "$2"      ;;
-    curRemove)              CurrentRemove          "$2"      ;;
-    All)                    All                    "$2"      ;;
-    all)                    All                    "$2"      ;;
-    allRemove)              AllRemove              "$2"      ;;
-    AllExceptCurrent)       AllExceptCurrent       "$2"      ;;
-    allButCur)              AllExceptCurrent       "$2"      ;;
-    allButCurRemove)        AllExceptCurrentRemove "$2"      ;;
-    GUIDlistRemove)         GUIDlistRemove         "$2"      ;;
-    *) Unwind $LINENO "Unknown method specified: '$1'"       ;;
+    Add)	            Add                    "$2" "$3" "$4" ;; 
+    Current)                Current                "$2"           ;;
+    cur)                    Current                "$2"           ;;
+    curRemove)              CurrentRemove          "$2"           ;;
+    All)                    All                    "$2"           ;;
+    all)                    All                    "$2"           ;;
+    allRemove)              AllRemove              "$2"           ;;
+    AllExceptCurrent)       AllExceptCurrent       "$2"           ;;
+    allButCur)              AllExceptCurrent       "$2"           ;;
+    allButCurRemove)        AllExceptCurrentRemove "$2"           ;;
+    GUIDlistRemove)         GUIDlistRemove         "$2"           ;;
+    *) Unwind $LINENO "Unknown method specified: '$1'"            ;;
   esac
   if [ $? -ne 0 ]; then Unwind $LINENO; fi
 exit 0;
