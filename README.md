@@ -198,8 +198,8 @@ Notes:
 + Options always consume the subsequent command line token, except when the token represents another option or is ' -- ': the argument separator.
 + The assignment operator, '=', can be omitted. Ex: "--dlwno-parent true" == "--dlwno-parent=true"
 + Specifying a boolean option without a value negates its default value. Ex. "--dlwno-parent -- ..." --dlwno-parent negated from 'false' to 'true'.
-+ Most commands like ```dlw rmi``` and ```dlw rm``` are <a href="#ConceptsComponentVersioning">image version</a> aware.  Use the option ```--dlwcomp-ver``` to specifyin a target version.  Most non-destructive dlw commands will assume the default version of *Current* ```--dlwcomp-ver=cur```.
-+ Nearly all commands permit specifying a set of target component names as arguments.  The 'all' name value is reserved as it specifies a shorthand represent the entire set of Components defined for the Project.
++ Most commands, like ```dlw rmi``` and ```dlw rm```, are <a href="#ConceptsComponentVersioning">image version</a> aware.  Use the option ```--dlwcomp-ver``` to specify a target version.  Most non-destructive dlw commands will assume the default version of *Current* ```--dlwcomp-ver=cur```.
++ Nearly all commands permit specifying a set of target component names as arguments.  The ```'all'``` name value is reserved. It specifies a shorthand representing the entire set of Components defined for the Project.
 + Nearly all commands support the ```--dlwshow``` option.  This option outputs the generated Docker CLI stream to STDOUT.
 + Nearly all commands support the ```--dlwno-exec``` option.  This option bypasses the execution of the generated CLI stream.  Use both ```--dlwshow``` and ```--dlwno-exec``` options to display the Docker CLI stream for the command.  Helps with debugging problems.
 + Docker array options [], like '-v', aren't directly supported by the dlw command line.  These recurring options should be specified within the context   
@@ -209,22 +209,22 @@ Notes:
 + **Remove All Component Versions for All Components:**
   Deletes all images, their versions, and all associated containers even if the containers are running at the time of this request:  
   ```
-> make Remove idscope=All complist=All
+> dlw rmi --dlwrm --dlwcomp-ver=all all
 ```
 + **Remove just the Current Component Version for All Components:**
   Deletes the most recently built image for every Component and all associated containers, even if the containers are running at the time of this request:  
   ```
-> make Remove idscope=Current complist=All
+> dlw rmi --dlwrm --dlwcomp-ver=cur all
 ```
-+ **Remove All the containers for Current Component Version of sshserver.img:**
++ **Remove All the containers for Current Component Version of dlw_sshserver**
   Deletes every container associated to the most recently built Component named "sshserver".  
   ```
-> make Remove restrict=OnlyContainers idscope=Current complist=sshserver.img
+> dlw rm --dlwcomp-ver=cur dlw_sshserver
 ```
 + **Remove All containers and All Components except for the Current ones.**
   Deletes every container and every image version except for the most recent version.  
   ```
-> make Remove idscope=AllExceptCurrent complist=All
+> dlw rmi --dlwrm --dlwcomp-ver=allButCur all
 ```
 
 ### Concepts
