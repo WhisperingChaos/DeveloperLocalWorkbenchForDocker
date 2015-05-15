@@ -1620,7 +1620,7 @@ function TestEnvironmentCleanAssert () {
   local -r lineNo="$1"
   local -r keepScript="$2"
   if ls ${TEST_FILE_PREFIX}* > /dev/null 2>/dev/null; then TestFileDeleteAssert $LINENO All; fi
-  if ! dlw.sh rmi -f --dlwrm --dlwcomp-ver=all -- all > /dev/null; then
+  if ! dlw.sh rmi --dlwrm --dlwcomp-ver=all -- all > /dev/null; then
     ScriptUnwind "lineNo" "Failed to remove all project images from local Docker Repository."
   fi
   local compName
