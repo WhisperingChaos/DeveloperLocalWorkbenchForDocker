@@ -10,6 +10,9 @@
 &nbsp;&nbsp;&nbsp;&nbsp;[Sample Project & Testing](#installing-sample-project--testing)  
 [Project Tutorial](#project-tutorial)  
 [Exploring Commands](#exploring-commands)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Remove](#exploring-commands--remove)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Run](#exploring-commands--run)  
+&nbsp;&nbsp;&nbsp;&nbsp;[tmux](#exploring-commands--tmux)  
 [Declaring Dependencies](#declaring-dependencies)  
 [Concepts](#concepts)  
 [What's Provided](#whats-provided)  
@@ -226,6 +229,10 @@ Notes:
   ```
 > dlw rmi --dlwrm --dlwcomp-ver=allButCur all
 ```
+
+#### Exploring Commands: Run 
+Since ```dlw run``` wraps its companion ```docker run``` command, it inherits the mirid  complexity of its options 
++ **Remove All Component Versions for All Components:**
 
 ### Concepts
 
