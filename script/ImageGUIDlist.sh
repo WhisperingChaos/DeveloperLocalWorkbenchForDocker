@@ -37,7 +37,6 @@ function Add () {
   if [ "$1" == "" ]; then Unwind $LINENO "Missing file path to Image GUID List."; fi 
   if [ "$2" == "" ]; then Unwind $LINENO "Missing Docker image name."; fi
   local -r componentDesc="$3"
-  echo "Debug: componentDesc: '$componentDesc' '$3'" >&2 
   local dockerImageKey  
   if ! dockerImageKey=`docker inspect --format="{{.Id}}" $2`; then Unwind $LINENO; fi
   # create Image GUID Catalog if it doesn't already exist
