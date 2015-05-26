@@ -10,9 +10,9 @@
 &nbsp;&nbsp;&nbsp;&nbsp;[Sample Project & Testing](#installing-sample-project--testing)  
 [Project Tutorial](#project-tutorial)  
 [Exploring Commands](#exploring-commands)  
-&nbsp;&nbsp;&nbsp;&nbsp;[Remove](#exploring-commands--remove)  
-&nbsp;&nbsp;&nbsp;&nbsp;[Run](#exploring-commands--run)  
-&nbsp;&nbsp;&nbsp;&nbsp;[tmux](#exploring-commands--tmux)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Remove](#exploring-commands-remove)  
+&nbsp;&nbsp;&nbsp;&nbsp;[Run](#exploring-commands-run)  
+&nbsp;&nbsp;&nbsp;&nbsp;[tmux](#exploring-commands-tmux)  
 [Declaring Dependencies](#declaring-dependencies)  
 [Concepts](#concepts)  
 [What's Provided](#whats-provided)  
@@ -205,38 +205,46 @@ Notes:
 + Nearly all commands permit specifying a set of target component names as arguments.  The ```'all'``` name value is reserved. It specifies a shorthand representing the entire set of Components defined for the Project.
 + Nearly all commands support the ```--dlwshow``` option.  This option outputs the generated Docker CLI stream to STDOUT.
 + Nearly all commands support the ```--dlwno-exec``` option.  This option bypasses the execution of the generated CLI stream.  Use both ```--dlwshow``` and ```--dlwno-exec``` options to display the Docker CLI stream for the command.  Helps with debugging problems.
-+ Docker array options [], like '-v', aren't directly supported by the dlw command line.  These recurring options should be specified within the context   
++ <a id="ExploringCommandsDockerArray"></a>Docker array options [], like '-v', aren't properly supported by the dlw command line, as only the rightmost (last) recurring value will appear on the generated ```docker run``` command(s).  Also, since these option values are generally unique to a specific Component, entering them when executing a pod level command is most likely undesireable, as the option values are typically different for each Component.  Therefore, recurring and other Component specific option values should be specified within a file called "DOCKER_CMMDLINE_OPTION".  When specfied, this file must be located in a Component's <a href="#ConceptsComponent">command-context directory</a>.   
 
 #### Exploring Commands: Remove 
 
-+ **Remove All Component Versions for All Components:**
++ **Remove all <a id="ConceptsComponentVersioning">Component Versions</a> for All Components:**
   Deletes all images, their versions, and all associated containers even if the containers are running at the time of this request:  
   ```
 > dlw rmi --dlwrm --dlwcomp-ver=all all
 ```
-+ **Remove just the Current Component Version for All Components:**
++ **Remove just the Current Component Version for all Components:**
   Deletes the most recently built image for every Component and all associated containers, even if the containers are running at the time of this request:  
   ```
 > dlw rmi --dlwrm --dlwcomp-ver=cur all
 ```
-+ **Remove All the containers for Current Component Version of dlw_sshserver**
-  Deletes every container associated to the most recently built Component named "sshserver".  
-  ```
-> dlw rm --dlwcomp-ver=cur dlw_sshserver
-```
-+ **Remove All containers and All Components except for the Current ones.**
++ **Remove all Component Versions and their containers except for the current ones.**
   Deletes every container and every image version except for the most recent version.  
   ```
 > dlw rmi --dlwrm --dlwcomp-ver=allButCur all
 ```
++ **Remove all containers for all Component versions except for the current Component Version**
+  Deletes every container associated to every Component except the most recent Component Version.  
+  ```
+> dlw rm --dlwcomp-ver=allButCur all
+```
++ **Remove all the containers for current Component Version of dlw_sshserver**
+  Deletes every container associated to the most recently built Component named "sshserver".  
+  ```
+> dlw rm --dlwcomp-ver=cur dlw_sshserver
+```
 
 #### Exploring Commands: Run 
-Since ```dlw run``` wraps its companion ```docker run``` command, it inherits the mirid  complexity of its options 
+Since ```dlw run``` wraps its companion ```docker run``` command, it inherits its myriad options.  Neary all ```docker run``` options represent static properties assigned to the newly constructed and then executed container.  
+
+DOCKER_CMMDLINE_OPTION
+ 
 + **Remove All Component Versions for All Components:**
 
 ### Concepts
 
-+ **Component**<a id="ConceptsComponent"></a>:  A widget that contributes one or more elemental services to a cooperative pod of other Components.  Component's offer their service(s) through either lexical inclusion, statically inheriting a base Component's implementation ([see FROM](http://docs.docker.io/reference/builder/#from)), or dynamically, as individually executing entities that coordinate their activity through some protocol mechanism ([see LINK](https://docs.docker.com/userguide/dockerlinks/)).
++ **Component**<a id="ConceptsComponent"></a>:  A widget that contributes one or more elemental services to a cooperative pod of other Components.  Components offer their service(s) through either lexical inclusion, statically inheriting a base Component's implementation ([see FROM](http://docs.docker.io/reference/builder/#from)), or dynamically, as individually executing entities that coordinate their activity through some protocol mechanism ([see LINK](https://docs.docker.com/userguide/dockerlinks/)).
 
     The dlw implements a Component as a directory whose name reflects the image's name in the local repository.  This directory contains a subdirectory called "context" which represents the resources required to execute a particular dlw command.  "context" is further subdivided by subdirectories whose names reflect a dlw command.  These command-context subdirectories contain resources, like command line options, required to execute the particular command.  They also identify which commands apply to a particular Component, as certain Components may support some but not all dlw commands. For example, a statically included Component might not support the ```dlw run``` command.
 + **Dependency Specification**<a id="ConceptsDependencySpecification"></a>: A declarative mechanism to encode dlw command dependencies between Components.  Component dependencies can be independenly specified for any dlw command, permitting for example, separate dependency graphs for build-time, ```dlw build``` vs. run-time concerns, ```dlw run```.  In general, nearly all dlw commands mirror either build-time or run-time dependencies.  For example, ```dlw start``` shares the same dependency graph as ```dlw run```.  In these cases, individual dlw commands can share an existing command's dependency graph.  Specified dependencies will order the dlw generated Docker Daemon CLI stream to more fully ensure its successful completion (see [How Does It Work](#how-does-it-work)).  Dependency Specification maybe optional, as weakly coupled Components, a pod whose ordering doesn't affect the outcome of any dlw command, eliminate its encoding.
@@ -247,8 +255,12 @@ Since ```dlw run``` wraps its companion ```docker run``` command, it inherits th
     A directory called "component" implements a Component Catalog.  One or more Component directores exist as subdirectories within "component".  dlw commands that operate on individual images and their derived containers iterate over "component".
 + **Image GUID List**<a id="ConceptsImageGUIDList"></a>:  An object that maintains a list of Docker image GUIDs generated when building a specific Component.  The different GUIDs in this list represent various image versions generated due to alterations applied to resources, like a Dockerfile, that comprise a Component's (image's) build context.  Associated to each GUID, a column property bag enables extending the metadata for an image to include an arbitrary set of attribures/columns.  These columns can appear in the reporting generated by the ```dlw ps``` and ```dlw image``` commands.
 
-  A standard text file implements each Image GUID List.  The text file is assigned the same name as the Component (image) name with a suffix of ".GUIDlist".  The image GUIDs in the file are ordered from the oldest, which appears as the first line in the text file, to the most recent GUID that occupies its last line.  The column property bag appears space prefixed after the GUID.  It's implemented as a [bash associative array](http://www.linuxjournal.com/content/bash-associative-arrays) named "componentPropBag".  Simply update this column property bag with the custom property names and values you wish displayed as reporting columns.
-+ **Component Versioning**<a id="ConceptsComponentVersioning"></a>: A changed to a Component's build context results in a new version of the compiled image.  This newly compiled image is automatically assigned a docker repository name mirroring the Component's name and a docker tag name of 'latest'.  An existing and now prior version of the Component will loose these names reverting to repository and tag names of '<none>'. dlw maintains a list of these prior versions (see <a id="ConceptsImageGUIDList">Image GUID List</a>) and offers a means of indicating a category specifier for a number of its commands.  The dlw supports the following category specifiers: *Current*(=cur): the most recent image version, *All*(=all): every known image version, *All But Current*:(=allButCur) All image versions excluding  the *current* one.  Since the development process typically focuses on evolving the *Current* version, dlw omits a means to select a particular previous version.
+  A standard text file implements each Image GUID List.  The text file is assigned the same name as the Component (image) name with a suffix of ".GUIDlist".  The image GUIDs in the file are ordered from the oldest, which appears as the first line in the text file, to the most recent GUID that occupies its last line.  The column property bag appears space prefixed after the GUID.  It's implemented as a [bash associative array](http://www.gnu.org/software/bash/manual/html_node/Arrays.html#Arrays) named "componentPropBag".  Simply update this column property bag with the custom property names and values you wish displayed as reporting columns.
++ **Component Versioning**<a id="ConceptsComponentVersioning"></a>: A changed to a Component's build context results in a new version of the compiled image.  This newly compiled image is automatically assigned a docker repository name mirroring the Component's name and a docker tag name of 'latest'.  An existing and now prior version of the Component will loose these names reverting to repository and tag names of '\<none\>'. dlw maintains a list of these prior versions (see <a id="ConceptsImageGUIDList">Image GUID List</a>) and offers a means of indicating a category specifier for a number of its commands.  The dlw supports the following category specifiers:
++  *Current*(=cur): the most recent image version,
++  *All*(=all): every known image version,
++  *All But Current*:(=allButCur) All image versions excluding  the *current* one.
+    Since the development process typically focuses on evolving the *Current* version, dlw omits a means to select a particular previous one.
 + **Build Target**<a id="ConceptsBuildTarget"></a>: An implementation level object whose timestamp represents a Component's last successful ```dlw build```.  This timestamp enables build-time optimization by only executing a ```dlw build``` for a given Component iff at least one of the Component's resources reflects a more recent date than the Build Target.  In this case, ```dlw build``` considers the Component changed since the last ```dlw build``` request causing ```dlw build``` to construct a new Component version.
 
     A Build Target implements itself as a file whose name concatenates the Component name with the suffix ".build".
