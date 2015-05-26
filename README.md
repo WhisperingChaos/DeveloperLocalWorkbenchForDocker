@@ -30,7 +30,7 @@ Although docker provides [Compose](https://docs.docker.com/compose/), a Trusted 
 
 ### Features
 
-+ Use simple commands like ```dlw build```,```dlw run```, and ```dlw images``` to manage and report on an service composed from multiple cooperating containers.
++ Use simple commands like ```dlw build```,```dlw run```, and ```dlw images``` to manage and report on a service composed from multiple cooperating containers.
 + Launch and concurrently attach to the terminal interfaces of multiple containers using the terminal multiplex feature of [tmux](http://tmux.sourceforge.net/).
 + Combined tmux, [linux watch](http://en.wikipedia.org/wiki/Watch_%28Unix%29) and reporting commands like 'top' and 'ps' to actively monitor the status of multiple containers.
 + Generate Docker CLI stream from command line arguments stored in a file, using a rudimentry command template.
@@ -107,7 +107,7 @@ Once testing successfully completes, a Project called 'sample' will exist in the
 
 ### Project Tutorial
 
-##### Project Turorial: Creation
+##### Project Tutorial: Create
 
 Create a minimal viable Project that builds a single Component.  
 
@@ -131,7 +131,7 @@ Create a minimal viable Project that builds a single Component.
         echo 'ENTRYPOINT [/bin/bash]'  >> ~/project/xproject/component/ycomponent/context/build/Dockerfile
         ```
 
-##### Project Turorial: Build
+##### Project Tutorial: Build
 
 + Build all Components associated to the Project.
   + Ex:
@@ -141,12 +141,12 @@ Create a minimal viable Project that builds a single Component.
         dlw build
         ```
 
-##### Project Turorial: Report
+##### Project Tutorial: Report
 
 + Report on a Project's related images:
   + Ex: ```dlw images``` Should return an extended form of the ```docker images``` report with only a single row of 'ycomponent' information.
 
-##### Project Turorial: Run
+##### Project Tutorial: Run
 
 Create new containers for all Components then run and attach to their ttys.
 
@@ -161,7 +161,7 @@ Create new containers for all Components then run and attach to their ttys.
 + Use [tmux](http://tmux.sourceforge.net/) attach command to connect to tmux session.
   + Ex: ```tmux attach``` Attaches the current tmux session named ```xproject```.
 
-##### Project Turorial: Remove Images
+##### Project Tutorial: Remove Images
 
 Removes all Images and derivative Containers associated to a Project from the Local Docker Registry. However, data maintained in the Project's Component Catalog remains untouched.
 
@@ -205,7 +205,8 @@ Notes:
 + Nearly all commands permit specifying a set of target component names as arguments.  The ```'all'``` name value is reserved. It specifies a shorthand representing the entire set of Components defined for the Project.
 + Nearly all commands support the ```--dlwshow``` option.  This option outputs the generated Docker CLI stream to STDOUT.
 + Nearly all commands support the ```--dlwno-exec``` option.  This option bypasses the execution of the generated CLI stream.  Use both ```--dlwshow``` and ```--dlwno-exec``` options to display the Docker CLI stream for the command.  Helps with debugging problems.
-+ <a id="ExploringCommandsDockerArray"></a>Docker array options [], like '-v', aren't properly supported by the dlw command line, as only the rightmost (last) recurring value will appear on the generated ```docker run``` command(s).  Also, since these option values are generally unique to a specific Component, entering them when executing a pod level command is most likely undesireable, as the option values are typically different for each Component.  Therefore, recurring and other Component specific option values should be specified within a file called "DOCKER_CMMDLINE_OPTION".  When specfied, this file must be located in a Component's <a href="#ConceptsComponent">command-context directory</a>.   
++ <a id="ExploringCommandsDockerArray"></a>Docker array options [], like '-v', aren't properly supported by the dlw command line, as only the rightmost (last) recurring value will appear on the generated ```docker``` command(s).  Also, since these option values are generally unique to a specific Component, entering them when executing a pod level command is most likely undesireable, as the option values are typically different for each Component.  Therefore, recurring and other Component specific option values should be specified within a file called "DOCKER_CMMDLINE_OPTION".  When specfied, this file must be located in a Component's <a href="#ConceptsComponent">command-context directory</a>.   
++ All ```dlw``` wrapper commands are compiled using a bash implemented [linux pipeline](http://en.wikipedia.org/wiki/Pipeline_%28Unix%29).  Therefore, resultant Docker commands which attempt to immediately attach to standard system streams, like ```docker {run|attach|start}...```, will fail, perhaps, silently.  In this situation, either actively defer attachment, ```dlw run -d ...`, or passively avoid attachment by omitting options that actively attach standard streams, see ```dlw start```.
 
 #### Exploring Commands: Remove 
 
@@ -236,11 +237,24 @@ Notes:
 ```
 
 #### Exploring Commands: Run 
-Since ```dlw run``` wraps its companion ```docker run``` command, it inherits its myriad options.  Neary all ```docker run``` options represent static properties assigned to the newly constructed and then executed container.  
+Since ```dlw run``` wraps its companion ```docker run``` command, it inherits its myriad options.  Neary all ```docker run``` options represent static properties assigned to the newly constructed and then executed container.
++ To avoid repeately specifying these generally constant option values for each single Component, these options should be specified, as a single line, in the file named ```DOCKER_CMMDLINE_OPTION``` located in the specific Component's <a href="#ConceptsComponent">run-context directory</a>. See <a href="#project-tutorial-run">Project Tutorial: Run</a> for an example.
++ All ```dlw``` commands are compiled and executed using a bash implemented [linux pipeline](http://en.wikipedia.org/wiki/Pipeline_%28Unix%29).  In situations where a Component's ```docker run``` option value, like ```-i```, cause a newly running container to commandeer the current terminal session, it will abnormally terminate this pipeline.  The interruption maybe noticed/unoticed depending on the ordering of the ```docker run``` CLI stream.  Therefore, for projects with at least one interactive container, specify [detached mode (-d)](https://docs.docker.com/reference/run/#detached-vs-foreground), as either an option on the initialting ```dlw run -d ...``` or via that Component's ```DOCKER_CMMDLINE_OPTION``` file.
++ Use the ```dlw tmux``` command to access an interactive process' standard streams/tty for one or more running containers.
 
-DOCKER_CMMDLINE_OPTION
- 
-+ **Remove All Component Versions for All Components:**
++ **A usual dlw workflow assuming interactive container processes and all appropriate options specified in each Component's ```DOCKER_CMMDLINE_OPTION``` file.**
+  ```
+> dlw run -d
+> dlw tmux
+```
+
++ **Another way to accomplish the same outcome as above.**
+  ```
+> dlw create
+> dlw start
+> dlw tmux
+```
+
 
 ### Concepts
 
