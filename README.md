@@ -256,7 +256,7 @@ Since ```dlw run``` wraps its companion ```docker run```, it inherits its myriad
 
 #### Exploring Commands: tmux
 
-[tmux](http://tmux.sourceforge.net/) implements a popular terminal multiplexer enabling the ```dlw``` to launch and concurrently attach to the terminal interfaces of multiple containers.  ```dlw tmux``` executes a recursive call to first generate the Docker CLI stream from the ```dlw``` command specified via its ```--dlwc``` option then partition this stream into individual ```tmux new-window``` commands.  The individual ```tmux new-window``` command for a given execution of the ```dlw tmux``` will be assigned to the same tmux session.  The name of this session defaults to the Project's name or one specified as an argument to the ```dlw tmux``` command.  Besides the tmux terminals produced by the the Docker CLI stream, each newly created session includes an additional bash terminal.  If desired, ```dlw``` commands can be issued from this tmux managed window.  Note, the resulting Docker command must keep STDIN open in order to persist its ```tmux``` window (terminal), otherwise, the ```tmux``` window will close.  When STDIN closes immediately, it may seem as if the ```dlw``` command completely or partially failed due to the absence of an "expected" window.  Therefore, please ensure the specific Docker CLI command generated from the ```dlw``` persists STDIN before assuming an abnormality in ```dlw``` execution.  Finally, for commands, like ```dlw {ps|image|port...}```, which once complete immediately close STDIN, use the ```dlw watch``` command to persist STDIN's open status and periodically re-execute the ```dlw``` command.  
+[tmux](http://tmux.sourceforge.net/) implements a popular terminal multiplexer enabling the ```dlw``` to launch and concurrently attach to the terminal interfaces of multiple containers.  ```dlw tmux``` executes a recursive call to first generate the Docker CLI stream from the ```dlw``` command specified via its ```--dlwc``` option then partition this stream into individual ```tmux new-window``` commands.  Each individual ```tmux new-window``` command for a given execution of the ```dlw tmux``` will be assigned to the same tmux session.  The name of this session defaults to the Project's name or one specified as an argument to the ```dlw tmux``` command.  Besides the tmux terminals produced by the the Docker CLI stream, each newly created session includes an additional bash terminal.  If desired, ```dlw``` commands can be issued from this tmux managed window.  Note, the resulting Docker command must keep STDIN open in order to persist its ```tmux``` window (terminal), otherwise, the ```tmux``` window will close.  When STDIN closes immediately, it may seem as if the ```dlw``` command completely or partially failed due to the absence of an "expected" window.  Therefore, please ensure the specific Docker CLI command generated from the ```dlw``` persists STDIN before assuming an abnormality in ```dlw``` execution.  Finally, for commands, like ```dlw {ps|image|port...}```, which at completion immediately close STDIN, use the ```dlw watch``` command to persist STDIN's open status and periodically re-execute the ```dlw``` command.  
 
 + **Attach to already running containers, derived from the Current Version of the Project's Components, started as interactive (STDIN open) and detached**
   ```
@@ -269,6 +269,14 @@ Since ```dlw run``` wraps its companion ```docker run```, it inherits its myriad
 > # or equivalent to minimize quoting
 > dlw tmux --dlwc 'watch --dlwc "ps --dlwcomp-ver=all"'
 ```
+### Declaring Dependencies
+
+The ```dlw``` provides a flexible and familiar means to declare dependencies, when necessary, between Components for each command-context.  See <a href="#ConceptsDependencySpecification">Dependency Specification</a> for detailed explaination.
+
+Assuming the necessity of a ```Dependency``` file:
++ Either add an empty text file of that name to the Project's <a id="ConceptsComponentCatalog">Component Catalog</a> or copy the contents of ['Dependency'](https://github.com/WhisperingChaos/DockerLocalWorkbench/blob/master/Dependency) from github.
++ Use a text editor to specify the dependencies using GNU makefile [rule syntax](http://www.gnu.org/software/make/manual/make.html#Rule-Syntax), however, omit encoding recipies.  For example, given a Component named "Child" with a static build dependency on another Component named "Parent" and assuming that "Parent" is a root Component, it doesn't depend on other Components, then enter the following GNU rule: ```Child.build : Parent.build``` on its own line in the ```Dependency``` file.  Once saved, ```dlw build``` command will order the resulting ```docker build``` commands to execute the 'Parent' build before performing the child's.
+
 
 ### Concepts
 
@@ -285,9 +293,9 @@ Since ```dlw run``` wraps its companion ```docker run```, it inherits its myriad
 
   A standard text file implements each Image GUID List.  The text file is assigned the same name as the Component (image) name with a suffix of ".GUIDlist".  The image GUIDs in the file are ordered from the oldest, which appears as the first line in the text file, to the most recent GUID that occupies its last line.  The column property bag appears space prefixed after the GUID.  It's implemented as a [bash associative array](http://www.gnu.org/software/bash/manual/html_node/Arrays.html#Arrays) named "componentPropBag".  Simply update this column property bag with the custom property names and values you wish displayed as reporting columns.
 + **Component Versioning**<a id="ConceptsComponentVersioning"></a>: A changed to a Component's build context results in a new version of the compiled image.  This newly compiled image is automatically assigned a docker repository name mirroring the Component's name and a docker tag name of 'latest'.  An existing and now prior version of the Component will loose these names reverting to repository and tag names of '\<none\>'. dlw maintains a list of these prior versions (see <a id="ConceptsImageGUIDList">Image GUID List</a>) and offers a means of indicating a category specifier for a number of its commands.  The dlw supports the following category specifiers:
-+  *Current*(=cur): the most recent image version,
-+  *All*(=all): every known image version,
-+  *All But Current*:(=allButCur) All image versions excluding  the *current* one.
+  + *Current* (=cur): the most recent image version,
+  + *All* (=all): every known image version,
+  + *All But Current* (=allButCur): All image versions excluding  the *current* one.
     Since the development process typically focuses on evolving the *Current* version, dlw omits a means to select a particular previous one.
 + **Build Target**<a id="ConceptsBuildTarget"></a>: An implementation level object whose timestamp represents a Component's last successful ```dlw build```.  This timestamp enables build-time optimization by only executing a ```dlw build``` for a given Component iff at least one of the Component's resources reflects a more recent date than the Build Target.  In this case, ```dlw build``` considers the Component changed since the last ```dlw build``` request causing ```dlw build``` to construct a new Component version.
 
