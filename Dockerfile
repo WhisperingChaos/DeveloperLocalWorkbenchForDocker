@@ -19,6 +19,12 @@ RUN /usr/bin/scriptInstall/installPackages.sh 'lxc-docker' 'make' 'tmux' \
     # Create a project directory for the dlw user to group projects and add
     # the 'sample' Project Catalog structure to provide testbed. 
     && mkdir -p '/home/dlw/project/sample/component' \
+    # Create a link spot for the tmux.conf file.  The file is empty so it
+    # assumes the tmux defaults.  This empty file can be overridden using
+    # volume option (-v) to incorporate desired tmux.conf from host. 
+    && mkdir '/home/dlw/.tmuxconfdir' \
+    && touch '/home/dlw/.tmuxconfdir/.tmux.conf' \
+    && ln -s '/home/dlw/.tmuxconfdir/.tmux.conf' '/home/dlw/.tmux.conf' \
     && mv /usr/bin/scriptInstall/.bash_aliases /home/dlw \
     # Establish dlw account as owner if its own files. This avoids creating
     # additional layers in order to set USER.
