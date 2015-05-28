@@ -26,7 +26,7 @@
 #
 #  RequiresServices.run : OffersService_1.run OffersService_2.run
 #
-# Where containers derived from the images OffersService_1 and OffersService_2
+# Where containers derived from Components OffersService_1 and OffersService_2
 # must be started before initiating a container derived from RequiresServices.
 #
 # Note, only rules that define dependencies should be specified.  Root (independent)
