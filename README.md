@@ -10,7 +10,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;[Sample Project & Testing](#installing-sample-project--testing)  
 [Project Tutorial](#project-tutorial)  
 [Exploring Commands](#exploring-commands)  
-&nbsp;&nbsp;&nbsp;&nbsp;[Remove](#exploring-commands-remove)  
+&nbsp;&nbsp;&nbsp;&nbsp;[rm, rmi](#exploring-commands-remove)  
 &nbsp;&nbsp;&nbsp;&nbsp;[run](#exploring-commands-run)  
 &nbsp;&nbsp;&nbsp;&nbsp;[tmux](#exploring-commands-tmux)  
 [Declaring Dependencies](#declaring-dependencies)  
@@ -33,7 +33,7 @@ Although docker provides [Compose](https://docs.docker.com/compose/), a Trusted 
 + Use simple commands like ```dlw build```,```dlw run```, and ```dlw images``` to manage and report on a service composed from multiple cooperating containers.
 + Launch and concurrently attach to the terminal interfaces of multiple containers using the terminal multiplex feature of [tmux](http://tmux.sourceforge.net/).
 + Combined tmux, [linux watch](http://en.wikipedia.org/wiki/Watch_%28Unix%29) and reporting commands like 'top' and 'ps' to actively monitor the status of multiple containers.
-+ Generate Docker CLI stream from command line arguments stored in a file, using a rudimentry command template.
++ Generate Docker CLI stream including command line arguments stored in a file, using a rudimentry command template.
 + Enhance report generation by associating custom properties to a docker image. 
 + Track previous versions of docker images and with single command remove all prior versions and their associated containers, ordering their removal to avoid "Conflict" errors issued by the Docker Daemon.
 + Enjoy the benefits of delivering and running this tool within a container.   
