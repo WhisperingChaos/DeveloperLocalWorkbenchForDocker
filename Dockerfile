@@ -16,6 +16,10 @@ RUN /usr/bin/scriptInstall/installPackages.sh 'lxc-docker' 'make' 'tmux' \
     # Create the dlw non-root user to provide another level of isolation
     # within the containers spawned from this image.
     && /usr/bin/scriptInstall/installUsers.sh 'dlw' \
+    # Patch login process so dlw account can assume an external 
+    # account's UID and GID list.
+    && mv /usr/bin/scriptInstall/dlwLogin.sh /usr/sbin/ \
+    && mv /usr/bin/scriptInstall/userUID_GID_Reassign.sh /usr/sbin/ \
     # Create a project directory for the dlw user to group projects and add
     # the 'sample' Project Catalog structure to provide testbed. 
     && mkdir -p '/home/dlw/project/sample/component' \
@@ -25,7 +29,7 @@ RUN /usr/bin/scriptInstall/installPackages.sh 'lxc-docker' 'make' 'tmux' \
     && mkdir '/home/dlw/.tmuxconfdir' \
     && touch '/home/dlw/.tmuxconfdir/.tmux.conf' \
     && ln -s '/home/dlw/.tmuxconfdir/.tmux.conf' '/home/dlw/.tmux.conf' \
-    && mv /usr/bin/scriptInstall/.bash_aliases /home/dlw \
+    && mv /usr/bin/scriptInstall/.bash_aliases /home/dlw/ \
     # Establish dlw account as owner if its own files. This avoids creating
     # additional layers in order to set USER.
     && chown -R dlw /home/dlw/* \ 
@@ -37,7 +41,7 @@ RUN /usr/bin/scriptInstall/installPackages.sh 'lxc-docker' 'make' 'tmux' \
 # Also, must use root level priviledges when establishing login proces
 # via the ENTRYPOINT command. 'login' below will fail if the container
 # is started by a non-root account.
-ENTRYPOINT login dlw
+ENTRYPOINT dlwLogin.sh
 # Install the dlw scripts into user level bin.  Located here, at the end,
 # as these frequently change during development.
 ADD ./script /usr/bin/dlw/

@@ -33,6 +33,24 @@ OPTIONS:
     -t             Existing host directory containing the '.tmux.conf' file. If omitted
                    tmux provides its own default settings.
 
+    -u ['ASSUME'|<UID>|'CONTAIN']
+                   External account UID that will replace the container's 'dlw'
+                   account's UID.  This permits processes within the container
+                   to access host directories/files mounted using docker run/create
+                   volume (-v) option, using rudementary Linux ACL.
+                     'ASSUME'  - Use the UID that started this script. (default)
+                     <UID>     - Numeric linux User Identifer.
+                     'CONTAIN'- Don't alter 'dlw' container UID.
+
+    -g ['ASSUME'|'<GID> ...'|'CONTAIN']
+                   GID list that will augment the container's 'dlw' account's GID list.
+                   This permits processes within the container to access host
+                   directories/files mounted using docker run/create 
+                   volume (-v) option, using rudementary Linux ACL.
+                     'ASSUME'  - Use the GID list associated to the UID that started this script. (default)
+                     <GID>     - Numeric linux Group Identifer.
+                     'CONTAIN'- Don't alter 'dlw' container account GID list.
+
 For more help: https://github.com/WhisperingChaos/DockerLocalWorkbench#ToC
 
 COMMAND_HELP
@@ -51,52 +69,120 @@ cat <<HOST_DIR_WARN
 HOST_DIR_WARN
 }
 ###############################################################################
-OPTIND=1
-unset HOST_PROJECT_DIR
-unset HOST_TMUX_DIR
-while getopts 'h?p:t:' opt; do
-    case "$opt" in
-    h|\?)
-        helpText
-        exit 0
-        ;;
-    p)  declare HOST_PROJECT_DIR="$OPTARG"
-        if ! [ -d "$HOST_PROJECT_DIR" ]; then
-          echo "Abort: -p option doesn't resolve to an existing host directory: '$HOST_PROJECT_DIR'.">&2
-          exit 1
-        fi
-        HOST_PROJECT_DIR="-v $HOST_PROJECT_DIR:/home/dlw/project"
-        ;;
-    t)  declare HOST_TMUX_DIR="$OPTARG"
-        if ! [ -d "$HOST_TMUX_DIR" ]; then
-          echo "Abort: -t option doesn't resolve to an existing host directory: '$HOST_TMUX_DIR'.">&2
-          exit 1
-        fi
-        if ! [ -e "$HOST_TMUX_DIR/.tmux.conf" ]; then
-          echo "Abort: -t option host directory: '$HOST_TMUX_DIR', doesn't contain: '.tmux.conf'.">&2
-          exit 1
-        fi
-        HOST_TMUX_DIR="-v $HOST_TMUX_DIR:/home/dlw/.tmuxconfdir"
-        ;;
-    esac
-done
-
-shift $((OPTIND-1))
-
-declare DLW_TAG='latest_latest'
-if [ -n "$1" ]; then
-  DLW_TAG="$1"
-fi
-
-if [ -z "$HOST_PROJECT_DIR" ]; then
-  hostDirWarningText
-  read -p "Confirm: Project files are local to the started container (Y/n):" -N 1 -- Yn
-  if [ "$Yn" != 'Y' ]; then
-    echo
-    echo "Abort: Please specify an existing host directory as second argument.">&2
-    exit 1;
+#
+#  Purpose:
+#    Generate GID list for user running this script.
+# 
+#  Outputs:
+#    STDOUT - Space separated list of GIDs assigned to account running this script.
+#
+###############################################################################
+function GID_list_gen (){
+  declare GID_name
+  delcare GID_list
+  for GID_name in $( groups )
+  do
+    GID="`getent group "$GID_name" | cut -d: -f3`"
+    if [ -z "$GID" ]; then Abort "$LINENO" "Failed to generate GID for group name: '$GID_name' associated to: '$USER'."; fi
+    GID_list+="$GID "
+  done
+  echo "$GID_list"
+}
+###############################################################################
+#
+#  Purpose:
+#    Verify value of UID/GID options.
+# 
+#  Inputs:
+#    1.  $1 - UID/GID option value.
+#
+###############################################################################
+function ID_verify () {
+  if [ "$1" != 'ASSUME' ] && ! [[ $1 =~ ^[0-9\ ]+$ ]] && [ "$1" != 'CONTAIN' ]; then
+    return 1
   fi
-  echo
-fi
-# create a container to run dlw.  Container will attach to current terminal
-docker run -i -t -v /var/run/docker.sock:/var/run/docker.sock $HOST_PROJECT_DIR $HOST_TMUX_DIR -- whisperingchaos/dlw:$DLW_TAG
+  return 0
+}
+###############################################################################
+# main
+###############################################################################
+  OPTIND=1
+  unset HOST_PROJECT_DIR
+  unset HOST_TMUX_DIR
+  declare ASSUME_UID='ASSUME'
+  declare ASSUME_GID_LIST='ASSUME'
+  while getopts 'h?p:t:u:g:' opt; do
+      case "$opt" in
+      h|\?)
+          helpText
+          exit 0
+          ;;
+      p)  declare HOST_PROJECT_DIR="$OPTARG"
+          if ! [ -d "$HOST_PROJECT_DIR" ]; then
+            echo "Abort: -p option doesn't resolve to an existing host directory: '$HOST_PROJECT_DIR'.">&2
+            exit 1
+          fi
+          HOST_PROJECT_DIR="-v $HOST_PROJECT_DIR:/home/dlw/project"
+          ;;
+      t)  declare HOST_TMUX_DIR="$OPTARG"
+          if ! [ -d "$HOST_TMUX_DIR" ]; then
+            echo "Abort: -t option doesn't resolve to an existing host directory: '$HOST_TMUX_DIR'.">&2
+            exit 1
+          fi
+          if ! [ -e "$HOST_TMUX_DIR/.tmux.conf" ]; then
+            echo "Abort: -t option host directory: '$HOST_TMUX_DIR', doesn't contain: '.tmux.conf'.">&2
+            exit 1
+          fi
+          HOST_TMUX_DIR="-v $HOST_TMUX_DIR:/home/dlw/.tmuxconfdir"
+          ;;
+      u)  ASSUME_UID="$OPTARG"
+          ;;
+      g)  ASSUME_GID_LIST="$OPTARG"
+          ;;
+      esac
+  done
+
+  if ! ID_verify "$ASSUME_UID"; then
+    echo "Abort: Specified -u option value invalid: '$ASSUME_UID'.">&2
+    exit 1
+  fi
+
+  if [ "$ASSUME_UID" == 'ASSUME' ]; then
+    ASSUME_UID="-e \"ASSUME_UID=`id -u`\""
+  elif [ "$ASSUME_UID" == 'CONTAIN' ]; then
+    unset ASSUME_UID
+  else
+    ASSUME_UID="-e \"ASSUME_UID=$ASSUME_UID\""
+  fi
+
+  if ! ID_verify "$ASSUME_GID_LIST"; then
+    echo "Abort: Specified -g option value invalid: '$ASSUME_GID_LIST'.">&2
+    exit 1
+  fi
+
+  if [ "$ASSUME_GID_LIST" == 'ASSUME' ]; then
+    ASSUME_GID_LIST="-e \"ASSUME_GID_LIST=`GID_list_gen`\""
+  elif [ "$ASSUME_GID_LIST" == 'CONTAIN' ]; then
+    unset ASSUME_GID_LIST
+  else
+    ASSUME_GID_LIST="-e \"ASSUME_GID_LIST=$ASSUME_GID_LIST\""
+  fi
+
+  shift $((OPTIND-1))
+  declare DLW_TAG='latest_latest'
+  if [ -n "$1" ]; then
+   DLW_TAG="$1"
+  fi
+
+  if [ -z "$HOST_PROJECT_DIR" ]; then
+    hostDirWarningText
+    read -p "Confirm: Project files are local to the started container (Y/n):" -N 1 -- Yn
+    if [ "$Yn" != 'Y' ]; then
+      echo
+      echo "Abort: Please specify an existing host directory as second argument.">&2
+      exit 1;
+    fi
+    echo
+  fi
+  # create a container to run dlw.  Container will attach to current terminal
+  docker run -i -t -v /var/run/docker.sock:/var/run/docker.sock $HOST_PROJECT_DIR $HOST_TMUX_DIR $ASSUME_UID $ASSUME_GID_LIST -- whisperingchaos/dlw:$DLW_TAG
