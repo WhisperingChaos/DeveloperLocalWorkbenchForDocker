@@ -99,4 +99,4 @@ if [ -z "$HOST_PROJECT_DIR" ]; then
   echo
 fi
 # create a container to run dlw.  Container will attach to current terminal
-docker run -i -t -v /var/run/docker.sock:/var/run/docker.sock $HOST_PROJECT_DIR $HOST_TMUX_DIR -- dlw:$DLW_TAG # whisperingchaos/dlw:$DLW_TAG
+docker run -i -t -v /var/run/docker.sock:/var/run/docker.sock $HOST_PROJECT_DIR $HOST_TMUX_DIR -- whisperingchaos/dlw:$DLW_TAG
