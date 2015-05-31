@@ -47,7 +47,7 @@ function VirtCmmdHelpDisplay () {
 cat <<COMMAND_HELP_Purpose
 
 Connect interactively to containers for targeted Components.  Must be used
-with 'screen' command in order to establish separate screen terminals for
+with 'tmux' command in order to establish separate terminals for
 attached each container.  Wraps docker '$commandName' command.
 
 Usage: dlw $commandName [OPTIONS] TARGET
