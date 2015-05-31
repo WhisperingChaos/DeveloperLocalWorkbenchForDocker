@@ -243,7 +243,7 @@ else
 	@echo "$*"
 endif
  
-attach create kill pause port restart run start stop top unpause: componentRunLst
+attach create kill logs pause port restart run start stop top unpause: componentRunLst
 	@
 
 # These commands (start, stop, restart,...) share runtime dependencies of the '%.run' command.
@@ -254,6 +254,8 @@ all.run: componentRunLst
 %.create:  %.run
 	@
 %.kill:    %.run
+	@
+%.logs:    %.run
 	@
 %.pause:   %.run
 	@
@@ -295,6 +297,8 @@ all.run.nodep: componentRunNodepLst
 %.create.nodep:  %.run.nodep 
 	@
 %.kill.nodep:    %.run.nodep
+	@
+%.logs.nodep:    %.run.nodep
 	@
 %.pause.nodep:   %.run.nodep
 	@
