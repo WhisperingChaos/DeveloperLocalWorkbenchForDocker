@@ -182,7 +182,7 @@ VirtDockerCmmdAssembleTemplateResolvePacketField () {
 ###############################################################################
 function VirtDockerCmmdAssembleTemplate () {
   # TODO: PACKET_DOCKER_COMMAND needs intelligent quoting mechanism, as there can be commands that have embedded quotes.
-  echo 'new-window -n "`if [ -n "$PACKET_COMPONENT_NAME" ]; then echo "$PACKET_COMPONENT_NAME"; else echo '"\'"'$( QuoteSingleReplace "$PACKET_DOCKER_COMMAND" ' ' )'"\'"'; fi`" \"$PACKET_DOCKER_COMMAND\"'
+  echo 'new-window -t `AssociativeMapAssignIndirect "$optsArgMapNm" "Arg1"` -n "`if [ -n "$PACKET_COMPONENT_NAME" ]; then echo "$PACKET_COMPONENT_NAME"; else echo '"\'"'$( QuoteSingleReplace "$PACKET_DOCKER_COMMAND" ' ' )'"\'"'; fi`" \"$PACKET_DOCKER_COMMAND\"'
   return 0
 }
 ###############################################################################
