@@ -33,23 +33,23 @@ OPTIONS:
     -t             Existing host directory containing the '.tmux.conf' file. If omitted
                    tmux provides its own default settings.
 
-    -u ['ASSUME'|<UID>|'CONTAIN']
+    -u {'ASSUME'|<UID>|'CONTAIN'}
                    External account UID that will replace the container's 'dlw'
                    account's UID.  This permits processes within the container
                    to access host directories/files mounted using docker run/create
                    volume (-v) option, using rudementary Linux ACL.
                      'ASSUME'  - Use the UID that started this script. (default)
                      <UID>     - Numeric linux User Identifer.
-                     'CONTAIN'- Don't alter 'dlw' container UID.
+                     'CONTAIN' - Don't alter 'dlw' container UID.
 
-    -g ['ASSUME'|'<GID> ...'|'CONTAIN']
+    -g {'ASSUME'|'<GID> ...'|'CONTAIN'}
                    GID list that will augment the container's 'dlw' account's GID list.
                    This permits processes within the container to access host
                    directories/files mounted using docker run/create 
                    volume (-v) option, using rudementary Linux ACL.
                      'ASSUME'  - Use the GID list associated to the UID that started this script. (default)
                      <GID>     - Numeric linux Group Identifer.
-                     'CONTAIN'- Don't alter 'dlw' container account GID list.
+                     'CONTAIN' - Don't alter 'dlw' container account GID list.
 
 For more help: https://github.com/WhisperingChaos/DockerLocalWorkbench#ToC
 
