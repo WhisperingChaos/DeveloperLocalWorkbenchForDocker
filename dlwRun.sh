@@ -79,7 +79,7 @@ HOST_DIR_WARN
 ###############################################################################
 function GID_list_gen (){
   declare GID_name
-  delcare GID_list
+  declare GID_list
   for GID_name in $( groups )
   do
     GID="`getent group "$GID_name" | cut -d: -f3`"
@@ -122,7 +122,7 @@ function ID_verify () {
             echo "Abort: -p option doesn't resolve to an existing host directory: '$HOST_PROJECT_DIR'.">&2
             exit 1
           fi
-          HOST_PROJECT_DIR="-v $HOST_PROJECT_DIR:/home/dlw/project"
+          HOST_PROJECT_DIR="-v '$HOST_PROJECT_DIR:/home/dlw/project'"
           ;;
       t)  declare HOST_TMUX_DIR="$OPTARG"
           if ! [ -d "$HOST_TMUX_DIR" ]; then
@@ -133,7 +133,7 @@ function ID_verify () {
             echo "Abort: -t option host directory: '$HOST_TMUX_DIR', doesn't contain: '.tmux.conf'.">&2
             exit 1
           fi
-          HOST_TMUX_DIR="-v $HOST_TMUX_DIR:/home/dlw/.tmuxconfdir"
+          HOST_TMUX_DIR="-v '$HOST_TMUX_DIR:/home/dlw/.tmuxconfdir'"
           ;;
       u)  ASSUME_UID="$OPTARG"
           ;;
@@ -148,7 +148,7 @@ function ID_verify () {
   fi
 
   if [ "$ASSUME_UID" == 'ASSUME' ]; then
-    ASSUME_UID="-e \"ASSUME_UID=`id -u`\""
+    ASSUME_UID="--env \"ASSUME_UID=`id -u`\""
   elif [ "$ASSUME_UID" == 'CONTAIN' ]; then
     unset ASSUME_UID
   else
@@ -161,7 +161,7 @@ function ID_verify () {
   fi
 
   if [ "$ASSUME_GID_LIST" == 'ASSUME' ]; then
-    ASSUME_GID_LIST="-e \"ASSUME_GID_LIST=`GID_list_gen`\""
+    ASSUME_GID_LIST="--env \"ASSUME_GID_LIST=`GID_list_gen`\""
   elif [ "$ASSUME_GID_LIST" == 'CONTAIN' ]; then
     unset ASSUME_GID_LIST
   else
@@ -185,4 +185,4 @@ function ID_verify () {
     echo
   fi
   # create a container to run dlw.  Container will attach to current terminal
-  docker run -i -t -v /var/run/docker.sock:/var/run/docker.sock $HOST_PROJECT_DIR $HOST_TMUX_DIR $ASSUME_UID $ASSUME_GID_LIST -- whisperingchaos/dlw:$DLW_TAG
+  eval docker run \-\i \-\t \-\v \'/var/run/docker.sock:/var/run/docker.sock\' $HOST_PROJECT_DIR $HOST_TMUX_DIR $ASSUME_UID $ASSUME_GID_LIST -- dlw:latest # whisperingchaos/dlw:$DLW_TAG
