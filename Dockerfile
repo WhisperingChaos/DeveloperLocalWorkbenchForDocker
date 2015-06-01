@@ -20,19 +20,24 @@ RUN /usr/bin/scriptInstall/installPackages.sh 'lxc-docker' 'make' 'tmux' \
     # account's UID and GID list.
     && mv /usr/bin/scriptInstall/dlwLogin.sh /usr/sbin/ \
     && mv /usr/bin/scriptInstall/userUID_GID_Reassign.sh /usr/sbin/ \
-    # Create a project directory for the dlw user to group projects and add
+    # Create a project directory, isolated from dlw's home directory
+    # tree, for the dlw user to group projects and add
     # the 'sample' Project Catalog structure to provide testbed. 
-    && mkdir -p '/home/dlw/project/sample/component' \
+    && mkdir -p '/project/sample/component' \
+    # Create a symbolic link to the /project directory to facilitate
+    # access by the dlw account and prevent cascading file ownership,
+    # primary group permission changes by 'usermod'
+    && ln -s '/project' '/home/dlw/project' \
     # Create a link spot for the tmux.conf file.  The file is empty so it
     # assumes the tmux defaults.  This empty file can be overridden using
     # volume option (-v) to incorporate desired tmux.conf from host. 
-    && mkdir '/home/dlw/.tmuxconfdir' \
-    && touch '/home/dlw/.tmuxconfdir/.tmux.conf' \
-    && ln -s '/home/dlw/.tmuxconfdir/.tmux.conf' '/home/dlw/.tmux.conf' \
+    && mkdir -p '/tmux/.tmuxconfdir' \
+    && touch '/tmux/.tmuxconfdir/.tmux.conf' \
+    && ln -s '/tmux/.tmuxconfdir/.tmux.conf' '/home/dlw/.tmux.conf' \
     && mv /usr/bin/scriptInstall/.bash_aliases /home/dlw/ \
     # Establish dlw account as owner if its own files. This avoids creating
     # additional layers in order to set USER.
-    && chown -R dlw /home/dlw/* \ 
+    && chown -R dlw:dlw /home/dlw   \ 
     # make install helper scripts invisible from this layer forward
     && rm -f -r "/usr/bin/scriptInstall"
 # Create an entry point to automatically login dlw user.
