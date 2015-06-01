@@ -96,9 +96,11 @@ function GIDadapt () {
   declare GID_list="$2"
   declare -A GID_map
 
+  declare GID_primary_new
   declare GID
   for GID in $GID_list
   do
+    if [ -z "$GID_primary_new" ]; then GID_primary_new="$GID"; fi
     GID_map[$GID]="$GID"
     # this external GID may or may not be in container /etc/groups,
     # add it and ignore overlaps.
@@ -124,9 +126,17 @@ function GIDadapt () {
   do
     GID_name="${GID_map[$key]}"
     if [ "$GID_name" != 'ASSOCIATED' ]; then
-      if ! usermod -a -G "$GID_name" "$user_name"; then Abort "$LINENO" "Adding external GID: '$key' to container account: '$user_name' failed."; fi
+      if ! usermod -a -G "$GID_name" -- "$user_name"; then Abort "$LINENO" "Adding external GID: '$key' to container account: '$user_name' failed."; fi
     fi
   done
+  # first GID in list to become primary GID
+  declare GID_primary_cur="`id -g -- "$user_name"`"
+  if [ "$GID_primary_cur" != "$GID_primary_new" ]; then
+    # need to remember name, not GID, of current primary group
+    GID_primary_cur="`id -g -n -- "$user_name"`"
+    if ! usermod --gid "$GID_primary_new" -- "$user_name"; then Abort "$LINENO" "Establishing external primary GID: '$GID_primary_new' for username: '$user_name' failed."; fi
+    if ! usermod -a -G "$GID_primary_cur" -- "$user_name"; then Abort "$LINENO" "Adding container primary GID: '$GID_primary_cur' to container account: '$user_name' failed."; fi
+  fi
   return 0
 }
 ###############################################################################
