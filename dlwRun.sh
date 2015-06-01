@@ -37,7 +37,7 @@ OPTIONS:
                    External account UID that will replace the container's 'dlw'
                    account's UID.  This permits processes within the container
                    to access host directories/files mounted using docker run/create
-                   volume (-v) option, using rudementary Linux ACL.
+                   volume (-v) option, using rudementary Linux DAC.
                      'ASSUME'  - Use the UID that started this script. (default)
                      <UID>     - Numeric linux User Identifer.
                      'CONTAIN' - Don't alter 'dlw' container UID.
@@ -46,7 +46,8 @@ OPTIONS:
                    GID list that will augment the container's 'dlw' account's GID list.
                    This permits processes within the container to access host
                    directories/files mounted using docker run/create 
-                   volume (-v) option, using rudementary Linux ACL.
+                   volume (-v) option, using rudementary Linux DAC.  The first GID becomes
+                   the 'dlw' account's primary GID.
                      'ASSUME'  - Use the GID list associated to the UID that started this script. (default)
                      <GID>     - Numeric linux Group Identifer.
                      'CONTAIN' - Don't alter 'dlw' container account GID list.
