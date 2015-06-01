@@ -185,4 +185,4 @@ function ID_verify () {
     echo
   fi
   # create a container to run dlw.  Container will attach to current terminal
-  eval docker run \-\i \-\t \-\v \'/var/run/docker.sock:/var/run/docker.sock\' $HOST_PROJECT_DIR $HOST_TMUX_DIR $ASSUME_UID $ASSUME_GID_LIST -- dlw:latest # whisperingchaos/dlw:$DLW_TAG
+  eval docker run \-\i \-\t \-\v \'/var/run/docker.sock:/var/run/docker.sock\' $HOST_PROJECT_DIR $HOST_TMUX_DIR $ASSUME_UID $ASSUME_GID_LIST -- whisperingchaos/dlw:$DLW_TAG
