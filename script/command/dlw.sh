@@ -241,7 +241,7 @@ function VirtCmmdExecute () {
   eval local -r subCommandName=\"\$\{$2\[\'Arg1\']\}\.sh\"
   OptionsArgsRemove 'Arg1' "$1" "$2" 'optArgSubCommandLst' 'optArgSubCommandMap'
   eval $subCommandName `OptionsArgsGen 'optArgSubCommandLst' 'optArgSubCommandMap'`
-  if [ "$?" -eq '0' ]; then TmpDirRemove; fi 
+  if [ "$?" -eq '0' ]; then TmpDirRemove; else return 1; fi 
 }
 ##############################################################################
 ##
