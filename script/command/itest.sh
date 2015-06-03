@@ -2369,7 +2369,7 @@ function dlw_Test_18 () {
     ReportLineCntAssert $LINENO 3
     ReportScanTokenIncludeAssert $LINENO 'docker' 'logs' 
     if ! dlw.sh tmux ; then ScriptUnwind $LINENO "tmux terminal multiplexer failed."; fi
-    if ! dlw.sh tmux --dlwc 'logs'; then ScriptUnwind $LINENO "tmux terminal multiplexer for logs failed."; fi
+    if ! dlw.sh tmux --dlwc 'logs -f'; then ScriptUnwind $LINENO "tmux terminal multiplexer for logs failed."; fi
     tmux_context_set "ReportRun $LINENO 'tmux ls'"
     ReportLineCntAssert $LINENO 1
     ReportScanTokenIncludeAssert $LINENO 'sample: 7 windows (created'
