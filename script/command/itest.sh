@@ -1583,6 +1583,10 @@ function TestEnvironmentAssert () {
   local errorInd='false'
   if ! TestFileScanPass;  then errorInd='true'; fi
   if ! SampleProjectPass; then errorInd='true'; fi
+  if tmux_context_set "tmux has-session" >/dev/null 2>/dev/null; then
+    ScriptError "tmux sessions exits which you may want to preserve."
+    errorInd='true'
+  fi
   if ! ImageNameLocalOverlapPass $TEST_COMPONENT_LIST; then errorInd='true'; fi
   if $errorInd; then
     ScriptError "Determine if reported errors refer to remnants of a prior test"
@@ -1604,6 +1608,7 @@ function TestEnvironmentAssert () {
 #    2. Local Docker container and image objects for sample project.
 #    3. Image GUID List(s),
 #    4. Sample Project Component Catalog.
+#    5. tmux 'sample' session.
 #
 #  Input:
 #    $1  - Line number calling assert.
@@ -1633,6 +1638,8 @@ function TestEnvironmentCleanAssert () {
     ImageGUIDListAssert  "$LineNo" "$compName" '0'
   done
   SampleProjectObliterateAssert "$LineNo" "$keepScript"
+  tmux_context_set "tmux kill-server" >/dev/null 2>/dev/null
+
   return 0;
 }
 ###############################################################################
@@ -1708,6 +1715,20 @@ function TestFileScanPass () {
     return 1
   fi
   return 0
+}
+##############################################################################
+#
+#  Purpose:
+#    Provide proper execution context to run independent (non-dlw) tmux
+#    commands that can connect to the same socke as dependent tmux commands.
+#
+#  Input:
+#    $1 - tmux command to execute.
+#
+##############################################################################
+function tmux_context_set() {
+  local TMPDIR="$TERM_MULTI_SOCKET"
+  eval $1    
 }
 ##############################################################################
 ##
@@ -2236,6 +2257,129 @@ function dlw_Test_15 () {
     if ! dlw.sh kill all >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "Kill of: 'all' failed."; fi
     ReportRun $LINENO 'dlw.sh ps'
     ReportLineCntAssert $LINENO 1
+  }
+}
+###############################################################################
+#
+#  Depends on:
+#    Initialized 'sample' project with 'dlw_apache', 'dlw_mysql' 
+#    and 'dlw_parent' Components.
+#
+###############################################################################
+function dlw_Test_16 () {
+  function dlw_Test_16_Desc () {
+    echo "Run current versions of: 'dlw_sshserver', 'dlw_mysql', and 'dlw_apache'. Expose port 3030 for all."
+  }
+  function dlw_Test_16_Run () {
+    ImageContainerRemove $LINENO '--dlwcomp-ver=all -- all'
+    ReportRun $LINENO 'dlw.sh ps'
+    ReportLineCntAssert $LINENO 1
+    ReportRun $LINENO 'dlw.sh images'
+    ReportLineCntAssert $LINENO 1
+    ImageCreate $LINENO '' 'dlw_mysql' 1
+    ImageCreate $LINENO '' 'dlw_apache' 1
+    ImageCreate $LINENO '' 'dlw_sshserver' 1
+    ReportRun $LINENO 'dlw.sh images -a --dlwcomp-ver=all'
+    ReportLineCntAssert $LINENO 5
+    if ! dlw.sh run -i -d >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "Run of: 'all' failed."; fi
+    ReportRun $LINENO 'dlw.sh ps --dlwcomp-ver=cur'
+    ReportLineCntAssert $LINENO 4
+    ReportScanTokenIncludeAssert $LINENO 'CONTAINER' 'IMAGE' 'dlw_sshserver' 'dlw_apache' 'dlw_mysql'
+    ReportScanTokenExcludeAssert $LINENO 'dlw_parent'
+    ReportRun $LINENO 'dlw.sh port'
+    # since no ports were open don't expect any report lines.
+    ReportLineCntAssert $LINENO 0
+    if ! dlw.sh rm -f --dlwcomp-ver=cur -- all >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "Remove all containers failed."; fi
+    # Expose and open port 3030 for all components.
+    if ! dlw.sh run -i -d --expose 3030 -p 3030 >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "Run exposing port 3030 failed."; fi
+    ReportRun $LINENO 'dlw.sh port'
+    ReportLineCntAssert $LINENO 4
+    ReportScanTokenIncludeAssert $LINENO 'COMPONENT' 'CONTAINER ID' 'PORT' 'MAP' '3030' 'dlw_apache' 'dlw_mysql' 'dlw_sshserver'
+    ReportScanTokenExcludeAssert $LINENO 'dlw_parent'
+    if ! dlw.sh rm -f --dlwcomp-ver=all all >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "Remove all containers failed."; fi
+    ReportRun $LINENO 'dlw.sh ps'
+    ReportLineCntAssert $LINENO 1
+  }
+}
+###############################################################################
+#
+#  Depends on:
+#    Initialized 'sample' project with 'dlw_apache', 'dlw_mysql' 
+#    and 'dlw_parent' Components.
+#
+###############################################################################
+function dlw_Test_17 () {
+  function dlw_Test_17_Desc () {
+    echo "Run current versions of: 'dlw_sshserver', 'dlw_mysql', and 'dlw_apache'. Generate docker attach commands for all. Create tmux session.  Eliminate containers closing their tmux windows."
+  }
+  function dlw_Test_17_Run () {
+    ImageContainerRemove $LINENO '--dlwcomp-ver=all -- all'
+    ReportRun $LINENO 'dlw.sh ps'
+    ReportLineCntAssert $LINENO 1
+    ReportRun $LINENO 'dlw.sh images'
+    ReportLineCntAssert $LINENO 1
+    ImageCreate $LINENO '' 'dlw_mysql' 1
+    ImageCreate $LINENO '' 'dlw_apache' 1
+    ImageCreate $LINENO '' 'dlw_sshserver' 1
+    ReportRun $LINENO 'dlw.sh images -a --dlwcomp-ver=all'
+    ReportLineCntAssert $LINENO 5
+    if ! dlw.sh run -i -d >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "Run of: 'all' failed."; fi
+    # Expect 3 'docker attach' commands.
+    ReportRun $LINENO 'dlw.sh attach'
+    ReportLineCntAssert $LINENO 3
+    ReportScanTokenIncludeAssert $LINENO 'docker' 'attach' 
+    if ! dlw.sh tmux ; then ScriptUnwind $LINENO "tmux terminal multiplexer failed."; fi
+    tmux_context_set "ReportRun $LINENO 'tmux ls'"
+    ReportLineCntAssert $LINENO 1
+    ReportScanTokenIncludeAssert $LINENO 'sample: 4 windows (created'
+    if ! dlw.sh rm -f --dlwcomp-ver=all all >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "Remove all containers failed."; fi
+    ReportRun $LINENO 'dlw.sh ps'
+    ReportLineCntAssert $LINENO 1
+    tmux_context_set "ReportRun $LINENO 'tmux ls'"
+    ReportLineCntAssert $LINENO 1
+    ReportScanTokenIncludeAssert $LINENO 'sample: 1 windows (created'
+    if ! tmux_context_set "tmux kill-session -t sample"; then ScriptUnwind $LINENO "tmux kill session failed."; fi
+  }
+}
+###############################################################################
+#
+#  Depends on:
+#    Initialized 'sample' project with 'dlw_apache', 'dlw_mysql' 
+#    and 'dlw_parent' Components.
+#
+###############################################################################
+function dlw_Test_18 () {
+  function dlw_Test_18_Desc () {
+    echo "Run current versions of: 'dlw_sshserver', 'dlw_mysql', and 'dlw_apache'. Generate docker logs commands for all and corresponding tmux session.  Eliminate containers which inturn closes their logs and tmux windows."
+  }
+  function dlw_Test_18_Run () {
+    ImageContainerRemove $LINENO '--dlwcomp-ver=all -- all'
+    ReportRun $LINENO 'dlw.sh ps'
+    ReportLineCntAssert $LINENO 1
+    ReportRun $LINENO 'dlw.sh images'
+    ReportLineCntAssert $LINENO 1
+    ImageCreate $LINENO '' 'dlw_mysql' 1
+    ImageCreate $LINENO '' 'dlw_apache' 1
+    ImageCreate $LINENO '' 'dlw_sshserver' 1
+    ReportRun $LINENO 'dlw.sh images -a --dlwcomp-ver=all'
+    ReportLineCntAssert $LINENO 5
+    if ! dlw.sh run -i -d >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "Run of: 'all' failed."; fi
+    # Expect 3 'docker attach' commands.
+    ReportRun $LINENO 'dlw.sh logs'
+    ReportLineCntAssert $LINENO 3
+    ReportScanTokenIncludeAssert $LINENO 'docker' 'logs' 
+    if ! dlw.sh tmux ; then ScriptUnwind $LINENO "tmux terminal multiplexer failed."; fi
+    if ! dlw.sh tmux --dlwc 'logs'; then ScriptUnwind $LINENO "tmux terminal multiplexer for logs failed."; fi
+    tmux_context_set "ReportRun $LINENO 'tmux ls'"
+    ReportLineCntAssert $LINENO 1
+    ReportScanTokenIncludeAssert $LINENO 'sample: 7 windows (created'
+    if ! dlw.sh rm -f --dlwcomp-ver=cur all >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "Remove all containers failed."; fi
+    ReportRun $LINENO 'dlw.sh ps'
+    ReportLineCntAssert $LINENO 1
+    tmux_context_set "ReportRun $LINENO 'tmux ls'"
+    ReportLineCntAssert $LINENO 1
+    ReportScanTokenIncludeAssert $LINENO 'sample: 1 windows (created'
+    if ! tmux_context_set "tmux kill-session -t sample"; then ScriptUnwind $LINENO "tmux kill session failed."; fi
   }
 }
 FunctionOverrideCommandGet
