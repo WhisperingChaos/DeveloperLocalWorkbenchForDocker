@@ -51,6 +51,8 @@ OPTIONS:
                      'ASSUME'  - Use the GID list associated to the UID that started this script. (default)
                      <GID>     - Numeric linux Group Identifer.
                      'CONTAIN' - Don't alter 'dlw' container account GID list.
+    
+    -l             Treat HUB_TAG_NAME as complete local repository image name.
 
 For more help: https://github.com/WhisperingChaos/DockerLocalWorkbench#ToC
 
@@ -112,7 +114,8 @@ function ID_verify () {
   unset HOST_TMUX_DIR
   declare ASSUME_UID='ASSUME'
   declare ASSUME_GID_LIST='ASSUME'
-  while getopts 'h?p:t:u:g:' opt; do
+  declare TREAT_LOCAL_REPOSITORY_NAME='false'
+  while getopts 'h?p:t:u:g:l' opt; do
       case "$opt" in
       h|\?)
           helpText
@@ -139,6 +142,8 @@ function ID_verify () {
       u)  ASSUME_UID="$OPTARG"
           ;;
       g)  ASSUME_GID_LIST="$OPTARG"
+          ;;
+      l)  TREAT_LOCAL_REPOSITORY_NAME='true'
           ;;
       esac
   done
@@ -174,6 +179,9 @@ function ID_verify () {
   if [ -n "$1" ]; then
    DLW_TAG="$1"
   fi
+  if ! $TREAT_LOCAL_REPOSITORY_NAME; then
+    DLW_TAG="whisperingchaos/dlw:$DLW_TAG"
+  fi
 
   if [ -z "$HOST_PROJECT_DIR" ]; then
     hostDirWarningText
@@ -186,4 +194,4 @@ function ID_verify () {
     echo
   fi
   # create a container to run dlw.  Container will attach to current terminal
-  eval docker run \-\i \-\t \-\v \'/var/run/docker.sock:/var/run/docker.sock\' $HOST_PROJECT_DIR $HOST_TMUX_DIR $ASSUME_UID $ASSUME_GID_LIST -- whisperingchaos/dlw:$DLW_TAG
+  eval docker run \-\i \-\t \-\v \'/var/run/docker.sock:/var/run/docker.sock\' $HOST_PROJECT_DIR $HOST_TMUX_DIR $ASSUME_UID $ASSUME_GID_LIST -- $DLW_TAG
