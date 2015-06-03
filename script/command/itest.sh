@@ -2364,7 +2364,7 @@ function dlw_Test_18 () {
     ReportRun $LINENO 'dlw.sh images -a --dlwcomp-ver=all'
     ReportLineCntAssert $LINENO 5
     if ! dlw.sh run -i -d >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "Run of: 'all' failed."; fi
-    # Expect 3 'docker attach' commands.
+    # Expect 3 'docker logs' commands.
     ReportRun $LINENO 'dlw.sh logs'
     ReportLineCntAssert $LINENO 3
     ReportScanTokenIncludeAssert $LINENO 'docker' 'logs' 
@@ -2380,6 +2380,43 @@ function dlw_Test_18 () {
     ReportLineCntAssert $LINENO 1
     ReportScanTokenIncludeAssert $LINENO 'sample: 1 windows (created'
     if ! tmux_context_set "tmux kill-session -t sample"; then ScriptUnwind $LINENO "tmux kill session failed."; fi
+  }
+}
+###############################################################################
+#
+#  Depends on:
+#    Initialized 'sample' project with 'dlw_apache', 'dlw_mysql' 
+#    and 'dlw_parent' Components.
+#
+###############################################################################
+function dlw_Test_19 () {
+  function dlw_Test_19_Desc () {
+    echo "Create and start current versions of: 'dlw_sshserver', 'dlw_mysql', and 'dlw_apache'."
+  }
+  function dlw_Test_19_Run () {
+    ImageContainerRemove $LINENO '--dlwcomp-ver=all -- all'
+    ReportRun $LINENO 'dlw.sh ps'
+    ReportLineCntAssert $LINENO 1
+    ReportRun $LINENO 'dlw.sh images'
+    ReportLineCntAssert $LINENO 1
+    if ! dlw.sh build >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "dlw build of Component: 'all' failed."; fi
+    ReportRun $LINENO 'dlw.sh images --dlwcomp-ver=all'
+    ReportScanTokenIncludeAssert $LINENO 'REPOSITORY' 'TAG' 'dlw_sshserver' 'dlw_apache' 'dlw_mysql' 'dlw_parent'
+    ReportLineCntAssert $LINENO 5
+    if ! dlw.sh create -i >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "dlw create of Component: 'all' failed."; fi
+    ReportRun $LINENO 'dlw.sh ps -a --dlwcomp-ver=all'
+    ReportLineCntAssert $LINENO 4
+    ReportScanTokenIncludeAssert $LINENO 'CONTAINER' 'IMAGE' 'dlw_sshserver' 'dlw_apache' 'dlw_mysql'
+    ReportScanTokenExcludeAssert $LINENO 'dlw_parent'
+    #TODO: when docker fixes bug #8796 enable this portion of the test.
+    #if ! dlw.sh start >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "Start of: 'all' failed."; fi
+    #ReportRun $LINENO 'dlw.sh ps'
+    #ReportLineCntAssert $LINENO 4
+    #ReportScanTokenIncludeAssert $LINENO 'CONTAINER' 'IMAGE' 'dlw_sshserver' 'dlw_apache' 'dlw_mysql'
+    #ReportScanTokenExcludeAssert $LINENO 'dlw_parent'
+    if ! dlw.sh rm -f --dlwcomp-ver=cur all >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "Remove all containers failed."; fi
+    ReportRun $LINENO 'dlw.sh ps'
+    ReportLineCntAssert $LINENO 1
   }
 }
 FunctionOverrideCommandGet
