@@ -50,7 +50,6 @@ COMMAND:
     attach    Using 'tmux' command below, connect to an interactive container(s) derived from specified Component(s) & version.
     build     Compile a new version of a Component(s) from the resources located in its build context directory.
     create    Produce a container for the specified Component(s) but don't run it.
-    diff      Inspect changes applied to container(s) derived from specified Component(s) & version.
     images    Generate a docker images report limited to the specified Component(s) & version.
     kill      Send a termination signal to containers derived from specified Component(s) & version.
     logs      Using 'tmux' command below, connect or snapshot a container's STDERR and STDOUT stream for targeted Components.
