@@ -2337,7 +2337,12 @@ function dlw_Test_17 () {
     ReportLineCntAssert $LINENO 1
     tmux_context_set "ReportRun $LINENO 'tmux ls'"
     ReportLineCntAssert $LINENO 1
-    ReportScanTokenIncludeAssert $LINENO 'sample: 1 windows (created'
+    #TODO docker 1.3.x would cause the tmux sessions to terminate when running containers were terminated using docker rm command.
+    # However, version 1.4.1 doesn't seem to send termination signal.
+    # When one of the attached windows is closed using tmux, the others are then also closed.  Therefore, this check will be changed
+    # to expect 4 windows.  Hopefully a future version of docker will cause this to fail hopefully indicating it has been repaired.  
+    # ReportScanTokenIncludeAssert $LINENO 'sample: 1 windows (created'
+    ReportScanTokenIncludeAssert $LINENO 'sample: 4 windows (created'
     if ! tmux_context_set "tmux kill-session -t sample"; then ScriptUnwind $LINENO "tmux kill session failed."; fi
   }
 }
@@ -2378,7 +2383,12 @@ function dlw_Test_18 () {
     ReportLineCntAssert $LINENO 1
     tmux_context_set "ReportRun $LINENO 'tmux ls'"
     ReportLineCntAssert $LINENO 1
-    ReportScanTokenIncludeAssert $LINENO 'sample: 1 windows (created'
+    #TODO docker 1.3.x would cause the tmux sessions to terminate when running containers were terminated using docker rm command.
+    # However, version 1.4.1 doesn't seem to send termination signal.
+    # When one of the attached windows is closed using tmux, the others are then also closed.  Therefore, this check will be changed
+    # to expect 4 windows.  Hopefully a future version of docker will cause this to fail hopefully indicating it has been repaired.  
+    # ReportScanTokenIncludeAssert $LINENO 'sample: 1 windows (created'
+    ReportScanTokenIncludeAssert $LINENO 'sample: 4 windows (created'
     if ! tmux_context_set "tmux kill-session -t sample"; then ScriptUnwind $LINENO "tmux kill session failed."; fi
   }
 }
@@ -2408,12 +2418,11 @@ function dlw_Test_19 () {
     ReportLineCntAssert $LINENO 4
     ReportScanTokenIncludeAssert $LINENO 'CONTAINER' 'IMAGE' 'dlw_sshserver' 'dlw_apache' 'dlw_mysql'
     ReportScanTokenExcludeAssert $LINENO 'dlw_parent'
-    #TODO: when docker fixes bug #8796 enable this portion of the test.
-    #if ! dlw.sh start >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "Start of: 'all' failed."; fi
-    #ReportRun $LINENO 'dlw.sh ps'
-    #ReportLineCntAssert $LINENO 4
-    #ReportScanTokenIncludeAssert $LINENO 'CONTAINER' 'IMAGE' 'dlw_sshserver' 'dlw_apache' 'dlw_mysql'
-    #ReportScanTokenExcludeAssert $LINENO 'dlw_parent'
+    if ! dlw.sh start >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "Start of: 'all' failed."; fi
+    ReportRun $LINENO 'dlw.sh ps'
+    ReportLineCntAssert $LINENO 4
+    ReportScanTokenIncludeAssert $LINENO 'CONTAINER' 'IMAGE' 'dlw_sshserver' 'dlw_apache' 'dlw_mysql'
+    ReportScanTokenExcludeAssert $LINENO 'dlw_parent'
     if ! dlw.sh rm -f --dlwcomp-ver=cur all >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "Remove all containers failed."; fi
     ReportRun $LINENO 'dlw.sh ps'
     ReportLineCntAssert $LINENO 1
