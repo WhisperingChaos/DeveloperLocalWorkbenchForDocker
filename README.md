@@ -85,7 +85,7 @@ Since the ```dlw``` issues Docker CLI commands, its image contains a copy of Doc
 + Start terminal session on host.
 + 'cd' to appropriate directory to contain the download of ```dlwRun.sh```.
 + Enter either ```curl``` or ```wget``` specifying ```https://github.com/WhisperingChaos/DockerLocalWorkbench/raw/<gitTag>/dlwRun.sh``` replacing \<gitTag\> with the appropriate <a href="#InstallingTagVersionPull">Tag name</a>.
-  + Ex: ```wget https://github.com/WhisperingChaos/DockerLocalWorkbench/raw/master/dlwRun.sh``` downloads current development version.
+  + Ex: ```wget https://github.com/WhisperingChaos/DockerLocalWorkbench/raw/0.5_1.3/dlwRun.sh``` downloads ```dlw``` 0.5 version coupled to Docker 1.3 Daemon.
 + Issue ```chmod +x dlwRun.sh```.
 
 Other methods to download ```dlwRun.sh``` exist [see stackoverflow.com](http://stackoverflow.com/questions/4604663/download-single-files-from-github).
