@@ -12,7 +12,7 @@ New release process:
 + Test the new branch.
   + ```dlwRun.sh -l dlw``` creates a new container reflecting the newly introduced component versions.
   + Verify that selected versions are reflected by:
-    + [dlw version]
+    + ```dlw version```
   + Run the integration tests within the container:
     + ```cd ~/project/sample```
     + ```dlw itest```
