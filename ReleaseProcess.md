@@ -1,13 +1,11 @@
 New release process:
 
-+ Determine ```dlw``` version to assign to new branch.
-+ Determine ```docker``` version new branch targets.
-+ Create a new [dlw](https://github.com/WhisperingChaos/DockerLocalWorkbench) branch:
-  + Generate branch name: ```dlw version```_```docker version```
++ merge latest_lastest branch into master.
 + Ensure new branch builds properly with new version:
   + Download branch to 'release-test environment':
-    + Release-test environment must have git and the desired version of the Docker Daemon running 
-  + Change existing files in new branch:
+    + Release-test environment must have git and the desired version of the Docker Daemon running
+    + ```git clone```
+  + Change existing files in Release-test environment:
     + [versionSpecifiers.sh](https://github.com/WhisperingChaos/DockerLocalWorkbench/blob/master/scriptInstall/versionSpecifiers.sh) must reflect the desired build time component versions.
     + [version.h](https://github.com/WhisperingChaos/DockerLocalWorkbench/blob/master/script/command/version.sh) must reflect the newly determined ```dlw``` version.
   + ```docker build``` the workbench locally.
@@ -19,6 +17,10 @@ New release process:
     + ```cd ~/project/sample```
     + ```dlw itest```
 + Iterate building & testing till happy.
++ Determine ```dlw``` version to assign to new branch.
++ Determine ```docker``` version new branch targets.
++ Create a new [dlw](https://github.com/WhisperingChaos/DockerLocalWorkbench) branch:
+  + Generate branch name: ```dlw version```_```docker version```
 + Push branch to github.
 + Add new [Docker Hub Tag](https://registry.hub.docker.com/u/whisperingchaos/dlw/tags/manage/) to reference the newly created branch.
   + tag name=github branch name
