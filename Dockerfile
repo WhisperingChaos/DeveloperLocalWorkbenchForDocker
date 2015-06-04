@@ -38,6 +38,7 @@ RUN /usr/bin/scriptInstall/installPackages.sh 'lxc-docker' 'make' 'tmux' \
     # Establish dlw account as owner if its own files. This avoids creating
     # additional layers in order to set USER.
     && chown -R dlw:dlw /home/dlw   \ 
+    && chown -R dlw:dlw /project/sample \
     # make install helper scripts invisible from this layer forward
     && rm -f -r "/usr/bin/scriptInstall"
 # Create an entry point to automatically login dlw user.
