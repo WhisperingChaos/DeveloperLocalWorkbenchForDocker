@@ -7,7 +7,7 @@ New release process:
     + ```git clone```
   + Change existing files in Release-test environment:
     + [versionSpecifiers.sh](https://github.com/WhisperingChaos/DockerLocalWorkbench/blob/master/scriptInstall/versionSpecifiers.sh) must reflect the desired build time component versions.
-    + [version.h](https://github.com/WhisperingChaos/DockerLocalWorkbench/blob/master/script/command/version.sh) must reflect the newly determined ```dlw``` version.
+    + [version.sh](https://github.com/WhisperingChaos/DockerLocalWorkbench/blob/master/script/command/version.sh) must reflect the newly determined ```dlw``` version.
   + ```docker build -t .``` the workbench locally.
 + Test the new branch.
   + ```dlwRun.sh -l dlw``` creates a new container reflecting the newly introduced component versions.
