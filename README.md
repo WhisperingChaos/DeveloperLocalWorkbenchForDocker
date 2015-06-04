@@ -84,7 +84,7 @@ Since the ```dlw``` issues Docker CLI commands, its image contains a copy of Doc
 ```dlwRun.sh``` wraps the Docker CLI request to pull and then run a newly created container from the desired ```dlw``` image.  It also mounts a host directory to store ```dlw``` <a href="#ConceptsProject">Projects</a> to the appropriate mount point within the newly created ```dlw``` container.
 + Start terminal session on host.
 + 'cd' to appropriate directory to contain the download of ```dlwRun.sh```.
-+ Enter either ```curl``` or ```wget``` specifying ```https://github.com/WhisperingChaos/DockerLocalWorkbench/raw/<branch>/dlwRun.sh``` replacing \<branch\> with the appropriate <a href="#InstallingTagVersionPull">Tag name</a>.
++ Enter either ```curl``` or ```wget``` specifying ```https://github.com/WhisperingChaos/DockerLocalWorkbench/raw/<gitTag>/dlwRun.sh``` replacing \<gitTag\> with the appropriate <a href="#InstallingTagVersionPull">Tag name</a>.
   + Ex: ```wget https://github.com/WhisperingChaos/DockerLocalWorkbench/raw/master/dlwRun.sh``` downloads current development version.
 + Issue ```chmod +x dlwRun.sh```.
 
