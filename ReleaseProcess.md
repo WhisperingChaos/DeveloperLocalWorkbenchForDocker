@@ -4,7 +4,9 @@ New release process:
 + Ensure merged master builds properly with new version:
   + Download master to 'release-test environment':
     + Release-test environment must have git and the desired version of the Docker Daemon running
-    + ```git clone```
+    + ```apt-cache show lxc-docker-?.?.?```
+    + ```git clone https://github.com/WhisperingChaos/DockerLocalWorkbench```
+    + ```git remote set-url origin git@github.com:WhisperingChaos/DockerLocalWorkbench.git```
   + Change existing files in Release-test environment:
     + [versionSpecifiers.sh](https://github.com/WhisperingChaos/DockerLocalWorkbench/blob/master/scriptInstall/versionSpecifiers.sh) must reflect the desired build time component versions.
     + [version.sh](https://github.com/WhisperingChaos/DockerLocalWorkbench/blob/master/script/command/version.sh) must reflect the newly determined ```dlw``` version.
@@ -27,4 +29,9 @@ New release process:
     + ```git push origin --tag     # new tag```    
 + Add new [Docker Hub Tag](https://registry.hub.docker.com/u/whisperingchaos/dlw/tags/manage/) to reference the newly created branch.
   + tag name=github tag name
++ Test Docker Hub image:
+  + Download and run ```dlw``` Hub image:
+  + ```dlwRun.sh <dlw version>_<docker version>```
+    + ```cd ~/project/sample```
+    + ```dlw itest```
 
