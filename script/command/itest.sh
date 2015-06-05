@@ -2337,12 +2337,7 @@ function dlw_Test_17 () {
     ReportLineCntAssert $LINENO 1
     tmux_context_set "ReportRun $LINENO 'tmux ls'"
     ReportLineCntAssert $LINENO 1
-    #TODO docker 1.3.x would cause the tmux sessions to terminate when running containers were terminated using docker rm command.
-    # However, version 1.4.1 doesn't seem to send termination signal.
-    # When one of the attached windows is closed using tmux, the others are then also closed.  Therefore, this check will be changed
-    # to expect 4 windows.  Hopefully a future version of docker will cause this to fail hopefully indicating it has been repaired.  
-    # ReportScanTokenIncludeAssert $LINENO 'sample: 1 windows (created'
-    ReportScanTokenIncludeAssert $LINENO 'sample: 4 windows (created'
+    ReportScanTokenIncludeAssert $LINENO 'sample: 1 windows (created'
     if ! tmux_context_set "tmux kill-session -t sample"; then ScriptUnwind $LINENO "tmux kill session failed."; fi
   }
 }
@@ -2383,12 +2378,7 @@ function dlw_Test_18 () {
     ReportLineCntAssert $LINENO 1
     tmux_context_set "ReportRun $LINENO 'tmux ls'"
     ReportLineCntAssert $LINENO 1
-    #TODO docker 1.3.x would cause the tmux sessions to terminate when running containers were terminated using docker rm command.
-    # However, version 1.4.1 doesn't seem to send termination signal.
-    # When one of the attached windows is closed using tmux, the others are then also closed.  Therefore, this check will be changed
-    # to expect 4 windows.  Hopefully a future version of docker will cause this to fail hopefully indicating it has been repaired.  
-    # ReportScanTokenIncludeAssert $LINENO 'sample: 1 windows (created'
-    ReportScanTokenIncludeAssert $LINENO 'sample: 4 windows (created'
+    ReportScanTokenIncludeAssert $LINENO 'sample: 1 windows (created'
     if ! tmux_context_set "tmux kill-session -t sample"; then ScriptUnwind $LINENO "tmux kill session failed."; fi
   }
 }
