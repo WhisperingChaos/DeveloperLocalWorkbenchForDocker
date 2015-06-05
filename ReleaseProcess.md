@@ -22,8 +22,9 @@ New release process:
   + Determine ```docker``` version.
   + Generate git tag name: ```dlw version```_```docker version```
   + ```git tag -a <dlw version>_<docker version> -m "dlw: <dlw version>, Docker Daemon: <docker version>"```
-  + Push branch to github.
-    + ```git push origin --tag```
+  + Push branchs to github:
+    + ```git push                  # updated production```
+    + ```git push origin --tag     # new tag```    
 + Add new [Docker Hub Tag](https://registry.hub.docker.com/u/whisperingchaos/dlw/tags/manage/) to reference the newly created branch.
   + tag name=github tag name
 
