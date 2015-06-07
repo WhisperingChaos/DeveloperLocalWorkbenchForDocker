@@ -10,7 +10,7 @@ New release process:
   + Change existing files in Release-test environment:
     + [versionSpecifiers.sh](https://github.com/WhisperingChaos/DockerLocalWorkbench/blob/master/scriptInstall/versionSpecifiers.sh) must reflect the desired build time component versions.
     + [version.sh](https://github.com/WhisperingChaos/DockerLocalWorkbench/blob/master/script/command/version.sh) must reflect the newly determined ```dlw``` version.
-  + ```docker build -t .``` the workbench locally.
+  + ```docker build -t dlw .``` the workbench locally.
 + Test the new branch.
   + ```dlwRun.sh -l dlw``` creates a new container reflecting the newly introduced component versions.
   + Verify that selected versions are reflected by:
@@ -20,8 +20,8 @@ New release process:
     + ```dlw itest```
 + Iterate building & testing till happy.
 + Create a new [dlw](https://github.com/WhisperingChaos/DockerLocalWorkbench) git tag:
-  + Determine ```dlw``` version.
-  + Determine ```docker``` version.
+  + Determine ```dlw version```.
+  + Determine ```docker version```.
   + Generate git tag name: ```dlw version```_```docker version```
   + ```git tag -a <dlw version>_<docker version> -m "dlw: <dlw version>, Docker Daemon: <docker version>"```
   + Push branchs to github:
