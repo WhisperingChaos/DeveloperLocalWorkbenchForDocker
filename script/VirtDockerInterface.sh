@@ -629,7 +629,7 @@ function DockerTargetImageGUIDGenerate (){
     CompNameMapGen "$optsArgListNm" "$optsArgMapNm" 'compMap'
   fi
   # Optionally include a truncation operation in the stream.
-  # Image GUID list contains only long image ids. 
+  # Image GUID list contains only long image ids.
   local truncateFun='PipeForwarder'
   if [ "$truncGUID" == 'true' ]; then 
     truncateFun='ImageGUIDtruncate'
@@ -818,8 +818,9 @@ function DockerTargetContainerGUIDGenerate (){
   local -r truncGUID="$5"
   local -r restrictToCompList="$6"
   local -r stateFilterApply="$7"
-  local -A imageGUIDreposTag  
-  ImageGUIDReproTagMapCreate "$truncGUID" 'imageGUIDreposTag'
+  local -A imageGUIDreposTag
+  #  Image GUID when it appears in ps command is always truncated
+  ImageGUIDReproTagMapCreate 'true' 'imageGUIDreposTag'
   function DependencyOrderPreambleRemove () {
     local packet
     while read packet; do
@@ -855,7 +856,7 @@ function DockerTargetContainerGUIDGenerate (){
     (( ++packetOrder ))
     PacketAddFromStrings "$packet"  'DependencyOrder' "$packetOrder" 'packet'
     imageGUIDfilterMap["$imageGUID"]="$packet"
-  done < <( DockerTargetImageGUIDGenerate "$optsArgListNm" "$optsArgMapNm" "$commandNm" "$componentPrereq" "$truncGUID" "$restrictToCompList" )
+  done < <( DockerTargetImageGUIDGenerate "$optsArgListNm" "$optsArgMapNm" "$commandNm" "$componentPrereq" 'true' "$restrictToCompList" )
 
   function ExtractToFirstWhiteSpace () {
     eval $1=\"\$2\"
@@ -882,12 +883,12 @@ function DockerTargetContainerGUIDGenerate (){
       continue
     fi
     # extract Image GUID/Repository:Tag
-    local possibleGUID="${psReport:$imageGUIDcolOff}"
-    ExtractToFirstWhiteSpace 'possibleGUID' $possibleGUID
+    local possibleImageGUID="${psReport:$imageGUIDcolOff}"
+    ExtractToFirstWhiteSpace 'possibleImageGUID' $possibleImageGUID
     # remove blank lines - shouldn't be there.
-    if [ -z "$possibleGUID" ]; then continue; fi
+    if [ -z "$possibleImageGUID" ]; then continue; fi
     # might be heading or unwanted image GUID
-    packet="${imageGUIDfilterMap["$possibleGUID"]}"
+    packet="${imageGUIDfilterMap["$possibleImageGUID"]}"
     if [ -z "$packet" ]; then continue; fi
     # does container pass status filter
     $stateFilterApply && if ! VirtContainerStateFilterApply "${psReport:$containerStatusColOff}"; then continue; fi
@@ -896,7 +897,7 @@ function DockerTargetContainerGUIDGenerate (){
     unset imageGUIDmap
     local -A imageGUIDmap
     PacketConvertToAssociativeMap "$packet" 'imageGUIDmap'
-    imageGUIDmap['ImageGUID']="$possibleGUID"
+    imageGUIDmap['ImageGUID']="$possibleImageGUID"
     PacketCreateFromAssociativeMap 'imageGUIDmap' 'packet'
     PacketAddFromStrings "$packet" 'ContainerGUID' "${psReport:$containerGUIDColOff:$GUIDlen}" 'packet'
     local dependencyOrder="${imageGUIDmap['DependencyOrder']}"

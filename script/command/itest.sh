@@ -44,7 +44,7 @@ function VirtCmmdConfigSetDefault (){
 ###############################################################################
 ##
 ##  Purpose:
-##    Define both the options and arguments accepted by the 'help' command.
+##    Define both the options and arguments accepted by the 'itest' command. 
 ##
 ###############################################################################
 function VirtCmmdOptionsArgsDef (){
@@ -1584,7 +1584,7 @@ function TestEnvironmentAssert () {
   if ! TestFileScanPass;  then errorInd='true'; fi
   if ! SampleProjectPass; then errorInd='true'; fi
   if tmux_context_set "tmux has-session" >/dev/null 2>/dev/null; then
-    ScriptError "tmux sessions exits which you may want to preserve."
+    ScriptError "tmux sessions exists which you may want to preserve."
     errorInd='true'
   fi
   if ! ImageNameLocalOverlapPass $TEST_COMPONENT_LIST; then errorInd='true'; fi
@@ -2254,6 +2254,11 @@ function dlw_Test_15 () {
     ReportLineCntAssert $LINENO 3
     ReportScanTokenIncludeAssert $LINENO 'COMPONENT' 'PID' 'PPID' 'dlw_sshserver'
     ReportScanTokenExcludeAssert $LINENO 'CONTAINER ID' 'dlw_parent' 'dlw_apache'
+    ReportRun $LINENO 'dlw.sh top --dlwno-prereq false dlw_apache'
+    ReportLineCntAssert $LINENO 5
+    ReportScanTokenIncludeAssert $LINENO 'COMPONENT' 'CONTAINER ID' 'PID' 'PPID' 'dlw_apache' 'dlw_mysql'
+    ReportScanTokenExcludeAssert $LINENO  'dlw_parent' 'dlw_sshserver' 
+
     if ! dlw.sh kill all >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "Kill of: 'all' failed."; fi
     ReportRun $LINENO 'dlw.sh ps'
     ReportLineCntAssert $LINENO 1
@@ -2296,9 +2301,22 @@ function dlw_Test_16 () {
     ReportLineCntAssert $LINENO 4
     ReportScanTokenIncludeAssert $LINENO 'COMPONENT' 'CONTAINER ID' 'PORT' 'MAP' '3030' 'dlw_apache' 'dlw_mysql' 'dlw_sshserver'
     ReportScanTokenExcludeAssert $LINENO 'dlw_parent'
-    if ! dlw.sh rm -f --dlwcomp-ver=all all >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "Remove all containers failed."; fi
-    ReportRun $LINENO 'dlw.sh ps'
-    ReportLineCntAssert $LINENO 1
+    ReportRun $LINENO 'dlw.sh port dlw_apache'
+    ReportLineCntAssert $LINENO 2
+    ReportScanTokenIncludeAssert $LINENO 'COMPONENT' 'CONTAINER ID' 'PORT' 'MAP' '3030' 'dlw_apache' 
+    ReportScanTokenExcludeAssert $LINENO 'dlw_parent' 'dlw_mysql' 'dlw_sshserver'
+    ReportRun $LINENO 'dlw.sh port --dlwno-prereq=false dlw_apache'
+    ReportLineCntAssert $LINENO 3
+    ReportScanTokenIncludeAssert $LINENO 'COMPONENT' 'CONTAINER ID' 'PORT' 'MAP' '3030' 'dlw_mysql' 'dlw_apache' 
+    ReportScanTokenExcludeAssert $LINENO 'dlw_parent' 'dlw_sshserver'
+    ReportRun $LINENO 'dlw.sh port  --dlwno-hdr --dlwno-prereq=false dlw_apache'
+    ReportLineCntAssert $LINENO 2
+    ReportScanTokenIncludeAssert $LINENO 'dlw_mysql' 'dlw_apache' 
+    ReportScanTokenExcludeAssert $LINENO 'COMPONENT' 'CONTAINER ID' 'dlw_parent' 'dlw_sshserver'
+    ReportRun $LINENO 'dlw.sh port  --dlwcol=none --dlwno-hdr --dlwno-prereq=false dlw_apache'
+    ReportLineCntAssert $LINENO 2
+    ReportScanTokenIncludeAssert $LINENO '3030' 
+    ReportScanTokenExcludeAssert $LINENO 'dlw_parent' 'dlw_sshserver' 'dlw_mysql' 'dlw_apache'
   }
 }
 ###############################################################################
@@ -2426,6 +2444,36 @@ function dlw_Test_19 () {
     if ! dlw.sh rm -f --dlwcomp-ver=cur all >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "Remove all containers failed."; fi
     ReportRun $LINENO 'dlw.sh ps'
     ReportLineCntAssert $LINENO 1
+  }
+}
+###############################################################################
+#
+#  Depends on:
+#    Initialized 'sample' project with 'dlw_apache', 'dlw_mysql' 
+#    and 'dlw_parent' Components.
+#
+###############################################################################
+function dlw_Test_20 () {
+  function dlw_Test_20_Desc () {
+    echo "Create current versions of: 'dlw_sshserver', 'dlw_mysql', and 'dlw_apache'. Verify behavior of: --no-trunc, -q, --dlwcol=none, and --dlwparent."
+  }
+  function dlw_Test_20_Run () {
+    ImageContainerRemove $LINENO '--dlwcomp-ver=all -- all'
+    ReportRun $LINENO 'dlw.sh ps'
+    ReportLineCntAssert $LINENO 1
+    ReportRun $LINENO 'dlw.sh images'
+    ReportLineCntAssert $LINENO 1
+    if ! dlw.sh build >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "dlw build of Component: 'all' failed."; fi
+    ReportRun $LINENO 'dlw.sh images --dlwcomp-ver=all'
+    ReportLineCntAssert $LINENO 5
+    ReportScanTokenIncludeAssert $LINENO 'REPOSITORY' 'TAG' 'dlw_sshserver' 'dlw_apache' 'dlw_mysql' 'dlw_parent'
+    ReportRun $LINENO 'dlw.sh images -q --no-trunc --dlwcol=none'
+    ReportLineCntAssert $LINENO 4
+    ReportScanTokenExcludeAssert $LINENO 'REPOSITORY' 'TAG' 'COMPONENT' 'DESCRIPTION'
+    ReportRun $LINENO 'dlw.sh images --dlwparent -- dlw_apache'
+    ReportLineCntAssert $LINENO 3
+    ReportScanTokenIncludeAssert $LINENO 'REPOSITORY' 'TAG' 'dlw_parent' 'dlw_apache'
+    ReportScanTokenExcludeAssert $LINENO  'dlw_sshserver' 'dlw_mysql'
   }
 }
 FunctionOverrideCommandGet

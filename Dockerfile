@@ -42,10 +42,10 @@ RUN /usr/bin/scriptInstall/installPackages.sh 'lxc-docker' 'make' 'tmux' \
     # make install helper scripts invisible from this layer forward
     && rm -f -r "/usr/bin/scriptInstall"
 # Create an entry point to automatically login dlw user.
-# Login properly establishes /dev permissions and 
-# sets correct home directory. 
-# Also, must use root level priviledges when establishing login proces
-# via the ENTRYPOINT command. 'login' below will fail if the container
+# 'dlwLogin.sh' configures dlw user permissions, properly establishes
+# device (/dev) permissions, and sets home directory as shell's current directory. 
+# Also, must use root level priviledges when establishing login process
+# via the ENTRYPOINT command. 'dlwlogin.sh' below will fail if the container
 # is started by a non-root account.
 ENTRYPOINT dlwLogin.sh
 # Install the dlw scripts into user level bin.  Located here, at the end,
