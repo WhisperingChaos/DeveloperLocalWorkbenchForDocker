@@ -629,7 +629,7 @@ function DockerTargetImageGUIDGenerate (){
     CompNameMapGen "$optsArgListNm" "$optsArgMapNm" 'compMap'
   fi
   # Optionally include a truncation operation in the stream.
-  # Image GUID list contains only long image ids. 
+  # Image GUID list contains only long image ids.
   local truncateFun='PipeForwarder'
   if [ "$truncGUID" == 'true' ]; then 
     truncateFun='ImageGUIDtruncate'
@@ -818,8 +818,9 @@ function DockerTargetContainerGUIDGenerate (){
   local -r truncGUID="$5"
   local -r restrictToCompList="$6"
   local -r stateFilterApply="$7"
-  local -A imageGUIDreposTag  
-  ImageGUIDReproTagMapCreate "$truncGUID" 'imageGUIDreposTag'
+  local -A imageGUIDreposTag
+  #  Image GUID when it appears in ps command is always truncated
+  ImageGUIDReproTagMapCreate 'true' 'imageGUIDreposTag'
   function DependencyOrderPreambleRemove () {
     local packet
     while read packet; do
@@ -846,16 +847,24 @@ function DockerTargetContainerGUIDGenerate (){
       echo "$packet"
       continue;
     fi
+    #TODO: Problem introduced in Docker 1.6 that adds docker tag to GUID.
+    #  remove once docker applies patch: #12918.  Remove all code below
+    #  that references imageGUIDhex
+    local imageGUIDhex=''
     # docker prefers displaying Repository:Tag instead of Image GUID
     local imageReposTagName="${imageGUIDreposTag["$imageGUID"]}"
     if [ -n "$imageReposTagName" ]; then
       # treat Repository:Tag as Image GUID
+      imageGUIDhex="$imageGUID"
       imageGUID="$imageReposTagName"
     fi
     (( ++packetOrder ))
     PacketAddFromStrings "$packet"  'DependencyOrder' "$packetOrder" 'packet'
     imageGUIDfilterMap["$imageGUID"]="$packet"
-  done < <( DockerTargetImageGUIDGenerate "$optsArgListNm" "$optsArgMapNm" "$commandNm" "$componentPrereq" "$truncGUID" "$restrictToCompList" )
+    if [ -n "$imageGUIDhex" ]; then
+      imageGUIDfilterMap["$imageGUIDhex"]="$packet"
+    fi
+  done < <( DockerTargetImageGUIDGenerate "$optsArgListNm" "$optsArgMapNm" "$commandNm" "$componentPrereq" 'true' "$restrictToCompList" )
 
   function ExtractToFirstWhiteSpace () {
     eval $1=\"\$2\"
@@ -882,13 +891,20 @@ function DockerTargetContainerGUIDGenerate (){
       continue
     fi
     # extract Image GUID/Repository:Tag
-    local possibleGUID="${psReport:$imageGUIDcolOff}"
-    ExtractToFirstWhiteSpace 'possibleGUID' $possibleGUID
+    local possibleImageGUID="${psReport:$imageGUIDcolOff}"
+    ExtractToFirstWhiteSpace 'possibleImageGUID' $possibleImageGUID
     # remove blank lines - shouldn't be there.
-    if [ -z "$possibleGUID" ]; then continue; fi
+    if [ -z "$possibleImageGUID" ]; then continue; fi
     # might be heading or unwanted image GUID
-    packet="${imageGUIDfilterMap["$possibleGUID"]}"
-    if [ -z "$packet" ]; then continue; fi
+    packet="${imageGUIDfilterMap["$possibleImageGUID"]}"
+    if [ -z "$packet" ]; then 
+      #TODO: Problem introduced in Docker 1.6 that adds docker tag to GUID.
+      #  remove once docker applies patch: #12918
+      # Image GUID in ps command is always truncated even when --no-trunc
+      possibleImageGUID="${possibleImageGUID:0:12}"
+      packet="${imageGUIDfilterMap["$possibleImageGUID"]}"
+      if [ -z "$packet" ]; then continue; fi
+    fi
     # does container pass status filter
     $stateFilterApply && if ! VirtContainerStateFilterApply "${psReport:$containerStatusColOff}"; then continue; fi
     # add the container GUID to the packet then forward it.
@@ -896,7 +912,7 @@ function DockerTargetContainerGUIDGenerate (){
     unset imageGUIDmap
     local -A imageGUIDmap
     PacketConvertToAssociativeMap "$packet" 'imageGUIDmap'
-    imageGUIDmap['ImageGUID']="$possibleGUID"
+    imageGUIDmap['ImageGUID']="$possibleImageGUID"
     PacketCreateFromAssociativeMap 'imageGUIDmap' 'packet'
     PacketAddFromStrings "$packet" 'ContainerGUID' "${psReport:$containerGUIDColOff:$GUIDlen}" 'packet'
     local dependencyOrder="${imageGUIDmap['DependencyOrder']}"
