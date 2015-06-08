@@ -40,6 +40,7 @@ function VirtDockerCmmdOptionsArgsDef () {
   ComponentVersionArgument 'cur'
   ColumnHeadingRemove
   echo '--dlwcol single "ComponentName/COMPONENT/15,ContainerGUID/CONTAINER ID/12,=EXIST=none" "ColumnSelectExcludeVerify \<--dlwcol\>" required ""'
+  echo '--dlwno-prereq single order=EXIST=true "ComponentNoPrereqVerify \<--dlwno-prereq\>" required ""'
   echo '--dlwign-state single false=EXIST=true "OptionsArgsBooleanVerify \<--dlwign-state\>" required ""'
 return 0
 }
@@ -65,6 +66,7 @@ COMMAND_HELP_Purpose
   HelpCommandTarget
   HelpOptionHeading
   HelpComponentVersion 'cur'
+  HelpComponentNoPrereq "$commandName" 'order'
   HelpIgnoreStateDocker 'false'
   HelpNoExecuteDocker 'false'
   HelpShowDocker 'false'
@@ -75,19 +77,45 @@ COMMAND_HELP_Purpose
 }
 
 ##############################################################################
-function VirtDockerTargetGenerate () {
-  local -r optsArgListNm="$1"
-  local -r optsArgMapNm="$2"
-  local -r commandNm="$3"
-  local -r computePrereqs="$4"
-  local -r truncGUID="$5"
-  # Determine if state filtering should be applied.
-  local stateFilterApply
-  AssociativeMapAssignIndirect "$optsArgMapNm" '--dlwign-state' 'stateFilterApply'
-  if $stateFilterApply; then stateFilterApply='false'; else stateFilterApply='true'; fi
-  DockerTargetContainerGUIDGenerate  "$optsArgListNm" "$optsArgMapNm" "$commandNm" "$computePrereqs" "$truncGUID" 'false' "$stateFilterApply"
-}
+#function VirtDockerTargetGenerate () {
+#  local -r optsArgListNm="$1"
+#  local -r optsArgMapNm="$2"
+#  local -r commandNm="$3"
+#  local -r computePrereqs="$4"
+#  local -r truncGUID="$5"
+#  # Determine if state filtering should be applied.
+#  local stateFilterApply
+#  AssociativeMapAssignIndirect "$optsArgMapNm" '--dlwign-state' 'stateFilterApply'
+#  if $stateFilterApply; then stateFilterApply='false'; else stateFilterApply='true'; fi
+#  DockerTargetContainerGUIDGenerate  "$optsArgListNm" "$optsArgMapNm" "$commandNm" "$computePrereqs" "$truncGUID" 'false' "$stateFilterApply"
+#}
 ##############################################################################
+
+###############################################################################
+##
+##  Purpose:
+##    Map Component names and  version scope to their associated 
+##    Container GUID.
+##
+###############################################################################
+#function VirtDockerTargetGenerate (){
+#  local -r optsArgListNm="$1"
+#  local -r optsArgMapNm="$2"
+#  local -r commandNm="$3"
+#  # Interpert ordering option to sequence Docker container commands so the
+#  # command is more likely to succeed.
+#  local dependGraph
+#  local excludePrereq
+#  NoPrereqSetting "`AssociativeMapAssignIndirect "$optsArgMapNm" '--dlwno-prereq'`" #"`VirtDockerContainerOrderingGet`" 'dependGraph' 'excludePrereq'
+#  # Determine if state filtering should be applied.
+#  local stateFilterApply
+#  AssociativeMapAssignIndirect "$optsArgMapNm" '--dlwign-state' 'stateFilterApply'
+#  if $stateFilterApply; then stateFilterApply='false'; else stateFilterApply='true'; fi 
+#  if ! DockerTargetContainerGUIDGenerate "$1" "$2" "$3" "$dependGraph" 'true' "$excludePrereq" #"$stateFilterApply"; then
+#    ScriptUnwind $LINENO "Failure while generating Container GUID targets"
+#  fi
+#}
+
 function VirtContainerStateFilterApply () {
   local -r dockerStatus="$1"
   if [ "${dockerStatus:0:2}" == 'Up' ]; then
@@ -102,15 +130,16 @@ function VirtContainerStateFilterApply () {
 ##    options followed by the container GUID.
 ##
 ###############################################################################
-function VirtDockerCmmdAssembleTemplate () {
-  echo '$PACKET_CONTAINER_GUID $DOCKER_CMMDLINE_OPTION' 
-  return 0
-}
+#function VirtDockerCmmdAssembleTemplate () {
+#  echo '$PACKET_CONTAINER_GUID $DOCKER_CMMDLINE_OPTION' 
+#  echo '$DOCKER_CMMDLINE_OPTION $PACKET_CONTAINER_GUID' 
+#  return 0
+#}
 ###############################################################################
-VirtDockerCmmdAssembleTemplateResolvePacketField () {
-  echo 'PACKET_CONTAINER_GUID ContainerGUID'
-  return 0
-}
+#VirtDockerCmmdAssembleTemplateResolvePacketField () {
+#  echo 'PACKET_CONTAINER_GUID ContainerGUID'
+#  return 0
+#}
 ###############################################################################
 function VirtDockerCmmdExecutePacketForward () {
   echo 'true'
