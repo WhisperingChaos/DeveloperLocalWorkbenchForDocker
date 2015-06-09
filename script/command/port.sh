@@ -6,6 +6,7 @@ source "ComponentListVerifyInclude.sh";
 source "ArgumentsDockerVerifyInclude.sh";
 source "VirtCmmdInterface.sh";
 source "VirtDockerInterface.sh";
+source "VirtDockerContainerInterface.sh";
 source "VirtDockerReportingInterface.sh";
 source "VirtDockerReportingCmmdMultiInterface.sh";
 source "PacketInclude.sh";
@@ -19,6 +20,13 @@ source "PacketInclude.sh";
 ##############################################################################
 function VirtDockerReportingCommandNameGet () {
   echo 'port'
+}
+function VirtDockerContainerCommandNameGet () {
+  VirtDockerReportingCommandNameGet
+}
+function VirtDockerContainerOrderingGet () {
+  # order of prerequsites as they are, not in reverse
+  echo 'true'
 }
 ###############################################################################
 function VirtDockerCmmdExecute () {
