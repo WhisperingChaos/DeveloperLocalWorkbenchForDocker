@@ -151,7 +151,7 @@ return 0
 function ContainerCreateAssert () {
   local ixFile
   for ((ixFile=$4; $ixFile < ($3+$4); ixFile++ )); do
-    if ! dlw.sh run --cidfile="${TEST_FILE_PREFIX}$ixFile" > /dev/null 2>/dev/null; then
+    if ! dlw.sh run --cidfile="${TEST_FILE_PREFIX}$ixFile" $2 > /dev/null 2>/dev/null; then
       ScriptUnwind "$1" "Failed run container with following dlw/Docker options: '$2'"
     fi
   done
