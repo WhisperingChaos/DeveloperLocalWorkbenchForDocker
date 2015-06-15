@@ -79,10 +79,10 @@ function VirtDockerReportingGUIDattribNameGet () {
 ##    None
 ## 
 ##  Outputs:
-##    SYSOUT - Augmented packet, appropiate target GUID, in dependency graph order.
+##    SYSOUT - report column name of join GUID.
 ##
 ###############################################################################
-function VirtDockerReportingJoinGUIDColmPosGet () {
+function VirtDockerReportingJoinGUIDcolmNameGet () {
   ScriptUnwind $LINENO "Please override: $FUNCNAME".
 }
 ###############################################################################
@@ -148,9 +148,9 @@ function VirtDockerCmmdExecutePacketForward () {
 ##         associated to that label.
 ##    $3 - dlw command to execute. Maps 1 to 1 onto with Docker command line.
 ##    SYSIN - Output from the Execute command.
-##    VirtDockerReportingJoinGUIDColmPosGet - Virtual callback function 
-##      providing the Image GUID/Name column position as displayed 
-##      by the docker reporting command. 
+##    VirtDockerReportingJoinGUIDcolmNameGet - Virtual callback function 
+##      providing the GUID column name as displayed by the docker reporting
+##      command. 
 ## 
 ##  Inputs:
 ##    SYSOUT - A filtered docker report displaying only the specified Components.
@@ -161,7 +161,7 @@ function VirtDockerCmmdProcessOutput () {
   local -r optsArgListNm="$1"
   local -r optsArgMapNm="$2"
   local -r commandNm="$3"
-  local -r joinImageColmPos="`VirtDockerReportingJoinGUIDColmPosGet`"
+  local -r joinImageColmName="`VirtDockerReportingJoinGUIDcolmNameGet`"
   local outputHeadingNot
   AssociativeMapAssignIndirect "$optsArgMapNm" '--dlwno-hdr' 'outputHeadingNot'
   local -A colmIncludeMap
@@ -173,9 +173,13 @@ function VirtDockerCmmdProcessOutput () {
     unset colmIncludeMap
     local -A colmIncludeMap
   fi
+  function ExtractToFirstWhiteSpace () {
+    eval $1=\"\$2\"
+  }
   local -r GUIDattribName=`VirtDockerReportingGUIDattribNameGet`
   local -A GUIDvalueFilterMap
   local -A GUIDvalueMap
+  local joinImageColOffStart=0
   local headingProcessed='false'
   local packet
   while read packet; do
@@ -202,9 +206,18 @@ function VirtDockerCmmdProcessOutput () {
       headingProcessed='true'
       local dockerHdrInd='false'
       if DockerHeadingSpecified "$packet"; then dockerHdrInd='true'; fi 
+      if $dockerHdrInd; then
+        # compute the offset to the GUID join column.
+        ReportColumnOffset 'ps or images' "$packet" "$joinImageColmName" 'joinImageColOffStart'
+      else 
+        # currently, the absence of Docker headings is indicative of the -q option.
+        # in this situation, the GUID is always the first column.
+        joinImageColOffStart=0
+      fi
       if ! $outputHeadingNot; then
         #  user wants dlw column headings, but are there Docker headings
         if $dockerHdrInd; then
+
           if [ "${#colmIncludeMap[@]}" -gt 0 ]; then
             # packet contained Docker report heading :: prefix with extended attributes column headings.
             echo "`ExtendedHeadingsGenerate 'colmIncludeMap'` $packet"
@@ -224,13 +237,9 @@ function VirtDockerCmmdProcessOutput () {
     fi
     # not a heading nor a dlw packet, most likely a reporting detail row.
     # see if GUID matches join column in output which is most likely a GUID.
-    local possibleGUID="`echo "$packet" | awk  "{ print $joinImageColmPos }"`"
-    if [ -z "$possibleGUID" ]; then
-      # see if GUID matches first column in output, use of -q docker option
-      possibleGUID="`echo "$packet" | awk  '{ print $1 }'`"
-      # if empty packet, skip without forwarding packet
-      if [ -z "$possibleGUID" ]; then continue; fi
-    fi
+    local possibleGUID
+    ExtractToFirstWhiteSpace 'possibleGUID' ${packet:$joinImageColOffStart}
+    if [ -z "$possibleGUID" ]; then continue; fi
     # possible GUID has a value :: following dereferencing works
     local possibleComp="${GUIDvalueFilterMap["$possibleGUID"]}"
     if [ -n "$possibleComp" ]; then

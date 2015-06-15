@@ -885,9 +885,9 @@ function DockerTargetContainerGUIDGenerate (){
     if ! $hdrPsProcessInd; then
       hdrPsProcessInd='true'
       # determine start location of desired column 
-      DockerContainerColumnLoc "$psReport" 'CONTAINER ID' 'containerGUIDColOff'
-      DockerContainerColumnLoc "$psReport" 'IMAGE' 'imageGUIDcolOff'
-      DockerContainerColumnLoc "$psReport" 'STATUS' 'containerStatusColOff'
+      ReportColumnOffset 'ps' "$psReport" 'CONTAINER ID' 'containerGUIDColOff'
+      ReportColumnOffset 'ps' "$psReport" 'IMAGE' 'imageGUIDcolOff'
+      ReportColumnOffset 'ps' "$psReport" 'STATUS' 'containerStatusColOff'
       continue
     fi
     # extract Image GUID/Repository:Tag
@@ -995,28 +995,30 @@ function ImageGUIDReproTagMapCreate () {
 ##      scope of this routine or its decendents.
 ##
 ##  Input:
-##    $1 - Header for Docker command.
-##    $2 - Column name to locate in the Docker header.
-##    $3 - Variable name to contain the column offset.
+##    $1 - Header type.
+##    $2 - Header for Docker command.
+##    $3 - Column name to locate in the Docker header.
+##    $4 - Variable name to contain the column offset.
 ##
 ##  Output:
-##    $3 - Image GUID column offset.
+##    $4 - Column offset.
 ## 
 ##  Return Code:
 ##    When Failure: 
 ##      SYSERR - message problem & unwind script.
 ##
 ###############################################################################
-function DockerContainerColumnLoc () {
-  local psHdr="$1"
-  local -r -i psHdrLen="${#1}"
-  local -r columnName="$2"
-  local -r columnNameNm="$3"
-  psHdr="${psHdr%%$columnName*}"
-  if ! [ "${#psHdr}" -lt "$psHdrLen" ]; then 
-    ScriptUnwind $LINENO "Docker ps header doesn't match what's expected.  Missing column: '$columnName'.  See: '$1'"
+function ReportColumnOffset () {
+  local -r rptHdrType="$1"
+  local rptHdr="$2"
+  local -r -i rptHdrLen="${#rptHdr}"
+  local -r columnName="$3"
+  local -r columnNameNm="$4"
+  rptHdr="${rptHdr%%$columnName*}"
+  if ! [ "${#rptHdr}" -lt "$rptHdrLen" ]; then 
+    ScriptUnwind $LINENO "Docker '$rptHdrType' header doesn't match what's expected.  Missing column: '$columnName'.  See: '$rptHdr'"
   fi
-  eval $columnNameNm=\"\$\{\#psHdr\}\"
+  eval $columnNameNm=\"\$\{\#rptHdr\}\"
   return 0
 }
 ###############################################################################

@@ -30,8 +30,8 @@ function VirtDockerReportingTargetGenerate () {
   DockerTargetContainerGUIDGenerate  "$optsArgListNm" "$optsArgMapNm" "$commandNm" "$computePrereqs" "$truncGUID" 'false' 'false'
 }
 ##############################################################################
-function VirtDockerReportingJoinGUIDColmPosGet () {
-  echo '$1'
+function VirtDockerReportingJoinGUIDcolmNameGet () {
+  echo 'CONTAINER ID'
   return 0
 }
 ##############################################################################
