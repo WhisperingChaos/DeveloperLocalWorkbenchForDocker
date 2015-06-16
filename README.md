@@ -26,13 +26,13 @@ Although Docker Inc. provides [Compose](https://docs.docker.com/compose/), a Tru
 + Avoid implementing a private registry and Docker&reg; Trusted Build cluster, especially for small projects.
 + Potentially improve the responsiveness of the development cycle, as all Docker&reg; commands are executed by the local Docker&reg; Daemon, especially, in situations when the public Docker&reg; Trusted Build cluster performance slows due to congestion of build requests or network connectivity issues.
 + Verify the construction of statically dependent images and execution of cooperative containers before committing them to a public index/registry.
-+ Maintain a level of "free privacy", as Docker&reg; Trusted Builds as currently multiple private repositories incur a monthly fee.
++ Maintain a level of "free privacy", as multiple private repositories hosted by Docker&reg; Trusted Build clusters currently incur a monthly fee.
 
 ### Features
 
 + Use simple commands like ```dlw build```,```dlw run```, and ```dlw images``` to manage and report on a service composed from multiple cooperating containers.
 + Launch and concurrently attach to the terminal interfaces of multiple containers using the terminal multiplex feature of [tmux](http://tmux.sourceforge.net/).
-+ Combined tmux, [linux watch](http://en.wikipedia.org/wiki/Watch_%28Unix%29) and reporting commands like 'top' and 'ps' to actively monitor the status of multiple containers.
++ Combined tmux, [linux watch](http://en.wikipedia.org/wiki/Watch_%28Unix%29) and reporting commands, like ```dlw top```, to actively monitor the status of multiple containers.
 + Generate Docker&reg; CLI stream including command line arguments stored in a file, using a rudimentary command template.
 + Enhance report generation by associating custom properties to a Docker&reg; image. 
 + Track previous versions of images and with single command remove all prior versions and their associated containers, ordering their removal to avoid "Conflict" errors issued by the Docker&reg; Daemon.
@@ -93,7 +93,7 @@ Other methods to download ```dlwRun.sh``` exist [see stackoverflow.com](http://s
 ##### Create Host Project Directory <a id="InstallingCreateHostProjectDirectory"></a>
 Most likely, ```dlw``` <a href="#ConceptsProject">Projects</a>, which consist of source artifacts to construct <a href="#ConceptsComponent">Component(s)</a>, will reside in the host's more "permanent" file system.  Although Projects can be encapsulated within a container running the ```dlw``` or stored in an associated [Docker&reg; Data Volume](http://docs.docker.com/userguide/dockervolumes/), at this time, it just feels "safer" for Projects to exist within a "traditional" file system, as opposed to a cellular one. Given this guidance, create a subdirectory to group one or more Projects within it.  Mounting this directory into the ```dlw``` container will omit the group directory name from the running ```dlw``` container, however, its contents will be accessible.
 
-Accessing host directories from a container's environment may elicit file permission errors due to differences between a container process' Linux [DAC](https://en.wikipedia.org/wiki/Discretionary_access_control) and the host system's own file security scheme.  The ```dlw``` image supports typical DAC security as explained [here](http://www.linuxsecurity.com/docs/SecurityAdminGuide/SecurityAdminGuide-8.html) supplying only a user's owner, primary group, and secondary group memberships to the host OS when determining access to host mounted files.  Therefore, when running a container derived from the ```dlw``` image, the UID, primary GID, and secondary GIDs of the ```dlw``` container account (also called ```dlw```) should mimic the values associated to the current host account used as your development account.  ```dlwRun.sh``` default behavior aligns the container account's UID and GIDs to assume the values specified by the host account that initiated the ```dlwRun.sh``` script.  ```dlwRun.sh``` additionally supports directly providing UID and GID values.  Please view its options via ```dlwRun.sh -h```.  You may wish to visit the Docker&reg: Forum thread [Hot to mount local directories as a non-root user in a container](https://forums.docker.com/t/hot-to-mount-local-directories-as-a-non-root-user-in-a-container/1789/2) for a more in-depth explanation of container process security.
+Accessing host directories from a container's environment may elicit file permission errors due to differences between a container process' Linux [DAC](https://en.wikipedia.org/wiki/Discretionary_access_control) and the host system's own file security scheme.  The ```dlw``` image supports typical DAC security as explained [here](http://www.linuxsecurity.com/docs/SecurityAdminGuide/SecurityAdminGuide-8.html) supplying only a user's owner, primary group, and secondary group memberships to the host OS when determining access to host mounted files.  Therefore, when running a container derived from the ```dlw``` image, the UID, primary GID, and secondary GIDs of the ```dlw``` container account (also called ```dlw```) should mimic the values associated to the current host account used as your development account.  ```dlwRun.sh``` default behavior aligns the container account's UID and GIDs to assume the values specified by the host account that initiated the ```dlwRun.sh``` script.  ```dlwRun.sh``` additionally supports directly providing UID and GID values.  Please view its options via ```dlwRun.sh -h```.  You may wish to visit the Docker&reg; Forum thread [Hot to mount local directories as a non-root user in a container](https://forums.docker.com/t/hot-to-mount-local-directories-as-a-non-root-user-in-a-container/1789/2) for a more in-depth explanation of container process security.
 
 #### Installing: Sample Project & Testing
 
@@ -102,7 +102,7 @@ Accessing host directories from a container's environment may elicit file permis
 + ```cd ~/project/sample``` Establish 'sample' as target Project directory for ```dlw``` commands.
 + ```dlw itest``` Installs a Project called 'sample' and performs integration tests.
 
-Once testing successfully completes, a Project called 'sample' will exist in the <a href="#InstallingCreateHostProjectDirectory">host directory</a> specified by the ```dlwRun.sh``` script.  The Project provides examples demonstrating various aspects of the ```dlw```.  For example, specifying a Component's command line arguments for a particular command like build or run to avoid having to constantly repeat static argument values on the ```dlw``` command line (see: "../sample/component/dlw_apache/context/run")
+Once testing successfully completes, a Project called 'sample' will exist in the <a href="#InstallingCreateHostProjectDirectory">host directory</a> specified by the ```dlwRun.sh``` script.  The Project provides examples demonstrating various aspects of the ```dlw```.  For example, specifying a Component's command line arguments for a particular command like ```dlw build``` or ```dlw run``` to avoid having to constantly repeat static argument values on the ```dlw``` command line (see: "../sample/component/dlw_apache/context/run")
 
 + Use 'sample' as a sandbox to explore various ```dlw``` options and their effects before applying these options to your own Project's Components.
 + The contents of the 'sample' project and local [Docker&reg; Registry](https://docs.docker.com/registry/) can be reverted at any time by running ```dlw itest```.
@@ -159,15 +159,15 @@ Create new containers for all Components then run and attach to their ttys.
 + Create containers for all Components and run them deferring terminal attachment.
   + Ex: ```dlw run -d``` Constructs a container from the ycomponent image and runs it.  Should output the Docker&reg; GUID for the newly constructed and running container.
 + Attach a Project's active container terminal instances to either a new or an existing tmux session.
-  + Ex: ```dlw tmux``` Creates a tmux session named 'xproject' with a single active tty session for container derived from 'ycomponent'.
+  + Ex: ```dlw tmux``` Creates a tmux session named 'xproject'. It consists of two terminal sessions (tmux windows): one running bash and the second connected to the executing container derived from 'ycomponent'.
 + Use [tmux](http://tmux.sourceforge.net/) attach command to connect to tmux session.
   + Ex: ```tmux attach``` Attaches the current tmux session named ```xproject```.
 + Terminate tmux window running container via 'exit' command.
-+ Terminate tmux bash session via 'exit' command.  This should return control to the ```dlw```'s container terminal.
++ Terminate tmux bash window via 'exit' command.  This should return control to the ```dlw```'s container terminal.
 
 ##### Project Tutorial: Remove Images
 
-Removes all Images and derivative Containers associated to a Project from the Local Docker&reg; Registry. However, data maintained in the Project's Component Catalog remains untouched.
+Removes all Images and derivative Containers associated to a Project from the local Docker&reg; Registry. However, data maintained in the Project's Component Catalog remains untouched.
 
 + ```dlw rmi --dlwrm --dlwcomp-ver=all all```
 
@@ -235,7 +235,7 @@ Notes:
 > dlw rm --dlwcomp-ver=allButCur all
 ```
 + **Remove all the containers for current Component Version of dlw_sshserver:**
-  Deletes every container associated to the most recently built Component named "sshserver".  
+  Deletes every container associated to the most recently built Component named "dlw_sshserver".  
   ```
 > dlw rm --dlwcomp-ver=cur dlw_sshserver
 ```
