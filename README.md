@@ -17,49 +17,49 @@
 [Concepts](#concepts)  
 [What's Provided](#whats-provided)  
 [License](#license)  
-
+[Legal Notice](#legal-notice)  
 ### Purpose
 
-To facilitate the development of cooperative multicontainer services by extending core Docker CLI commands to operate on related groups of images/containers managed by the local Docker Daemon.  Facilitation embodies a desire to accelerate the iterative development loop through the efficiency of local file and computing resources, thereby, avoiding the network and service contention delays inherent to remote web interfaces.
+To facilitate the development of cooperative multicontainer services by extending core [Docker&reg;](#legal-notice) CLI commands to operate on related groups of images/containers managed by the local Docker&reg; Daemon.  Facilitation embodies a desire to accelerate the iterative development loop through the efficiency of local file and computing resources, thereby, avoiding the network and service contention delays inherent to remote web interfaces.
 
-Although docker provides [Compose](https://docs.docker.com/compose/), a Trusted Build cluster, and GitHub integration that conceptually provide this functionality, some may adopt this tool to:
-+ Avoid implementing a private registry and Trusted Build cluster, especially for small projects.
-+ Potentially improve the responsiveness of the development cycle, as all Docker commands are executed by the local Docker Daemon, especially, in situations when the public Trusted Build cluster performance slows due to congestion of build requests or network connectivity issues.
-+ Verify the construction of statically dependent images and execution of cooperative containers before committing them to the public index/registry.
-+ Maintain a level of "free privacy", as Trusted Builds currently operate on docker's public index/repository and multiple private repositories incurr a monthly fee.
+Although Docker Inc. provides [Compose](https://docs.docker.com/compose/), a Trusted Build cluster, and GitHub integration that conceptually provide this functionality, some may adopt this tool to:
++ Avoid implementing a private registry and Docker&reg Trusted Build cluster, especially for small projects.
++ Potentially improve the responsiveness of the development cycle, as all Docker&reg; commands are executed by the local Docker&reg; Daemon, especially, in situations when the public Docker&reg; Trusted Build cluster performance slows due to congestion of build requests or network connectivity issues.
++ Verify the construction of statically dependent images and execution of cooperative containers before committing them to a public index/registry.
++ Maintain a level of "free privacy", as Docker&reg; Trusted Builds as currently multiple private repositories incurr a monthly fee.
 
 ### Features
 
 + Use simple commands like ```dlw build```,```dlw run```, and ```dlw images``` to manage and report on a service composed from multiple cooperating containers.
 + Launch and concurrently attach to the terminal interfaces of multiple containers using the terminal multiplex feature of [tmux](http://tmux.sourceforge.net/).
 + Combined tmux, [linux watch](http://en.wikipedia.org/wiki/Watch_%28Unix%29) and reporting commands like 'top' and 'ps' to actively monitor the status of multiple containers.
-+ Generate Docker CLI stream including command line arguments stored in a file, using a rudimentry command template.
-+ Enhance report generation by associating custom properties to a docker image. 
-+ Track previous versions of docker images and with single command remove all prior versions and their associated containers, ordering their removal to avoid "Conflict" errors issued by the Docker Daemon.
++ Generate Docker&reg; CLI stream including command line arguments stored in a file, using a rudimentry command template.
++ Enhance report generation by associating custom properties to a Docker&reg; image. 
++ Track previous versions of images and with single command remove all prior versions and their associated containers, ordering their removal to avoid "Conflict" errors issued by the Docker&reg; Daemon.
 + Enjoy the benefits of delivering and running this tool within a container.   
 + Add custom ```dlw``` extensions and repair code without changing existing script source.
 
 ### How Does It Work
 
-In a nutshell, most ```dlw``` commands [wrap](http://en.wikipedia.org/wiki/Adapter_pattern) a corresponding Docker CLI command.  The wrapper transforms the ```dlw``` <a href=#ConceptsComponent>Component</a> and <a href=#ConceptsProject>Project</a> abstractions to an equivalent list of targeted images/containers.  These image/container lists are then used, along with a rudimentry command template, to generate a Docker CLI stream consisting of one or more individual Docker commands which implement the original ```dlw``` command.  Besides its template generation feature, the ```dlw``` , through a <a href=#ConceptsDependencySpecification>Dependency Specification</a>, applies a directed graph to order the individual Docker commands within the CLI stream to better ensure the successful execution of the entire stream.
+In a nutshell, most ```dlw``` commands [wrap](http://en.wikipedia.org/wiki/Adapter_pattern) a corresponding Docker&reg; CLI command.  The wrapper transforms the ```dlw``` <a href=#ConceptsComponent>Component</a> and <a href=#ConceptsProject>Project</a> abstractions to an equivalent list of targeted images/containers.  These image/container lists are then used, along with a rudimentry command template, to generate a Docker&reg; CLI stream consisting of one or more individual Docker&reg; commands which implement the original ```dlw``` command.  Besides its template generation feature, the ```dlw``` , through a <a href=#ConceptsDependencySpecification>Dependency Specification</a>, applies a directed graph to order the individual Docker&reg; commands within the CLI stream to better ensure the successful execution of the entire stream.
 
-For example, suppose a Project labeled 'sample' contains four Components: dlw_parent, dlw_sshserver, dlw_mysql, and dlw_apache.  Furthermore, the Components: dlw_sshserver, dlw_mysql, and dlw_apache lexically include dlw_parent.  In this situation, executing ```dlw build```will generate the following Docker CLI stream:
+For example, suppose a Project labeled 'sample' contains four Components: dlw_parent, dlw_sshserver, dlw_mysql, and dlw_apache.  Furthermore, the Components: dlw_sshserver, dlw_mysql, and dlw_apache lexically include dlw_parent.  In this situation, executing ```dlw build```will generate the following Docker&reg; CLI stream:
 ```
 docker build  -t "dlw_parent" "/home/dlw/project/sample/component/dlw_parent/context/build"
 docker build  -t "dlw_apache" "/home/dlw/project/sample/component/dlw_apache/context/build"
 docker build  -t "dlw_mysql" "/home/dlw/project/sample/component/dlw_mysql/context/build"
 docker build  -t "dlw_sshserver" "/home/dlw/project/sample/component/dlw_sshserver/context/build"
 ```
-Notice, the placement of the Docker dlw_parent build request before the other build requests, as dlw_parent must exist/be current to correctly build the deriviative Components. 
+Notice, the placement of the ```docker build -t dlw_parent...```  request before the other build requests, as dlw_parent must exist/be current to correctly build the deriviative Components. 
 
 ### Installing
 
 #### Installing: Pulling Image
 
-+ <a href="#InstallingTagVersionPull">Determine ```dlw``` tagged version to pull.</a>  View avaliable [```dlw``` Docker Hub tags](https://registry.hub.docker.com/u/whisperingchaos/dlw/tags/manage/).
++ <a href="#InstallingTagVersionPull">Determine ```dlw``` tagged version to pull.</a>  View avaliable [```dlw``` Docker&reg; Hub tags](https://registry.hub.docker.com/u/whisperingchaos/dlw/tags/manage/).
 + <a href="#InstallingDownloaddlwRunsh">Download ```dlwRun.sh``` and make it runnable.</a>
 + <a href="#InstallingCreateHostProjectDirectory">Create ```dlw``` host Project directory.</a>
-+ Open command terminal accessing appropriate Docker Daemon.
++ Open command terminal accessing appropriate Docker&reg; Daemon.
 + Execute ```dlwRun.sh``` specifying the desired Tag and host Project directory arguments.  
   + Ex: ```> dlwRun.sh -p ~/Desktop/projects 0.5_1.3```
     Once ```dlwRun.sh``` completes, an active ```dlw``` terminal session should appear:
@@ -77,21 +77,21 @@ Notice, the placement of the Docker dlw_parent build request before the other bu
 
     dlw@a1d8390a5a8d:~$ 
 ```
-##### Determine Docker Tag <a id="InstallingTagVersionPull"></a>
-Since the ```dlw``` issues Docker CLI commands, its image contains a copy of Docker.  This embedded Docker instance acts as a client to communicate with the locally running Docker Daemon by forwarding, [via socket](https://docs.docker.com/articles/basics/#bind-docker-to-another-hostport-or-a-unix-socket), Docker CLI commands generated by ```dlw```.  Therefore, the embedded Docker instance version must be compatible with the locally running Docker Daemon.  To facilitate selecting the correct ```dlw``` version, its [image tag](https://docs.docker.com/userguide/dockerimages/#setting-tags-on-an-image) consists of two version numbers.  The first one represents the ```dlw``` version, while the second specifies the Docker Daemon version.  Tag generation appends the first version to an underscore ('_') then appends the second one.  For example, a ```dlw``` version of 0.5 and Docker Daemon version of 1.3 produces an image tag of '0.5_1.3'.
+##### Determine Docker&reg; Tag <a id="InstallingTagVersionPull"></a>
+Since the ```dlw``` issues Docker&reg; CLI commands, its image contains a copy of Docker&reg; Daemon.  This embedded instance acts as a client to communicate with the locally running Docker&reg; Daemon by forwarding, [via socket](https://docs.docker.com/articles/basics/#bind-docker-to-another-hostport-or-a-unix-socket), Docker&reg; CLI commands generated by ```dlw```.  Therefore, the embedded Docker&reg; Daemon version must be compatible with the locally running one.  To facilitate selecting the correct ```dlw``` version, its [image tag](https://docs.docker.com/userguide/dockerimages/#setting-tags-on-an-image) consists of two version numbers.  The first one represents the ```dlw``` version, while the second specifies the Docker&reg; Daemon version.  Tag generation appends the first version to an underscore ('_') then appends the second one.  For example, a ```dlw``` version of 0.5 and Docker&reg; Daemon version of 1.3 produces an image tag of '0.5_1.3'.
 
 ##### Download dlwRun.sh <a id="InstallingDownloaddlwRunsh"></a>
-```dlwRun.sh``` wraps the Docker CLI request to pull and then run a newly created container from the desired ```dlw``` image.  It also mounts a host directory to store ```dlw``` <a href="#ConceptsProject">Projects</a> to the appropriate mount point within the newly created ```dlw``` container.
+```dlwRun.sh``` wraps the Docker&reg; CLI request to pull and then run a newly created container from the desired ```dlw``` image.  It also mounts a host directory to store ```dlw``` <a href="#ConceptsProject">Projects</a> to the appropriate mount point within the newly created ```dlw``` container.
 + Start terminal session on host.
 + 'cd' to appropriate directory to contain the download of ```dlwRun.sh```.
-+ Enter either ```curl``` or ```wget``` specifying ```https://github.com/WhisperingChaos/DockerLocalWorkbench/raw/<gitTag>/dlwRun.sh``` replacing \<gitTag\> with the appropriate <a href="#InstallingTagVersionPull">Tag name</a>.
-  + Ex: ```wget https://github.com/WhisperingChaos/DockerLocalWorkbench/raw/0.5_1.3/dlwRun.sh``` downloads ```dlw``` 0.5 version coupled to Docker 1.3 Daemon.
++ Enter either ```curl``` or ```wget``` specifying ```https://github.com/WhisperingChaos/DeveloperLocalWorkbenchForDocker/raw/<gitTag>/dlwRun.sh``` replacing \<gitTag\> with the appropriate <a href="#InstallingTagVersionPull">Tag name</a>.
+  + Ex: ```wget https://github.com/WhisperingChaos/DeveloperLocalWorkbenchForDocker/raw/0.5_1.3/dlwRun.sh``` downloads ```dlw``` 0.5 version coupled to Docker&reg; 1.3 Daemon.
 + Issue ```chmod +x dlwRun.sh```.
 
 Other methods to download ```dlwRun.sh``` exist [see stackoverflow.com](http://stackoverflow.com/questions/4604663/download-single-files-from-github).
 
 ##### Create Host Project Directory <a id="InstallingCreateHostProjectDirectory"></a>
-Most likely, ```dlw``` <a href="#ConceptsProject">Projects</a>, which consist of source artifacts to construct <a href="#ConceptsComponent">Component(s)</a>, will reside in the host's more "permanent" file system.  Although Projects can be encapsulated within a container running the ```dlw``` or stored in an associated [Docker Data Volume](http://docs.docker.com/userguide/dockervolumes/), at this time, it just feels "safer" for Projects to exist within a "traditional" file system, as opposed to a cellular one. Given this guidance, create a subdirectory to group one or more Projects within it.  Mounting this directory into the ```dlw``` container will omit the group directory name from the running ```dlw``` container, however, its contents will be accessible.
+Most likely, ```dlw``` <a href="#ConceptsProject">Projects</a>, which consist of source artifacts to construct <a href="#ConceptsComponent">Component(s)</a>, will reside in the host's more "permanent" file system.  Although Projects can be encapsulated within a container running the ```dlw``` or stored in an associated [Docker&reg; Data Volume](http://docs.docker.com/userguide/dockervolumes/), at this time, it just feels "safer" for Projects to exist within a "traditional" file system, as opposed to a cellular one. Given this guidance, create a subdirectory to group one or more Projects within it.  Mounting this directory into the ```dlw``` container will omit the group directory name from the running ```dlw``` container, however, its contents will be accessible.
 
 Accessing host directories from a container's environment may elicit file permission errors due to differences between the application of these permissions by ```dlw```'s container OS and the host system's own file security scheme.  The ```dlw``` implements typical Linux [DAC](https://en.wikipedia.org/wiki/Discretionary_access_control) as explained [here](http://www.linuxsecurity.com/docs/SecurityAdminGuide/SecurityAdminGuide-8.html) relying on only a user's owner, primary group, and secondary group memeberships to determine access to host mounted files.  Therefore, when running a container derived from the ```dlw``` image, the UID, primary GID, and secondary GIDs of the ```dlw``` container account (also called ```dlw```) should mimic the values associated to the current host account used as your development account.  ```dlwRun.sh``` default behavior aligns the container account's UID and GIDs to assume the values specified by the host account that initiated the ```dlwRun.sh``` script.  ```dlwRun.sh``` additionally supports the direct enumeration of UID and GID values.  Please view its options via ```dlwRun.sh -h```.
 
@@ -105,7 +105,7 @@ Accessing host directories from a container's environment may elicit file permis
 Once testing successfully completes, a Project called 'sample' will exist in the <a href="#InstallingCreateHostProjectDirectory">host directory</a> specified by the ```dlwRun.sh``` script.  The Project provides examples demonstrating various aspects of the ```dlw```.  For example, specifying a Component's command line arguments for a particular command like build or run to avoid having to constantly repeat static argument values on the ```dlw``` command line (see: "../sample/component/dlw_apache/context/run")
 
 + Use 'sample' as a sandbox to expolore various ```dlw``` options and their effects before applying these options to your own Project's Components.
-+ The contents of the 'sample' project and local [Docker Registry](https://docs.docker.com/registry/) can be reverted at any time by running ```dlw itest```.
++ The contents of the 'sample' project and local [Docker&reg; Registry](https://docs.docker.com/registry/) can be reverted at any time by running ```dlw itest```.
 
 ### Project Tutorial
 
@@ -122,7 +122,7 @@ Create a minimal viable <a href="#ConceptsProject">Project</a>  that builds a si
   + Ex: ```mkdir ~/project/xproject/component/ycomponent``` given Component name of 'ycomponent'.
 + Create a Component's "context' directory.
   + Ex: ```mkdir ~/project/xproject/component/ycomponent/context``` given Component name of 'ycomponent'.
-+ Create a Component's build context directory directory.  A build context directory encapsulates all the resources required to successfully build a Docker image.
++ Create a Component's build context directory directory.  A build context directory encapsulates all the resources required to successfully build a Docker&reg; image.
   + Ex: ```mkdir ~/project/xproject/component/ycomponent/context/build```
 + Create and save a Dockerfile to a Component's build context directory.
   + Ex: Produces a Component that's slightly different from ubuntu:12:04 and starts bash when executing ```dlw run```.
@@ -157,7 +157,7 @@ Create new containers for all Components then run and attach to their ttys.
 + Create the file named DOCKER_CMMDLINE_OPTION and populate it with run options of '-i --tty'.  This file preserves these options to ensure a terminal can be attached to the Component's derivative container and reflect a tty interface without having to specify them on every ```dlw run``` command.
   + Ex: ```echo '-i --tty' > ~/project/xproject/component/ycomponent/context/run/DOCKER_CMMDLINE_OPTION```
 + Create containers for all Components and run them deferring terminal attachment.
-  + Ex: ```dlw run -d``` Constructs a container from the ycomponent image and runs it.  Should output the Docker GUID for the newly constructed and running container.
+  + Ex: ```dlw run -d``` Constructs a container from the ycomponent image and runs it.  Should output the Docker&reg; GUID for the newly constructed and running container.
 + Attach a Project's active container terminal instances to either a new or an existing tmux session.
   + Ex: ```dlw tmux``` Creates a tmux session named 'xproject' with a single active tty session for container derived from 'ycomponent'.
 + Use [tmux](http://tmux.sourceforge.net/) attach command to connect to tmux session.
@@ -167,7 +167,7 @@ Create new containers for all Components then run and attach to their ttys.
 
 ##### Project Tutorial: Remove Images
 
-Removes all Images and derivative Containers associated to a Project from the Local Docker Registry. However, data maintained in the Project's Component Catalog remains untouched.
+Removes all Images and derivative Containers associated to a Project from the Local Docker&reg; Registry. However, data maintained in the Project's Component Catalog remains untouched.
 
 + ```dlw rmi --dlwrm --dlwcomp-ver=all all```
 
@@ -201,16 +201,16 @@ OPTIONS: docker:
     -t, --tag=""         Repository name (and optionally a tag) to be applied to the resulting image in case of success
 ```
 Notes:
-+ ```dlw``` wrapper commands display two sets of options: ```dlw``` specific, always prefixed by ```--dlw``` and the related Docker options. Allows weaving of ```dlw``` options and Docker specific ones.  
++ ```dlw``` wrapper commands display two sets of options: ```dlw``` specific, always prefixed by ```--dlw``` and the related Docker&reg; options. Allows weaving of ```dlw``` options and Docker&reg; specific ones.  
 + Options always consume the subsequent command line token, except when the token represents another option or is ``` -- ```: the argument separator.
 + The assignment operator, '=', can be omitted. Ex: ```--dlwno-parent true``` == ```--dlwno-parent=true```
 + Specifying a boolean option without a value negates its default value. Ex. ```--dlwno-parent --...``` Negates ```--dlwno-parent``` from 'false' to 'true'.
 + Most commands, like ```dlw rmi``` and ```dlw rm```, are <a href="#ConceptsComponentVersioning">Component Version</a> aware.  Use the option ```--dlwcomp-ver``` to specify a target version.  Most non-destructive ```dlw``` commands will assume the default version of *Current* ```--dlwcomp-ver=cur```.
 + Nearly all commands permit specifying a set of target component names as arguments.  The ```'all'``` name value is reserved. It specifies a shorthand representing the entire set of Components defined for the Project.
-+ Nearly all commands support the ```--dlwshow``` option.  This option outputs the generated Docker CLI stream to STDOUT.
-+ Nearly all commands support the ```--dlwno-exec``` option.  This option bypasses the execution of the generated CLI stream.  Use both ```--dlwshow``` and ```--dlwno-exec``` options to display the Docker CLI stream for the command.  Helps with debugging problems.
-+ Docker array options [] <a id="ExploringCommandsDockerArray"></a>, like '-v', aren't properly supported by the ```dlw``` command line, as only the rightmost (last) recurring value will appear on the generated ```docker``` command(s).  Also, since these option values are generally unique to a specific Component, entering them when executing a pod level command is most likely undesireable, as the option values are typically different for each Component.  Therefore, recurring and other Component specific option values should be specified within a file called "DOCKER_CMMDLINE_OPTION".  When specfied, this file must be located in a Component's <a href="#ConceptsComponent">command-context directory</a>.   
-+ All ```dlw``` wrapper commands are compiled using a bash implemented [linux pipeline](http://en.wikipedia.org/wiki/Pipeline_%28Unix%29).  Therefore, resultant Docker commands which attempt to immediately attach to standard system streams, like ```docker {run|attach|start}...```, will fail, perhaps, silently.  In this situation, either actively defer attachment, ```dlw run -d ...```, or passively avoid attachment by omitting options that actively attach standard streams, see ```dlw start```.
++ Nearly all commands support the ```--dlwshow``` option.  This option outputs the generated Docker&reg; CLI stream to STDOUT.
++ Nearly all commands support the ```--dlwno-exec``` option.  This option bypasses the execution of the generated CLI stream.  Use both ```--dlwshow``` and ```--dlwno-exec``` options to display the Docker&reg; CLI stream for the command.  Helps with debugging problems.
++ Docker&reg; array options [] <a id="ExploringCommandsDockerArray"></a>, like '-v', aren't properly supported by the ```dlw``` command line, as only the rightmost (last) recurring value will appear on the generated ```docker {ps|run|images|...}``` command(s).  Also, since these option values are generally unique to a specific Component, entering them when executing a pod level command is most likely undesireable, as the option values are typically different for each Component.  Therefore, recurring and other Component specific option values should be specified within a file called "DOCKER_CMMDLINE_OPTION".  When specfied, this file must be located in a Component's <a href="#ConceptsComponent">command-context directory</a>.   
++ All ```dlw``` wrapper commands are compiled using a bash implemented [linux pipeline](http://en.wikipedia.org/wiki/Pipeline_%28Unix%29).  Therefore, resultant Docker&reg; commands which attempt to immediately attach to standard system streams, like ```docker {run|attach|start}...```, will fail, perhaps, silently.  In this situation, either actively defer attachment, ```dlw run -d ...```, or passively avoid attachment by omitting options that actively attach standard streams, see ```dlw start```.
 
 #### Exploring Commands: rm, rmi 
 
@@ -262,7 +262,7 @@ Since ```dlw run``` wraps its companion ```docker run```, it inherits its myriad
 
 #### Exploring Commands: tmux
 
-[tmux](http://tmux.sourceforge.net/) implements a popular terminal multiplexer enabling the ```dlw``` to launch and concurrently attach to the terminal interfaces of multiple containers.  ```dlw tmux``` executes a recursive call to first generate the Docker CLI stream from the ```dlw``` command specified via its ```--dlwc``` option then partition this stream into individual ```tmux new-window``` commands.  Each individual ```tmux new-window``` command for a given execution of the ```dlw tmux``` will be assigned to the same tmux session.  The name of this session defaults to the Project's name or one specified as an argument to the ```dlw tmux``` command.  Besides the tmux terminals produced by the the Docker CLI stream, each newly created session includes an additional bash terminal.  If desired, ```dlw``` commands can be issued from this tmux managed window.  Note, the resulting Docker command must keep STDIN open in order to persist its ```tmux``` window (terminal), otherwise, the ```tmux``` window will close.  When STDIN closes immediately, it may seem as if the ```dlw``` command completely or partially failed due to the absence of an "expected" window.  Therefore, please ensure the specific Docker CLI command generated from the ```dlw``` persists STDIN before assuming an abnormality in ```dlw``` execution.  Finally, for commands, like ```dlw {ps|image|port...}```, which at completion immediately close STDIN, use the ```dlw watch``` command to persist STDIN's open status and periodically re-execute the ```dlw``` command.  
+[tmux](http://tmux.sourceforge.net/) implements a popular terminal multiplexer enabling the ```dlw``` to launch and concurrently attach to the terminal interfaces of multiple containers.  ```dlw tmux``` executes a recursive call to first generate the Docker&reg; CLI stream from the ```dlw``` command specified via its ```--dlwc``` option then partition this stream into individual ```tmux new-window``` commands.  Each individual ```tmux new-window``` command for a given execution of the ```dlw tmux``` will be assigned to the same tmux session.  The name of this session defaults to the Project's name or one specified as an argument to the ```dlw tmux``` command.  Besides the tmux terminals produced by the the Docker&reg; CLI stream, each newly created session includes an additional bash terminal.  If desired, ```dlw``` commands can be issued from this tmux managed window.  Note, the resulting Docker&reg; command must keep STDIN open in order to persist its ```tmux``` window (terminal), otherwise, the ```tmux``` window will close.  When STDIN closes immediately, it may seem as if the ```dlw``` command completely or partially failed due to the absence of an "expected" window.  Therefore, please ensure the specific Docker&reg; CLI command generated from the ```dlw``` persists STDIN before assuming an abnormality in ```dlw``` execution.  Finally, for commands, like ```dlw {ps|image|port...}```, which at completion immediately close STDIN, use the ```dlw watch``` command to persist STDIN's open status and periodically re-execute the ```dlw``` command.  
 
 + **Attach to already running containers, derived from the Current Version of the Project's Components, started as interactive (STDIN open) and detached**
   ```
@@ -281,7 +281,7 @@ Since ```dlw run``` wraps its companion ```docker run```, it inherits its myriad
 The ```dlw``` provides a flexible and familiar means to declare dependencies, when necessary, between Components for each command-context.  See <a href="#ConceptsDependencySpecification">Dependency Specification</a> for detailed explaination.
 
 Assuming the necessity of a ```Dependency``` file:
-+ Either add an empty text file of that name to the Project's <a href="#ConceptsComponentCatalog">Component Catalog</a> or copy the contents of ['Dependency'](https://github.com/WhisperingChaos/DockerLocalWorkbench/blob/master/Dependency) from github.
++ Either add an empty text file of that name to the Project's <a href="#ConceptsComponentCatalog">Component Catalog</a> or copy the contents of ['Dependency'](https://github.com/WhisperingChaos/DeveloperLocalWorkbenchForDocker/blob/master/Dependency) from github.
 + Use a text editor to specify the dependencies using GNU makefile [rule syntax](http://www.gnu.org/software/make/manual/make.html#Rule-Syntax), however, omit encoding recipies.  For example, given a Component named "Child" with a static build dependency on another Component named "Parent" and assuming that "Parent" is a root Component, it doesn't depend on other Components, then enter the following GNU rule: ```Child.build : Parent.build``` on its own line in the ```Dependency``` file.  Once saved, ```dlw build``` command will order the resulting ```docker build``` commands to execute the 'Parent' build before performing the child's.
 
 Ex: Dependency file generated during the [Install: Sample Project & Testing](#installing-sample-project--testing).
@@ -297,16 +297,16 @@ dlw_apache.run : dlw_mysql.run
 + **Component**<a id="ConceptsComponent"></a>:  A widget that contributes one or more elemental services to a cooperative pod of other Components.  Components offer their service(s) through either lexical inclusion, statically inheriting a base Component's implementation ([see FROM](http://docs.docker.io/reference/builder/#from)), or dynamically, as individually executing entities that coordinate their activity through some protocol mechanism ([see LINK](https://docs.docker.com/userguide/dockerlinks/)).
 
     The ```dlw``` implements a Component as a directory whose name reflects the image's name in the local repository.  This directory contains a subdirectory called "context" which represents the resources required to execute a particular ```dlw``` command.  "context" is further subdivided by subdirectories whose names reflect a ```dlw``` command.  These **command-context** subdirectories contain resources, like command line options, required to execute the particular command.  They also identify which commands apply to a particular Component, as certain Components may support some but not all ```dlw``` commands. For example, a statically included Component might not support the ```dlw run``` command.
-+ **Dependency Specification**<a id="ConceptsDependencySpecification"></a>: A declarative mechanism to encode ```dlw``` command dependencies between Components.  Component dependencies can be independenly specified for any ```dlw``` command, permitting for example, separate dependency graphs for build-time, ```dlw build``` vs. run-time concerns, ```dlw run```.  In general, nearly all ```dlw``` commands mirror either build-time or run-time dependencies.  For example, ```dlw start``` shares the same dependency graph as ```dlw run```.  In these cases, individual ```dlw``` commands can share an existing command's dependency graph.  Specified dependencies will order the ```dlw``` generated Docker Daemon CLI stream to more fully ensure its successful completion (see [How Does It Work](#how-does-it-work)).  Dependency Specification maybe optional, as weakly coupled Components, a pod whose ordering doesn't affect the outcome of any ```dlw``` command, eliminate its encoding.
++ **Dependency Specification**<a id="ConceptsDependencySpecification"></a>: A declarative mechanism to encode ```dlw``` command dependencies between Components.  Component dependencies can be independenly specified for any ```dlw``` command, permitting for example, separate dependency graphs for build-time, ```dlw build``` vs. run-time concerns, ```dlw run```.  In general, nearly all ```dlw``` commands mirror either build-time or run-time dependencies.  For example, ```dlw start``` shares the same dependency graph as ```dlw run```.  In these cases, individual ```dlw``` commands can share an existing command's dependency graph.  Specified dependencies will order the ```dlw``` generated Docker&reg; Daemon CLI stream to more fully ensure its successful completion (see [How Does It Work](#how-does-it-work)).  Dependency Specification maybe optional, as weakly coupled Components, a pod whose ordering doesn't affect the outcome of any ```dlw``` command, eliminate its encoding.
 
     A file named "Dependency" captures [GNU make rules](http://www.gnu.org/software/make/manual/html_node/Rule-Introduction.html#Rule-Introduction) for each Component name and ```dlw``` command pair. A rule should only specify a target and its prerequiste(s).  In all cases, a provided default recipie triggers an appropriate process chain to implement the specified ```dlw``` command.  As indicated above, this file should not exist in situations involving weakly coupled Components, as it will be empty.
 + **Component Catalog**<a id="ConceptsComponentCatalog"></a>: Defines the pod of directly interacting Components from which desired group behavior emerges and optionally contains a Dependency Specification.
 
     A directory called "component" implements a Component Catalog.  One or more Component directores exist as subdirectories within "component".  ```dlw``` commands that operate on individual images and their derived containers iterate over "component".
-+ **Image GUID List**<a id="ConceptsImageGUIDList"></a>:  An object that maintains a list of Docker image GUIDs generated when building a specific Component.  The different GUIDs in this list represent various image versions generated due to alterations applied to resources, like a Dockerfile, that comprise a Component's (image's) build context.  Associated to each GUID, a column property bag enables extending the metadata for an image to include an arbitrary set of attribures/columns.  These columns can appear in the reporting generated by the ```dlw ps``` and ```dlw image``` commands.
++ **Image GUID List**<a id="ConceptsImageGUIDList"></a>:  An object that maintains a list of Docker&reg; image GUIDs generated when building a specific Component.  The different GUIDs in this list represent various image versions generated due to alterations applied to resources, like a Dockerfile, that comprise a Component's (image's) build context.  Associated to each GUID, a column property bag enables extending the metadata for an image to include an arbitrary set of attribures/columns.  These columns can appear in the reporting generated by the ```dlw ps``` and ```dlw image``` commands.
 
   A standard text file implements each Image GUID List.  The text file is assigned the same name as the Component (image) name with a suffix of ".GUIDlist".  The image GUIDs in the file are ordered from the oldest, which appears as the first line in the text file, to the most recent GUID that occupies its last line.  The column property bag appears space prefixed after the GUID.  It's implemented as a [bash associative array](http://www.gnu.org/software/bash/manual/html_node/Arrays.html#Arrays) named "componentPropBag".  Simply update this column property bag with the custom property names and values you wish displayed as reporting columns.
-+ **Component Versioning**<a id="ConceptsComponentVersioning"></a>: A change to a Component's build context results in a new version of the compiled image.  This newly compiled image is automatically assigned a docker repository name mirroring the Component's name and a docker tag name of 'latest'.  An existing and now prior version of the Component will loose these names reverting to repository and tag names of '\<none\>'. ```dlw``` maintains a list of these prior versions (see <a id="ConceptsImageGUIDList">Image GUID List</a>) and offers a means of indicating a version specifier for a number of its commands.  The ```dlw``` supports the following version specifiers:
++ **Component Versioning**<a id="ConceptsComponentVersioning"></a>: A change to a Component's build context results in a new version of the compiled image.  This newly compiled image is automatically assigned a Docker&reg; repository name mirroring the Component's name and a Docker&reg; tag name of 'latest'.  An existing and now prior version of the Component will loose these names reverting to repository and tag names of '\<none\>'. ```dlw``` maintains a list of these prior versions (see <a id="ConceptsImageGUIDList">Image GUID List</a>) and offers a means of indicating a version specifier for a number of its commands.  The ```dlw``` supports the following version specifiers:
   + *Current* (=cur): the most recent image version,
   + *All* (=all): every known image version,
   + *All But Current* (=allButCur): All image versions excluding  the *current* one.
@@ -333,17 +333,17 @@ dlw_apache.run : dlw_mysql.run
 
 ##### What's Provided
 
-+ Docker's OS image: [Ubuntu 12.04](https://github.com/tianon/docker-brew-ubuntu-core/blob/7fef77c821d7f806373c04675358ac6179eaeaf3/precise/Dockerfile)
++ Docker&reg; image: [Ubuntu 12.04](https://github.com/tianon/docker-brew-ubuntu-core/blob/7fef77c821d7f806373c04675358ac6179eaeaf3/precise/Dockerfile)
   + [GNU bash](https://www.gnu.org/software/bash/): [4.2.25(1)-release](http://manpages.ubuntu.com/manpages/precise/man1/bash.1.html)
-+ [Docker Daemon (Client)](https://docs.docker.com/reference/commandline/cli/): lxc-docker-?.?.?
++ [Docker&reg; Daemon (Client)](https://docs.docker.com/reference/commandline/cli/): lxc-docker-?.?.?
 + [GNU make](http://www.gnu.org/software/make/manual/html_node/index.html): [3.81-8.1ubuntu1.1](http://packages.ubuntu.com/precise/make)
 + [tmux](http://tmux.sourceforge.net/): [1.9a-1~ppa1~p](https://launchpad.net/~pi-rho/+archive/ubuntu/dev/+index?field.series_filter=precise)
-+ [Docker Local Workbench](https://github.com/WhisperingChaos/DockerLocalWorkbench)
++ [Developer Local Workbench For Docker](https://github.com/WhisperingChaos/DeveloperLocalWorkbenchForDocker)
 
 ### License
 
 The MIT License (MIT)
-Copyright (c) 2014 Richard Moyse License@Moyse.US
+Copyright (c) 2014-2015 Richard Moyse License@Moyse.US
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -361,3 +361,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
+
+###Legal Notice
+
+Docker and the Docker logo are trademarks or registered trademarks of Docker, Inc. in the United States and/or other countries. Docker, Inc. and other parties may also have trademark rights in other terms used herein.
