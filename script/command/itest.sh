@@ -250,11 +250,11 @@ function ContainerRemoveAssert (){
 ###############################################################################
 #
 #  Purpose:
-#    Ensure provided image GUID has been removed from the local docker repository.
+#    Ensure provided image GUID has been removed from the local Docker repository.
 #
 #  Input:
 #    $1 - LINENO
-#    $2-$N - docker image GUID.
+#    $2-$N - Docker image GUID.
 #
 #  Return:
 #    0 - Assertion true.
@@ -275,11 +275,11 @@ function DockerRepositoryImageDeleteAssert (){
 ###############################################################################
 #
 #  Purpose:
-#    Ensure provided image GUID exists in local docker repository.
+#    Ensure provided image GUID exists in local Docker repository.
 #
 #  Input:
 #    $1 - LINENO
-#    $2 - docker image GUID.
+#    $2 - Docker image GUID.
 #
 #  Return:
 #    0 - Assertion true.
@@ -299,7 +299,7 @@ function DockerRepositoryImageExistsAssert (){
 #
 #  Input:
 #    $1 - LINENO
-#    $2 - docker image name.
+#    $2 - Docker image name.
 #
 #  Return:
 #    0 - Successful
@@ -322,7 +322,7 @@ function DockerRepositoryImageAssign (){
 #    image.
 #
 #  Input:
-#    $1 - docker image name.
+#    $1 - ocker image name.
 #
 ###############################################################################
 function ImageChangeVersion (){
@@ -424,7 +424,7 @@ function ImageContainerShow (){
 #
 #  Input:
 #    $1 - LINENO	
-#    $2 - docker image name.
+#    $2 - Docker image name.
 #    $3 - Expected number of GUIDs.
 #
 #  Return:
@@ -448,10 +448,10 @@ function ImageGUIDListAssert (){
 ##############################################################################
 #
 #  Purpose:
-#    Check local docker repository for an image with the provided name.
+#    Check local Docker repository for an image with the provided name.
 #
 #  Input:
-#    $1 - docker image name.
+#    $1 - Docker image name.
 #
 #  Return:
 #    0 - Image exists.
@@ -960,7 +960,7 @@ DEPENDENCY_FILE_DOC
 #
 #  Output:
 #    ${TEST_FILE_PREFIX}${$cmmdName} - A temporary file used to contain the 
-#        makefile rule(s) for the given docker command and Component.
+#        makefile rule(s) for the given Docker command and Component.
 #  Return:
 #    SYSERR - Message describing the reason this operation failed.
 #
@@ -2328,7 +2328,7 @@ function dlw_Test_16 () {
 ###############################################################################
 function dlw_Test_17 () {
   function dlw_Test_17_Desc () {
-    echo "Run current versions of: 'dlw_sshserver', 'dlw_mysql', and 'dlw_apache'. Generate docker attach commands for all. Create tmux session.  Eliminate containers closing their tmux windows."
+    echo "Run current versions of: 'dlw_sshserver', 'dlw_mysql', and 'dlw_apache'. Generate Docker attach commands for all. Create tmux session.  Eliminate containers closing their tmux windows."
   }
   function dlw_Test_17_Run () {
     ImageContainerRemove $LINENO '--dlwcomp-ver=all -- all'
@@ -2342,7 +2342,7 @@ function dlw_Test_17 () {
     ReportRun $LINENO 'dlw.sh images -a --dlwcomp-ver=all'
     ReportLineCntAssert $LINENO 5
     if ! dlw.sh run -i -d >/dev/null 2>/dev/null; then ScriptUnwind $LINENO "Run of: 'all' failed."; fi
-    # Expect 3 'docker attach' commands.
+    # Expect 3 'Docker attach' commands.
     ReportRun $LINENO 'dlw.sh attach'
     ReportLineCntAssert $LINENO 3
     ReportScanTokenIncludeAssert $LINENO 'docker' 'attach' 
@@ -2368,7 +2368,7 @@ function dlw_Test_17 () {
 ###############################################################################
 function dlw_Test_18 () {
   function dlw_Test_18_Desc () {
-    echo "Run current versions of: 'dlw_sshserver', 'dlw_mysql', and 'dlw_apache'. Generate docker logs commands for all and corresponding tmux session.  Eliminate containers which inturn closes their logs and tmux windows."
+    echo "Run current versions of: 'dlw_sshserver', 'dlw_mysql', and 'dlw_apache'. Generate dlw logs commands for all and corresponding tmux session.  Eliminate containers which inturn closes their logs and tmux windows."
   }
   function dlw_Test_18_Run () {
     ImageContainerRemove $LINENO '--dlwcomp-ver=all -- all'
@@ -2468,3 +2468,32 @@ function dlw_Test_20 () {
 }
 FunctionOverrideCommandGet
 source "ArgumentsMainInclude.sh";
+###############################################################################
+# 
+# The MIT License (MIT)
+# Copyright (c) 2014-2015 Richard Moyse License@Moyse.US
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+###############################################################################
+#
+# Docker and the Docker logo are trademarks or registered trademarks of Docker, Inc.
+# in the United States and/or other countries. Docker, Inc. and other parties
+# may also have trademark rights in other terms used herein.
+#
+###############################################################################

@@ -267,7 +267,7 @@ function GUIDlistRemoveScan () {
 ##
 ##  Purpose:
 ##    Remove the build timestamp file used as a surrogate to represent 
-##    the docker image produced by a Compoent's resources.
+##    the Docker image produced by a Compoent's resources.
 ##
 ##  Input:
 ##    $1 - Image GUID List file location.
@@ -339,7 +339,7 @@ exit 0;
 ###############################################################################
 # 
 # The MIT License (MIT)
-# Copyright (c) 2014 Richard Moyse License@Moyse.US
+# Copyright (c) 2014-2015 Richard Moyse License@Moyse.US
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -357,5 +357,11 @@ exit 0;
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+#
+###############################################################################
+#
+# Docker and the Docker logo are trademarks or registered trademarks of Docker, Inc.
+# in the United States and/or other countries. Docker, Inc. and other parties
+# may also have trademark rights in other terms used herein.
 #
 ###############################################################################

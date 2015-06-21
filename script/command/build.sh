@@ -36,7 +36,7 @@ return 0
 function VirtCmmdHelpDisplay () {
 cat <<COMMAND_HELP_Purpose
 
-Create image file for targeted Components.  Wraps docker build command.
+Create image file for targeted Components.  Wraps Docker build command.
 
 Usage: dlw build [OPTIONS] TARGET 
 COMMAND_HELP_Purpose
@@ -62,7 +62,7 @@ return 0
 ##    Container GUID.
 ##
 ##    Essentially this function converts the Docker Local Workbench
-##    (dlw) Component concept into is associated docker image or container
+##    (dlw) Component concept into is associated Docker image or container
 ##    objects.  A dlw Component is a analogous to class/type definition
 ##    that can be instantiated as an executable object.  Given this definition,
 ##    a Component can be directly mapped to a Docker image (class/type)
@@ -123,7 +123,7 @@ function VirtDockerCmmdAssembleTemplate () {
 ###############################################################################
 ##
 ##  Purpose:
-##    Given a docker build, update the just built component's ImageGUIDlist
+##    Given 'docker build', update the just built component's ImageGUIDlist
 ##    to add its image GUID as the "current" version.  
 ##    
 ##  Assumption:
@@ -141,7 +141,7 @@ function VirtDockerCmmdAssembleTemplate () {
 ##    $3 - dlw command to execute. Maps 1 to 1 onto with Docker command line.
 ##    $4 - Variable name to an associative array containing other component 
 ##         specific attributes.
-##    $5 - Return code of the executed docker command. 
+##    $5 - Return code of the executed Docker command. 
 ##
 ###############################################################################
 function VirtDockerCmmdExecute () {
@@ -168,7 +168,7 @@ function VirtDockerCmmdExecutePacketForward () {
 ##
 ##  Purpose:
 ##    Implements the dlw build command. dlw build command is a wrapper that
-##    calls the docker build command.  dlw assembles command line options
+##    calls the 'docker build' command.  dlw assembles command line options
 ##
 ##  Assumption:
 ##    Since bash variable names are passed to this routine, these names
@@ -196,3 +196,32 @@ function VirtCmmdExecute (){
 }
 FunctionOverrideCommandGet
 source "ArgumentsMainInclude.sh";
+###############################################################################
+# 
+# The MIT License (MIT)
+# Copyright (c) 2014-2015 Richard Moyse License@Moyse.US
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+###############################################################################
+#
+# Docker and the Docker logo are trademarks or registered trademarks of Docker, Inc.
+# in the United States and/or other countries. Docker, Inc. and other parties
+# may also have trademark rights in other terms used herein.
+#
+###############################################################################
