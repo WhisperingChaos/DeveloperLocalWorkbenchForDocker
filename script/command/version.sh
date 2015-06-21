@@ -87,7 +87,7 @@ function VirtCmmdExecute (){
   local -r showDepend="`AssociativeMapAssignIndirect "$argOptMap" '--dlwdepend'`"
   local -r showLicense="`AssociativeMapAssignIndirect "$argOptMap" '--dlwlicense'`"
   local -r showBugs="`AssociativeMapAssignIndirect "$argOptMap" '--dlwbugs'`"
-  echo "Version: dlw (developer local workbench): 0.5"
+  echo "Version: dlw (developer local workbench): 0.6"
   if $showDepend; then 
     echo
     echo "Depends on: Docker:   version: `read version < <(docker version); echo "$version"|sed 's/Client version: \([^.]*\.[^.]*\).*/\1/'`.x"
@@ -97,7 +97,7 @@ function VirtCmmdExecute (){
   if $showLicense; then
     echo
     echo "License: The MIT License (MIT): http://opensource.org/licenses/MIT" 
-    echo "License: Copyright (c) 2015 Richard Moyse License@Moyse.US"
+    echo "License: Copyright (c) 2014-2015 Richard Moyse License@Moyse.US"
   fi
   if $showBugs; then
     echo
