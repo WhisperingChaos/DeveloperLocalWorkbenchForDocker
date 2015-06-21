@@ -1,3 +1,4 @@
 *.sh~
+*.md~
 makefile~
 gitignore~
