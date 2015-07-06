@@ -208,7 +208,7 @@ function VirtDockerCmmdProcessOutput () {
       if DockerHeadingSpecified "$packet"; then dockerHdrInd='true'; fi 
       if $dockerHdrInd; then
         # compute the offset to the GUID join column.
-        ReportColumnOffset 'ps or images' "$packet" "$joinImageColmName" 'joinImageColOffStart'
+        ReportColumnOffset "$commandNm" "$packet" "$joinImageColmName" 'joinImageColOffStart'
       else 
         # currently, the absence of Docker headings is indicative of the -q option.
         # in this situation, the GUID is always the first column.
