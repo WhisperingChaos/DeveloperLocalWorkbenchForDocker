@@ -1,4 +1,5 @@
 *.sh~
 *.md~
 makefile~
-gitignore~
+.gitignore~
+.dockerignore~
