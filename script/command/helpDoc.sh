@@ -23,7 +23,7 @@ source "MessageInclude.sh";
 ##    whitespace from its short description.  There are no empty lines
 ##    separating commands.  As mentioned above, there are two classes of 
 ##    commands and their order within this list determines their class. The
-##    wrapped docker commands appear in the list before the dlw specific
+##    wrapped Docker commands appear in the list before the dlw specific
 ##    commands and the dlw specific commands must follow the "section" labeled
 ##   'dlw specific:'.
 ##
@@ -40,7 +40,7 @@ source "MessageInclude.sh";
 function main () {
   cat <<COMMAND_HELP
 
-Docker Local Workbench extends specific Docker commands incorporating
+Developer Local Workbench extends specific Docker commands incorporating
 "Project" and "Component" abstractions within the local Docker environment.
 Many dlw commands wrap existing Docker ones while some are dlw specific.
 
@@ -50,12 +50,12 @@ COMMAND:
     attach    Using 'tmux' command below, connect to an interactive container(s) derived from specified Component(s) & version.
     build     Compile a new version of a Component(s) from the resources located in its build context directory.
     create    Produce a container for the specified Component(s) but don't run it.
-    images    Generate a docker images report limited to the specified Component(s) & version.
+    images    Generate a 'docker images' report limited to the specified Component(s) & version.
     kill      Send a termination signal to containers derived from specified Component(s) & version.
     logs      Using 'tmux' command below, connect or snapshot a container's STDERR and STDOUT stream for targeted Components.
     pause     Quiesce the running processes within container(s) derived from specified Component(s) & version.
     port      Generate the port mappings exposed by container(s) derived from specified Component(s) & version.
-    ps        Generate a docker ps report limited to only the specified Component(s) & version.
+    ps        Generate a 'docker ps' report limited to only the specified Component(s) & version.
     restart   Send the restart signal to container(s) derived from specified Component(s) & version.
     rm        Remove container(s) derived from specified Component(s) & version.
     rmi       Remove image(s) associated to specified Component(s) & version including their associated containers.
@@ -73,10 +73,39 @@ dlw specific:
 
 Specify: 'help COMMAND' to display [ARG...] help for that command.
 
-For more help: https://github.com/WhisperingChaos/DockerLocalWorkbench#toc
+For more help: https://github.com/WhisperingChaos/DeveloperLocalWorkbenchForDocker#toc
 
 COMMAND_HELP
   return 0
 }
 FunctionOverrideCommandGet
 main
+###############################################################################
+# 
+# The MIT License (MIT)
+# Copyright (c) 2014-2015 Richard Moyse License@Moyse.US
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+###############################################################################
+#
+# Docker and the Docker logo are trademarks or registered trademarks of Docker, Inc.
+# in the United States and/or other countries. Docker, Inc. and other parties
+# may also have trademark rights in other terms used herein.
+#
+###############################################################################

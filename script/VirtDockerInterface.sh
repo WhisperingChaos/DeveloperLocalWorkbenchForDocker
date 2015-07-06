@@ -3,7 +3,7 @@
 ##
 ##    Section: Abstract Interface:
 ##      Defines an abstract interface for the compliation, execution and 
-##      postprocessing of SYSOUT for a docker command.
+##      postprocessing of SYSOUT for a Docker command.
 ##
 ###############################################################################
 ##
@@ -25,9 +25,9 @@ function VirtDockerCmmdOptionsArgsDef () {
 ##
 ##  Purpose:
 ##    Define the abstract pipeline that will identify Docker Targets,
-##    assemble/compile and execute one or more fully formed docker commands,
+##    assemble/compile and execute one or more fully formed Docker commands,
 ##    and enables inspection and alteration of SYSOUT generated during the
-##    execution of the docker command(s).
+##    execution of the Docker command(s).
 ##    
 ##  Assume:
 ##    Since bash variable names are passed to this routine, these names
@@ -116,18 +116,18 @@ function VirtDockerTargetGenerate (){
 ###############################################################################
 ##
 ##  Purpose:
-##    Assemble a docker command using a template mechanism inspired by
+##    Assemble a Docker command using a template mechanism inspired by
 ##    environment variable substitution to construct the desired 
-##    docker operation.
+##    Docker operation.
 ##
 ##    There are two general classes of Docker commands.  One being
 ##    a targeted command, like rmi, which operates on a specific image GUID,
 ##    while the second type is untargeted and generally refers to either all
 ##    containers or images, for example, ps.  For targeted commands, each packet
-##    generates a specific docker command and its command text is added to 
+##    generates a specific Docker command and its command text is added to 
 ##    the given packet. However, when producing untargeted, nonspecific
 ##    commands, the first detected packet will generate anrestrictToCompListother packet
-##    containing the docker command.
+##    containing the Docker command.
 ##
 ##  See:
 ##    'function DockerCmmdAssemble' for more detailed explaination of
@@ -152,8 +152,8 @@ function VirtDockerTargetGenerate (){
 ## 
 ##  Output:     
 ##    SYSOUT - A field named 'DockerCommand' is added to either every packet or
-##       the first detected packet of a non specific docker command packet
-##       that contains the assembled docker command.
+##       the first detected packet of a non specific Docker command packet
+##       that contains the assembled Docker command.
 ##
 ###############################################################################
 function VirtDockerCmmdAssemble () {
@@ -175,7 +175,7 @@ function VirtDockerCmmdAssemble () {
 ## 
 ##  Output:   
 ##    SYSOUT - A single record whose format reflects the option and argument
-##         values and placement needed by the docker command.  The dynamic
+##         values and placement needed by the Docker command.  The dynamic
 ##         option/argument values are defined using bash variable names while
 ##         static ones, can simply appear in the template's body.
 ##
@@ -210,8 +210,8 @@ function VirtDockerCmmdAssembleTemplateResolvePacketField () {
 ###############################################################################
 ##
 ##  Purpose:
-##    Permits 'primary' commands other than docker to utilize template 
-##    assembly process.  For example, in addition to the 'docker' primary
+##    Permits 'primary' commands other than Docker to utilize template 
+##    assembly process.  For example, in addition to the 'Docker' primary
 ##    command, the template assembly process can also generate 
 ##    linux screen commands. 
 ##
@@ -247,7 +247,7 @@ function VirtDockerCmmdExecPrimaryName () {
 ##    $3 - dlw command to execute. Maps 1 to 1 onto with Docker command line.
 ##    $4 - Variable name to an associative array.  The key/value pairs of the
 ##         array differ depending on the type of Docker Target.
-##    $5 - A fully formed docker command.
+##    $5 - A fully formed Docker command.
 ##
 ##  Output:
 ##    SYSOUT - Messages returned by the Docker daemon 
@@ -278,10 +278,10 @@ function VirtDockerCmmdExecutePacketForward () {
 ###############################################################################
 ##
 ##  Purpose:
-##    Execute a procedure after all the docker file commands have been
+##    Execute a procedure after all the Docker file commands have been
 ##    successfully executed.  This procedure will typically modify the 
 ##    one or more Components' Image GUID List(s).  For example, after 
-##    successfully deleting images from the local docker repository,
+##    successfully deleting images from the local Docker repository,
 ##    the corresponding GUIDs maintained in Image GUID List(s) must be 
 ##    removed from the list. 
 ##    
@@ -306,7 +306,7 @@ function VirtDockerCmmdExecuteAtCompletion () {
 ###############################################################################
 ##
 ##  Purpose:
-##    Allows inspection/alteration of SYSOUT from all docker commands executed
+##    Allows inspection/alteration of SYSOUT from all Docker commands executed
 ##    by the pipeline.
 ##    
 ##  Assume:
@@ -422,7 +422,7 @@ function VirtCmmdConfigSetDefault () {
 ##
 ##  Output:
 ##    SYSOUT - Packets containing attributes specific to a given Docker Target.
-##         For example, docker commands that operate on containers require a
+##         For example, Docker commands that operate on containers require a
 ##         Container GUID. In this situation, the packet will contain a
 ##         Container GUID field.
 ## 
@@ -768,8 +768,8 @@ function CompNameMapGen () {
 ##    parent Image GUID packet with offspring Container GUIDS.
 ##    
 ##    Essentially, perform a join operation between the Container list
-##    generated by the docker ps command and the Image GUIDs associated to the
-##    targeted Components.  This stream is needed by docker commands 
+##    generated by the 'docker ps' command and the Image GUIDs associated to the
+##    targeted Components.  This stream is needed by Docker commands 
 ##    implementing Container operators, like 'Stop'.
 ##    
 ##  Assume:
@@ -847,7 +847,7 @@ function DockerTargetContainerGUIDGenerate (){
       echo "$packet"
       continue;
     fi
-    # docker prefers displaying Repository:Tag instead of Image GUID
+    # Docker prefers displaying Repository:Tag instead of Image GUID
     local imageReposTagName="${imageGUIDreposTag["$imageGUID"]}"
     if [ -n "$imageReposTagName" ]; then
       # treat Repository:Tag as Image GUID
@@ -877,9 +877,9 @@ function DockerTargetContainerGUIDGenerate (){
     if ! $hdrPsProcessInd; then
       hdrPsProcessInd='true'
       # determine start location of desired column 
-      DockerContainerColumnLoc "$psReport" 'CONTAINER ID' 'containerGUIDColOff'
-      DockerContainerColumnLoc "$psReport" 'IMAGE' 'imageGUIDcolOff'
-      DockerContainerColumnLoc "$psReport" 'STATUS' 'containerStatusColOff'
+      ReportColumnOffset 'ps' "$psReport" 'CONTAINER ID' 'containerGUIDColOff'
+      ReportColumnOffset 'ps' "$psReport" 'IMAGE' 'imageGUIDcolOff'
+      ReportColumnOffset 'ps' "$psReport" 'STATUS' 'containerStatusColOff'
       continue
     fi
     # extract Image GUID/Repository:Tag
@@ -930,7 +930,7 @@ function DockerTargetContainerGUIDGenerate (){
 ##
 ##  Output:
 ##    $2 - An associative array correlating all the Repository:tag
-##         image names known locally to docker to their GUID.
+##         image names known to local Docker Daemon to their GUID.
 ## 
 ##  Return Code:
 ##    When Failure: 
@@ -970,7 +970,7 @@ function ImageGUIDReproTagMapCreate () {
 ##
 ##  Purpose:
 ##    Extract important column offsets from the metadata tags (column headings)
-##    generated by a docker report.  If the report no longer provides
+##    generated by a Docker report.  If the report no longer provides
 ##    the data or it's column heading has changed, then this routine will
 ##    potentially identify this issue and unwind this process.
 ##
@@ -980,39 +980,41 @@ function ImageGUIDReproTagMapCreate () {
 ##      scope of this routine or its decendents.
 ##
 ##  Input:
-##    $1 - Header for Docker command.
-##    $2 - Column name to locate in the Docker header.
-##    $3 - Variable name to contain the column offset.
+##    $1 - Header type.
+##    $2 - Header for Docker command.
+##    $3 - Column name to locate in the Docker header.
+##    $4 - Variable name to contain the column offset.
 ##
 ##  Output:
-##    $3 - Image GUID column offset.
+##    $4 - Column offset.
 ## 
 ##  Return Code:
 ##    When Failure: 
 ##      SYSERR - message problem & unwind script.
 ##
 ###############################################################################
-function DockerContainerColumnLoc () {
-  local psHdr="$1"
-  local -r -i psHdrLen="${#1}"
-  local -r columnName="$2"
-  local -r columnNameNm="$3"
-  psHdr="${psHdr%%$columnName*}"
-  if ! [ "${#psHdr}" -lt "$psHdrLen" ]; then 
-    ScriptUnwind $LINENO "Docker ps header doesn't match what's expected.  Missing column: '$columnName'.  See: '$1'"
+function ReportColumnOffset () {
+  local -r rptHdrType="$1"
+  local rptHdr="$2"
+  local -r -i rptHdrLen="${#rptHdr}"
+  local -r columnName="$3"
+  local -r columnNameNm="$4"
+  rptHdr="${rptHdr%%$columnName*}"
+  if ! [ "${#rptHdr}" -lt "$rptHdrLen" ]; then 
+    ScriptUnwind $LINENO "Docker '$rptHdrType' header doesn't match what's expected.  Missing column: '$columnName'.  See: '$rptHdr'"
   fi
-  eval $columnNameNm=\"\$\{\#psHdr\}\"
+  eval $columnNameNm=\"\$\{\#rptHdr\}\"
   return 0
 }
 ###############################################################################
 ##
 ##  Purpose:
 ##    Filter container targets so they match appropriate state: 'UP', 
-##    'Paused',... required to execute the yet to be generated docker
+##    'Paused',... required to execute the yet to be generated Docker
 ##    container command.
 ##
 ##  Input:
-##    $1 - Status string displayed by the docker ps -a command report..
+##    $1 - Status string displayed by the 'docker ps -a' command report..
 ##
 ##  Return Code:
 ##    When Success:
@@ -1028,8 +1030,8 @@ function VirtContainerStateFilterApply () {
 ###############################################################################
 ##
 ##  Purpose:
-##    This default implementation generates a docker command packet for 
-##    each input packet it consumes.  In general, docker commands require either
+##    This default implementation generates a Docker command packet for 
+##    each input packet it consumes.  In general, Docker commands require either
 ##    a container or image reference (GUID, name...) be specified 
 ##    in order to apply the desired operation.  However, there are some
 ##    reporting commands, like ps/images that either don't accept targets or
@@ -1051,9 +1053,9 @@ function VirtDockerCmmdAssemble () {
 ##  Purpose:
 ##    Assemble the Docker command to perform the desired function.  Assembly
 ##    cobbles together Docker options, its command target(s), and additional
-##    arguments to form an executable docker command.  This function also
+##    arguments to form an executable Docker command.  This function also
 ##    provides a context for resolving variables defined in a template.  A 
-##    template reflects the form of a docker command's arguments.
+##    template reflects the form of a Docker command's arguments.
 ##    A context merges:
 ##      1. The command option and arguments supplied by the user.  These values
 ##         (context) don't change at all during the execution of the particular
@@ -1068,10 +1070,10 @@ function VirtDockerCmmdAssemble () {
 ##    which supersede/overide items defined by "1".  The data elements are
 ##    are ultimately implemented as bash variables.
 ##   
-##    A template describes the docker option/argument syntax for a given docker
-##    command. It consists of potentially constant docker argument value(s),
+##    A template describes the Docker option/argument syntax for a given Docker
+##    command. It consists of potentially constant Docker argument value(s),
 ##    those that never change, as well as variable argument values, those
-##    that change from component to component or one docker command invocation
+##    that change from component to component or one Docker command invocation
 ##    to another.  The variable arguments are encoded as bash variable names
 ##    and must appear in their substitution
 ##    form: $VARIABLE_NAME or ${VARIABLE_NAME}.
@@ -1108,7 +1110,7 @@ function VirtDockerCmmdAssemble () {
 ##  Return Code:     
 ##    When Success:
 ##       A field named 'DockerCommand' is appended to the current packet
-##       containing the compiled docker command.  The updated packet is then
+##       containing the compiled Docker command.  The updated packet is then
 ##       written to SYSOUT.
 ##    When Failure: 
 ##      Issues a notify message to SYSOUT with error messages written
@@ -1164,7 +1166,7 @@ function DockerCmmdAssemble () {
 ## 
 ##  Return Code:     
 ##    When Success:
-##       SYSOUT - Reveals a fully resolved docker command.
+##       SYSOUT - Reveals a fully resolved Docker command.
 ##    When Failure: 
 ##      Issues a notify message to SYSOUT with error messages written
 ##      to SYSERR, then terminate the process.
@@ -1236,9 +1238,9 @@ VirtDockerCmmdAssembleTemplateResolvePacketField () {
 ##  Purpose:
 ##    Manages the execution of one or more fully formed Docker commands.  It
 ##    implements semantics common to all commands, such as the 'show' feature
-##    that writes the docker command to SYSOUT before its execution, and when
+##    that writes the Docker command to SYSOUT before its execution, and when
 ##    directed, performs a virtual function that's responsible to submit
-##    the command to Docker.  Finally, once all the Docker commands have
+##    the command to Docker Daemon.  Finally, once all the Docker commands have
 ##    been submitted and successfully executed, another virtual function 
 ##    is called to perform other clean up actions, like updating the 
 ##    Image GUID catalog after deleting Images from the
@@ -1263,7 +1265,7 @@ VirtDockerCmmdAssembleTemplateResolvePacketField () {
 ## 
 ##  Output:
 ##    SYSOUT - Can represent the command itself and/or the SYSOUT messages 
-##         generated by docker daemon while executing it.
+##         generated by Docker Daemon while executing it.
 ##
 ###############################################################################
 function DockerCmmdExecute () {
@@ -1284,7 +1286,7 @@ function DockerCmmdExecute () {
     PacketConvertToAssociativeMap "$target" 'targetMap'
     local dockerCmmd="${targetMap['DockerCommand']}"
     if [ -z "$dockerCmmd" ]; then
-      # packet doesn't contain a docker command :: forward it.
+      # packet doesn't contain a Docker command :: forward it.
       echo "$target"
       continue
     fi
@@ -1320,8 +1322,8 @@ function VirtDockerCmmdExecPrimaryName () {
 ###############################################################################
 function VirtDockerCmmdExecute () {
   local -r dockerCmmd="$5"
-  # default implementation simply runs the docker command and relies on docker
-  # to provide a meaningful message when the command fails.  Use eval to
+  # default implementation simply runs the Docker command and relies on Docker
+  # Daemon to provide a meaningful message when the command fails.  Use eval to
   # properly parse command options.
   eval $dockerCmmd
   if [ "$?" -ne '0' ]; then return 1; fi
@@ -1339,9 +1341,9 @@ function VirtDockerCmmdExecuteAtCompletion () {
 ##
 ##    This routine implements semantics common to all commands, as it simply
 ##    forwards output, for no execution requests.  In this situation,
-##    there's no docker command output to process.  However, important
+##    there's no Docker command output to process.  However, important
 ##    content may still flow through the pipeline, like one or more
-##    fully formed docker commands.
+##    fully formed Docker commands.
 ##
 ##  Assume:
 ##    Since bash variable names are passed to this routine, these names
@@ -1359,7 +1361,7 @@ function VirtDockerCmmdExecuteAtCompletion () {
 ##    SYSIN - Output from the upstream pipeline.
 ## 
 ##  Output:     
-##    SYSOUT - Potentially altered output form an executed docker command.
+##    SYSOUT - Potentially altered output form an executed Docker command.
 ##
 ###############################################################################
 function DockerCmmdProcessOutput () {
@@ -1399,3 +1401,32 @@ function PipeForwarder (){
   return 0
 }
 FunctionOverrideIncludeGet
+###############################################################################
+# 
+# The MIT License (MIT)
+# Copyright (c) 2014-2015 Richard Moyse License@Moyse.US
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+###############################################################################
+#
+# Docker and the Docker logo are trademarks or registered trademarks of Docker, Inc.
+# in the United States and/or other countries. Docker, Inc. and other parties
+# may also have trademark rights in other terms used herein.
+#
+###############################################################################

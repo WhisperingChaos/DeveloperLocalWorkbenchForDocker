@@ -52,7 +52,7 @@ return 0
 function VirtCmmdHelpDisplay () {
 cat <<COMMAND_HELP_Purpose
 
-Remove targeted Components' images.  Wraps docker 'rmi' command.
+Remove targeted Components' images.  Wraps Docker 'rmi' command.
 
 Usage: dlw rmi [OPTIONS] TARGET 
 
@@ -77,7 +77,7 @@ COMMAND_HELP_Purpose
 ##    Container GUID.
 ##
 ##    Essentially this function converts the Docker Local Workbench
-##    (dlw) Component concept into is associated docker image or container
+##    (dlw) Component concept into is associated Docker image or container
 ##    objects.  A dlw Component is a analogous to class/type definition
 ##    that can be instantiated as an executable object.  Given this definition,
 ##    a Component can be directly mapped to a Docker image (class/type)
@@ -112,7 +112,7 @@ function VirtDockerTargetGenerate (){
   local -r dependGraph="`if $orderlessRMI; then echo 'false'; else echo 'reverse'; fi`"
   # Provide feature to remove orphan containers when deleting it's image,
   # as orphaned containers are essentially garbage without their base image
-  # and docker doesn't currently remove them when executing the rmi command
+  # and Docker doesn't currently remove them when executing the rmi command
   local -r removeContainers="`AssociativeMapAssignIndirect "$optsArgMapNm" '--dlwrm'`"
   if $removeContainers; then
     # forward certain parameters to the rm command
@@ -137,7 +137,7 @@ function VirtDockerTargetGenerate (){
 ##    Provides a means of extending the bash variable name-value pairs 
 ##    defined during template resolution.
 ##
-##    Need the image GUID targeted for delection by the docker rmi command.
+##    Need the image GUID targeted for delection by the Docker rmi command.
 ##
 ##  Output:   
 ##    When Success:
@@ -156,7 +156,7 @@ function VirtDockerCmmdAssembleTemplateResolvePacketField () {
 ###############################################################################
 ##
 ##  Purpose:
-##    Define docker rmi command template.
+##    Define 'docker rmi' command template.
 ##
 ###############################################################################
 function VirtDockerCmmdAssembleTemplate () {
@@ -218,7 +218,7 @@ function VirtDockerCmmdExecute () {
 ##    Scan the rmi output for possible deletions of dangling ancestor images
 ##    that might be managed as a statically included component in the 
 ##    Image GUID Catalog for the image targeted by the rmi command.  After
-##    scanning the output, forward most docker messages to either
+##    scanning the output, forward most Docker messages to either
 ##    SYSOUT or SYSERR. 
 ##
 ##    Also, if Docker returns an unexpected return code, individually delete
@@ -240,7 +240,7 @@ function VirtDockerCmmdExecute () {
 ##    $3 - Variable name to an associative array containing component attributes
 ##         for the one targeted by the rmi command.
 ##    SYSIN - A mixed stream of SYSOUT and SYSERR messages issued by the
-##            docker command.
+##            Docker command.
 ## 
 ##  Return Code:
 ##    When Success:
@@ -268,7 +268,7 @@ function RMIoutputFilterPerCmmd () {
   local -A ancestorMap
   ancestorMap["$templateGUID"]="`eval $REMOVE_REQ_TEMPLATE;`"
   local calcAncestorMap='false'
-  # parse the SYSOUT and SYSERR of the docker rmi command
+  # parse the SYSOUT and SYSERR of the 'docker rmi' command
   local -r deletedLit='Deleted:'
   local -r untaggedLit='Untagged:'
   local anticipatedError='false'
@@ -316,7 +316,7 @@ function RMIoutputFilterPerCmmd () {
     fi
     # probably an error but might not be.  In any case, redirect to SYSERR
     echo "$rmiOutput">&2
-    # an unexpected docker command error, remove individual docker Image GUIDs
+    # an unexpected Docker command error, remove individual Docker Image GUIDs
     # that were successfully deleted before encountering this error.
     "ImageGUIDlist.sh" 'GUIDlistRemove' "$RMI_REMOVE_GUID_TARGET_LIST"
     rm -f "$RMI_REMOVE_GUID_TARGET_LIST"
@@ -397,7 +397,7 @@ function RMIancestorMapUpdate () {
 ###############################################################################
 ##
 ##  Purpose:
-##    After removing images from the local docker repository, now remove
+##    After removing images from the local Docker repository, now remove
 ##    references to these destroyed images from the Image GUID List(s).
 ##    Optimize the removal process by converting individual GUID removal
 ##    requests, based on a GUID into those based on a component version
@@ -428,7 +428,7 @@ function RMIancestorMapUpdate () {
 ##    $3 - dlw command to execute. Maps 1 to 1 onto with Docker command line.
 ##    RMI_REMOVE_GUID_TARGET_LIST - A temporary file containing all the Image
 ##         GUID List file names and GUIDs successfully removed from the local
-##         docker repository.
+##         Docker repository.
 ## 
 ##
 ###############################################################################
@@ -478,7 +478,7 @@ function VirtDockerCmmdExecuteAtCompletion () {
 ##
 ##  Purpose:
 ##    Implements the dlw build command. dlw build command is a wrapper that
-##    calls the docker build command.  dlw assembles command line options
+##    calls the Docker build command.  dlw assembles command line options
 ##
 ##  Assumption:
 ##    Since bash variable names are passed to this routine, these names
@@ -506,3 +506,32 @@ function VirtCmmdExecute (){
 }
 FunctionOverrideCommandGet
 source "ArgumentsMainInclude.sh";
+###############################################################################
+# 
+# The MIT License (MIT)
+# Copyright (c) 2014-2015 Richard Moyse License@Moyse.US
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+###############################################################################
+#
+# Docker and the Docker logo are trademarks or registered trademarks of Docker, Inc.
+# in the United States and/or other countries. Docker, Inc. and other parties
+# may also have trademark rights in other terms used herein.
+#
+###############################################################################

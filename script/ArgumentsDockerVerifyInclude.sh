@@ -5,7 +5,7 @@
 ##    Extract and format Docker command options.
 ##
 ##  Output:
-##    SYSOUT - A list of docker options for the provided command.
+##    SYSOUT - A list of Docker options for the provided command.
 ##
 ###############################################################################
 function DockerOptionsFormat () {
@@ -78,10 +78,10 @@ function HelpComponentNoPrereq () {
   echo "                                      target list."
 }
 function HelpIgnoreStateDocker () {
-  HelpTrueFalseOption '--dlwign-state' ' Ignore container state when generating docker command.' "$1"
+  HelpTrueFalseOption '--dlwign-state' ' Ignore container state when generating Docker command.' "$1"
 }
 function HelpNoExecuteDocker () {
-  HelpTrueFalseOption '--dlwno-exec' '   Do not execute the generated docker command.' "$1"
+  HelpTrueFalseOption '--dlwno-exec' '   Do not execute the generated Docker command.' "$1"
 }
 function HelpShowDocker (){
   local defaultValue="$1"
@@ -89,7 +89,7 @@ function HelpShowDocker (){
     ShowOptionVerify "$defaultValue";
   fi
   defaultValue="`ColumnPadding "$defaultValue" 6`"
-  echo "    --dlwshow=$defaultValue      Write the generated docker command to SYSOUT."
+  echo "    --dlwshow=$defaultValue      Write the generated Docker command to SYSOUT."
 }
 function HelpHelpDisplay (){
   HelpTrueFalseOption '--help' '         Display help for this command.' "$1"
@@ -334,3 +334,33 @@ function ShowOptionVerify () {
   return 1;
 }
 FunctionOverrideIncludeGet
+###############################################################################
+#
+# The MIT License (MIT)
+# Copyright (c) 2014-2015 Richard Moyse License@Moyse.US
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+#
+###############################################################################
+#
+# Docker and the Docker logo are trademarks or registered trademarks of Docker, Inc.
+# in the United States and/or other countries. Docker, Inc. and other parties
+# may also have trademark rights in other terms used herein.
+#
+###############################################################################
+
