@@ -101,7 +101,7 @@ function VirtCmmdExecute (){
   fi
   if $showBugs; then
     echo
-    echo "Bugs: GitHub: https://github.com/WhisperingChaos/DevelperLocalWorkbenchForDocker" 
+    echo "Bugs: GitHub: https://github.com/WhisperingChaos/DeveloperLocalWorkbenchForDocker" 
   fi
 }
 source "ArgumentsMainInclude.sh";
