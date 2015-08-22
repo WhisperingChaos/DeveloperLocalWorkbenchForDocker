@@ -1895,8 +1895,7 @@ function dlw_Test_4 () {
     ContainerCreateAssert $LINENO 'dlw_sshserver' 2 3
     ReportRun $LINENO 'dlw.sh ps -a --dlwcomp-ver=all -- all'
     ReportLineCntAssert $LINENO 5
-    #ReportScanTokenIncludeAssert $LINENO 'CONTAINER' 'IMAGE' 'dlw_sshserver:latest'
-    ReportScanTokenIncludeAssert $LINENO 'CONTAINER' 'IMAGE' 'dlw_sshserver'
+    ReportScanTokenIncludeAssert $LINENO 'CONTAINER' 'IMAGE' 'dlw_sshserver:latest'
     ReportRun $LINENO 'dlw.sh ps -a --dlwcomp-ver=allButCur -- all'
     ReportLineCntAssert $LINENO 3
     ReportScanTokenIncludeAssert $LINENO 'CONTAINER' 'IMAGE'

@@ -847,23 +847,15 @@ function DockerTargetContainerGUIDGenerate (){
       echo "$packet"
       continue;
     fi
-    #TODO: Problem introduced in Docker 1.6 that adds Docker tag to GUID.
-    #  remove once Docker Inc. applies patch: #12918.  Remove all code below
-    #  that references imageGUIDhex
-    local imageGUIDhex=''
-    # Docker  CLI prefers displaying Repository:Tag instead of Image GUID
+    # docker prefers displaying Repository:Tag instead of Image GUID
     local imageReposTagName="${imageGUIDreposTag["$imageGUID"]}"
     if [ -n "$imageReposTagName" ]; then
       # treat Repository:Tag as Image GUID
-      imageGUIDhex="$imageGUID"
       imageGUID="$imageReposTagName"
     fi
     (( ++packetOrder ))
     PacketAddFromStrings "$packet"  'DependencyOrder' "$packetOrder" 'packet'
     imageGUIDfilterMap["$imageGUID"]="$packet"
-    if [ -n "$imageGUIDhex" ]; then
-      imageGUIDfilterMap["$imageGUIDhex"]="$packet"
-    fi
   done < <( DockerTargetImageGUIDGenerate "$optsArgListNm" "$optsArgMapNm" "$commandNm" "$componentPrereq" 'true' "$restrictToCompList" )
 
   function ExtractToFirstWhiteSpace () {
@@ -897,14 +889,7 @@ function DockerTargetContainerGUIDGenerate (){
     if [ -z "$possibleImageGUID" ]; then continue; fi
     # might be heading or unwanted image GUID
     packet="${imageGUIDfilterMap["$possibleImageGUID"]}"
-    if [ -z "$packet" ]; then 
-      #TODO: Problem introduced in Docker 1.6 that adds Docker tag to GUID.
-      #  remove once Docker Inc. applies patch: #12918
-      # Image GUID in ps command is always truncated even when --no-trunc
-      possibleImageGUID="${possibleImageGUID:0:12}"
-      packet="${imageGUIDfilterMap["$possibleImageGUID"]}"
-      if [ -z "$packet" ]; then continue; fi
-    fi
+    if [ -z "$packet" ]; then continue; fi
     # does container pass status filter
     $stateFilterApply && if ! VirtContainerStateFilterApply "${psReport:$containerStatusColOff}"; then continue; fi
     # add the container GUID to the packet then forward it.
