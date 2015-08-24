@@ -903,8 +903,19 @@ function DockerTargetContainerGUIDGenerate (){
       # Image GUID in ps command is always truncated even when --no-trunc
       possibleImageGUID="${possibleImageGUID:0:12}"
       packet="${imageGUIDfilterMap["$possibleImageGUID"]}"
-      if [ -z "$packet" ]; then continue; fi
-    fi
+      if [ -z "$packet" ]; then
+        #TODO: Docker 1.6 problem - not only can a tag be added to the GUID
+        # but the Image GUID may only reflect just a repository name without
+        # a tag and in some cases, the wrong name.  Therefore, consider the
+        # image GUID appearing in the ps report corrupt.  Which leaves
+        # using 'docker inspect' to reveal the container's image GUID.
+        # Diminishes performance, but one gets the correct answer.
+        possibleImageGUID=$( docker inspect --format='{{.Image}}' ${psReport:$containerGUIDColOff:$GUIDlen})
+        possibleImageGUID="${possibleImageGUID:0:12}"
+        packet="${imageGUIDfilterMap["$possibleImageGUID"]}"      
+        if [ -z "$packet" ]; then continue; fi
+      fi
+     fi
     # does container pass status filter
     $stateFilterApply && if ! VirtContainerStateFilterApply "${psReport:$containerStatusColOff}"; then continue; fi
     # add the container GUID to the packet then forward it.
