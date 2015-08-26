@@ -12,7 +12,7 @@ ADD ./scriptInstall/* /usr/bin/scriptInstall/
 # PATH variable.
 ADD .bash_aliases /usr/bin/scriptInstall/
 # Install desired packages.
-RUN /usr/bin/scriptInstall/installPackages.sh 'lxc-docker' 'make' 'tmux' \
+RUN /usr/bin/scriptInstall/installPackages.sh 'docker-engine' 'make' 'tmux' \
     # Create the dlw non-root user to provide another level of isolation
     # within the containers spawned from this image.
     && /usr/bin/scriptInstall/installUsers.sh 'dlw' \

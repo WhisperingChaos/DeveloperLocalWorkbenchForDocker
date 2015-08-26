@@ -90,7 +90,7 @@ function VirtCmmdExecute (){
   echo "Version: dlw (developer local workbench): 0.6"
   if $showDepend; then 
     echo
-    echo "Depends on: Docker:   version: `read version < <(docker version); echo "$version"|sed 's/Client version: \([^.]*\.[^.]*\).*/\1/'`.x"
+    echo "Depends on: Docker:   version: `read version < <(docker version --format {{.Client.Version}}); echo "$version"|sed 's/\([^.]*\.[^.]*\).*/\1/'`.x"
     echo "Depends on: GNU bash: version: `read version < <(bash --version); echo "$version"|sed -r 's/GNU bash[, ]+version[ ]+([^.]+\.[^.]+[^ ]+).*/\1/'`"
     echo "Depends on: tmux:     version: `read version < <(tmux -V); echo "$version"|sed -r 's/tmux[ ]+([^.]+\.+[^ ]+).*/\1/'`"
   fi
