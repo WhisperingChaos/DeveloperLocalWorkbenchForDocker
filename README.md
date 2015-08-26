@@ -31,6 +31,7 @@ Although Docker Inc. provides [Compose](https://docs.docker.com/compose/), a Tru
 ### Features
 
 + Use simple commands like ```dlw build```,```dlw run```, and ```dlw images``` to manage and report on a service composed from multiple cooperating containers.
++ Extend ```docker build``` using integrated [GNU make](https://www.gnu.org/software/make/) facility.  For example, employ ```make``` to construct all final artifacts in the host file system producing a build context that's simply copied into a container, such as [scratch](https://hub.docker.com/_/scratch/), resulting in a minimally sized container for deployment.  
 + Launch and concurrently attach to the terminal interfaces of multiple containers using the terminal multiplex feature of [tmux](http://tmux.sourceforge.net/).
 + Combined tmux, [linux watch](http://en.wikipedia.org/wiki/Watch_%28Unix%29) and reporting commands, like ```dlw top```, to actively monitor the status of multiple containers.
 + Generate Docker&reg; CLI stream including command line arguments stored in a file, using a rudimentary command template.
