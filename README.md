@@ -32,7 +32,7 @@ Although Docker Inc. provides [Compose](https://docs.docker.com/compose/), a Tru
 
 + Use simple commands like ```dlw build```,```dlw run```, and ```dlw images``` to manage and report on a service composed from multiple cooperating containers.
 + Extend ```docker build``` using integrated [GNU make](https://www.gnu.org/software/make/) facility.  For example, employ ```make``` to construct all final artifacts in the host file system producing a build context that's simply copied into a container, such as [scratch](https://hub.docker.com/_/scratch/), resulting in a minimally sized container for deployment.  
-+ Launch and concurrently attach to the terminal interfaces of multiple containers using the terminal multiplex feature of [tmux](http://tmux.sourceforge.net/).
++ Launch and concurrently attach to the terminal interfaces of multiple containers using the terminal multiplex feature of [tmux](http://tmux.github.io/).
 + Combined tmux, [linux watch](http://en.wikipedia.org/wiki/Watch_%28Unix%29) and reporting commands, like ```dlw top```, to actively monitor the status of multiple containers.
 + Generate Docker&reg; CLI stream including command line arguments stored in a file, using a rudimentary command template.
 + Enhance report generation by associating custom properties to a Docker&reg; image. 
@@ -161,7 +161,7 @@ Create new containers for all Components then run and attach to their ttys.
   + Ex: ```dlw run -d``` Constructs a container from the ycomponent image and runs it.  Should output the Docker&reg; GUID for the newly constructed and running container.
 + Attach a Project's active container terminal instances to either a new or an existing tmux session.
   + Ex: ```dlw tmux``` Creates a tmux session named 'xproject'. It consists of two terminal sessions (tmux windows): one running bash and the second connected to the executing container derived from 'ycomponent'.
-+ Use [tmux](http://tmux.sourceforge.net/) attach command to connect to tmux session.
++ Use [tmux](http://tmux.github.io/) attach command to connect to tmux session.
   + Ex: ```tmux attach``` Attaches the current tmux session named ```xproject```.
 + Terminate tmux window running container via 'exit' command.
 + Terminate tmux bash window via 'exit' command.  This should return control to the ```dlw```'s container terminal.
@@ -252,6 +252,7 @@ Since ```dlw run``` wraps its companion ```docker run```, it inherits its myriad
   ```
 > dlw run -d
 > dlw tmux
+> tmux a
 ```
 + **Another way to accomplish the same outcome as above:**
 
@@ -259,15 +260,17 @@ Since ```dlw run``` wraps its companion ```docker run```, it inherits its myriad
 > dlw create
 > dlw start
 > dlw tmux
+> tmux a
 ```
 
 #### Exploring Commands: tmux
 
-[tmux](http://tmux.sourceforge.net/) implements a popular terminal multiplexer enabling the ```dlw``` to launch and concurrently attach to the terminal interfaces of multiple containers.  ```dlw tmux``` executes a recursive call to first generate the Docker&reg; CLI stream from the ```dlw``` command specified via its ```--dlwc``` option then partition this stream into individual ```tmux new-window``` commands.  Each individual ```tmux new-window``` command for a given execution of the ```dlw tmux``` will be assigned to the same tmux session.  The name of this session defaults to the Project's name or one specified as an argument to the ```dlw tmux``` command.  Besides the tmux terminals produced by the the Docker&reg; CLI stream, each newly created session includes an additional bash terminal.  If desired, ```dlw``` commands can be issued from this tmux managed window.  Note, the resulting Docker&reg; command must keep STDIN open in order to persist its ```tmux``` window (terminal), otherwise, the ```tmux``` window will close.  When STDIN closes immediately, it may seem as if the ```dlw``` command completely or partially failed due to the absence of an "expected" window.  Therefore, please ensure the specific Docker&reg; CLI command generated from the ```dlw``` persists STDIN before assuming an abnormality in ```dlw``` execution.  Finally, for commands, like ```dlw {ps|image|port...}```, which at completion immediately close STDIN, use the ```dlw watch``` command to persist STDIN's open status and periodically re-execute the ```dlw``` command.  
+[tmux](http://tmux.github.io/) implements a popular terminal multiplexer enabling the ```dlw``` to launch and concurrently attach to the terminal interfaces of multiple containers.  ```dlw tmux``` executes a recursive call to first generate the Docker&reg; CLI stream from the ```dlw``` command specified via its ```--dlwc``` option then partition this stream into individual ```tmux new-window``` commands.  Each individual ```tmux new-window``` command for a given execution of the ```dlw tmux``` will be assigned to the same tmux session.  The name of this session defaults to the Project's name or one specified as an argument to the ```dlw tmux``` command.  Besides the tmux terminals produced by the the Docker&reg; CLI stream, each newly created session includes an additional bash terminal.  If desired, ```dlw``` commands can be issued from this tmux managed window.  Note, the resulting Docker&reg; command must keep STDIN open in order to persist its ```tmux``` window (terminal), otherwise, the ```tmux``` window will close.  When STDIN closes immediately, it may seem as if the ```dlw``` command completely or partially failed due to the absence of an "expected" window.  Therefore, please ensure the specific Docker&reg; CLI command generated from the ```dlw``` persists STDIN before assuming an abnormality in ```dlw``` execution.  Finally, for commands, like ```dlw {ps|image|port...}```, which at completion immediately close STDIN, use the ```dlw watch``` command to persist STDIN's open status and periodically re-execute the ```dlw``` command.  
 
 + **Attach to already running containers, derived from the Current Version of the Project's Components, started as interactive (STDIN open) and detached**
   ```
 > dlw tmux
+> tmux a
 ```
 
 + **Monitor the status of all running containers for any Component version.**
@@ -275,6 +278,7 @@ Since ```dlw run``` wraps its companion ```docker run```, it inherits its myriad
 > dlw tmux --dlwc='watch --dlwc="'"ps --dlwcomp-ver=all"'"'
 > # or equivalent to minimize quoting
 > dlw tmux --dlwc 'watch --dlwc "ps --dlwcomp-ver=all"'
+> tmux a
 ```
 
 ### Declaring Dependencies
@@ -338,7 +342,7 @@ dlw_apache.run : dlw_mysql.run
   + [GNU bash](https://www.gnu.org/software/bash/): [4.2.25(1)-release](http://manpages.ubuntu.com/manpages/precise/man1/bash.1.html)
 + [Docker&reg; Daemon (Client)](https://docs.docker.com/reference/commandline/cli/): lxc-docker-?.?.?
 + [GNU make](http://www.gnu.org/software/make/manual/html_node/index.html): [3.81-8.1ubuntu1.1](http://packages.ubuntu.com/precise/make)
-+ [tmux](http://tmux.sourceforge.net/): [1.9a-1~ppa1~p](https://launchpad.net/~pi-rho/+archive/ubuntu/dev/+index?field.series_filter=precise)
++ [tmux](http://tmux.github.io/): [1.9a-1~ppa1~p](https://launchpad.net/~pi-rho/+archive/ubuntu/dev/+index?field.series_filter=precise)
 + [Developer Local Workbench For Docker](https://github.com/WhisperingChaos/DeveloperLocalWorkbenchForDocker)
 
 ### License
