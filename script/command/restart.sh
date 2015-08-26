@@ -28,7 +28,7 @@ function VirtContainerStateFilterApply () {
   if [ "${dockerStatus:0:2}" == 'Up' ] && ! [[ "$dockerStatus" =~ .*\(Paused\) ]]; then
     return 0;
   fi
-  if [ "${dockerStatus:0:2}" == '  ' ] || [ "${dockerStatus:0:6}" == 'Exited' ] ; then
+  if [ "${dockerStatus:0:2}" == '  ' ] || [ "${dockerStatus:0:6}" == 'Exited' ] || [ "${dockerStatus:0:7}" == 'Created' ]  ; then
     # restart acts as start
     return 0;
   fi

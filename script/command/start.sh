@@ -29,7 +29,7 @@ function VirtDockerContainerCompArgDefault () {
 ##############################################################################
 function VirtContainerStateFilterApply () {
   local -r dockerStatus="$1"
-    if [ "${dockerStatus:0:2}" == '  ' ] || [ "${dockerStatus:0:6}" == 'Exited' ] ; then
+    if [ "${dockerStatus:0:2}" == '  ' ] || [ "${dockerStatus:0:6}" == 'Exited' ] || [ "${dockerStatus:0:7}" == 'Created' ] ; then
     return 0;
   fi
   return 1
