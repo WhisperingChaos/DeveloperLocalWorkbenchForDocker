@@ -312,7 +312,9 @@ function RMIoutputFilterPerCmmd () {
       continue
     elif $anticipatedError; then
       anticipatedError='false'
-      if [[ $rmiOutput =~ .*Error:.failed.to.remove.one.or.more.images.* ]]; then continue; fi
+      # API change in response. Newer response checked before older one.  
+      # older response retained for backward compatibility.
+      if [[ $rmiOutput =~ ^Error:.failed.to.remove.images:.* ]] || [[ $rmiOutput =~ .*Error:.failed.to.remove.one.or.more.images.* ]]; then continue; fi
     fi
     # probably an error but might not be.  In any case, redirect to SYSERR
     echo "$rmiOutput">&2
