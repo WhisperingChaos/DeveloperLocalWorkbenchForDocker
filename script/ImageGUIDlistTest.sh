@@ -1,7 +1,10 @@
 #!/bin/bash
 INC_Scripts=$(dirname "${BASH_SOURCE[0]}");
 source "$INC_Scripts/MessageInclude.sh";
-TMPDIR="\tmp"
+source "$INC_Scripts/ImageGUIDlist.sh" include;
+
+export TMPDIR='/tmp'
+export IMAGE_BUILD_TIMESTAMP_DIR="$TMPDIR"
 ###############################################################################
 ##
 ##  Purpose:
@@ -36,7 +39,7 @@ function GUIDgen () {
 ###############################################################################
 ##
 ##  Purpose:
-##    Create a pseudo Image GUID List.
+##    Create a pseudo Image GUID List and its corresponding "build" file.
 ##  
 ##  Input:
 ##    $1  - File name to create.
@@ -47,6 +50,9 @@ function ImageGUIDListFileCreate () {
   local -r imageGUIDFileName="$1"
   local -r GUIDgenCnt="$2"
   if [ -f "$imageGUIDFileName" ]; then ScriptUnwind $LINENO "File already exists!  Remove it or change name: '$imageGUIDFileName'"; fi
+  local buildTmStmpFileName
+  BuildTimeStampNameGen "$imageGUIDFileName" 'buildTmStmpFileName'
+  if ! touch "$buildTmStmpFileName"; then ScriptUnwind $LINENO "Problem creating build file!  Name: '$buildTmStmpFileName'"; fi
   GUIDgen $GUIDgenCnt >>"$imageGUIDFileName"
   return 0;
 }
@@ -141,42 +147,9 @@ function GUIDremovalByGUIDAssert ()  {
     ScriptUnwind $LINENO "One of the files is nonexistent while the other one exists: Actual: '$imageGUIDFile' Anticipated '$GUIDpreserveFile'";
   fi
   if ! rm -f "$GUIDremovalFile";  then ScriptUnwind $LINENO "Remove failed for: '$GUIDremovalFile'.";  fi
-  if ! rm -f "$imageGUIDFile";    then ScriptUnwind $LINENO "Remove failed for: '$imageGUIDFile'.";    fi
+  if ! "$INC_Scripts/ImageGUIDlist.sh" 'allRemove' "$imageGUIDFile"; then ScriptUnwind $LINENO "Remove failed for: '$imageGUIDFile'.";    fi
   if ! rm -f "$GUIDpreserveFile"; then ScriptUnwind $LINENO "Remove failed for: '$GUIDpreserveFile'."; fi
 }
-###############################################################################
-##
-##  Purpose:
-##    Test Image GUID List removal methods preserve timestamp.
-##  
-##  Input:
-##    $1  - A selector determining which GUIDs from the Image GUID List
-##          should be deleted.  Valid values: 'cur', 'allButCur', and 'all' 
-##    $2  - Number of pseudo GUIDs to generate.
-##
-###############################################################################
-function ImageModifyDatePreserveAssert ()  {
-  function CompVersionVerify () {
-    if [ "$1" == 'cur' ];       then return 0; fi
-    if [ "$1" == 'allButCur' ]; then return 0; fi
-    ScriptUnwind $LINENO "Invalid GUID removal request:'$1'."
-  }
-  local -r compVersion="$1"
-  CompVersionVerify "$compVersion"
-  local -r GUIDcntToGen="$2"
-  local -r imageGUIDFile="`mktemp -u`"
-  ImageGUIDListFileCreate "$imageGUIDFile" "$GUIDcntToGen"
-  local -r imageGUIDFileTimeStampBefore="`stat -c %Y "$imageGUIDFile"`"
-  # mtime must implement resolution of at least 1 second
-  sleep 1s
-  if ! "$INC_Scripts/ImageGUIDlist.sh" "${compVersion}Remove" "$imageGUIDFile"; then ScriptUnwind $LINENO "${compVersion}Remove failed."; fi
-  local -r imageGUIDFileTimeStampAfter="`stat -c %Y "$imageGUIDFile"`"
-  if [ "$imageGUIDFileTimeStampBefore" -ne "$imageGUIDFileTimeStampAfter" ]; then
-     ScriptUnwind $LINENO "${compVersion}Remove failed to preserve time stamp.  GUID File: '$imageGUIDFile' TimeStampBefore '$imageGUIDFileTimeStampBefore' TimeStampAfter: '$imageGUIDFileTimeStampAfter'"
-  fi
-  if ! rm -f "$imageGUIDFile"; then ScriptUnwind $LINENO "Remove failed for: '$imageGUIDFile'.";    fi
-}
-
 ###############################################################################
 ##
 ##  Purpose:
@@ -231,23 +204,72 @@ function GUIDlistRemoveTest () {
 ###############################################################################
 ##
 ##  Purpose:
-##    Test Image GUID List removal functions to ensure they preserve mtime.
-##  
+##    To ensure that the current image GUID to be added to a given component's
+##    Image GUID List doesn't generate a duplicate GUID entry.  This situation
+##    can occur when an image's current build context matches the build context
+##    of one of its prior builds.  If this should occur, the prior GUID entry
+##    should be removed by the 'Add' operation and the 'cur' entry GUID should
+##    reflect the value of this prior one.
+##
 ###############################################################################
-function GUIDlistRemoveModifyDatePreserveTest () {
-  echo "$FUNCNAME Test 1: Remove the current Image GUID, leaving at least one"
-  echo "$FUNCNAME Test 1:   other GUID in the file." 
-  ImageModifyDatePreserveAssert  'cur' 2
-  echo "$FUNCNAME Test 1: Successful"
-  echo "$FUNCNAME Test 2: Remove the all but the current Image GUID, leaving at least one"
-  echo "$FUNCNAME Test 2:   other GUID in the file." 
-#  ImageModifyDatePreserveAssert  'allButCur' 3
-  echo "$FUNCNAME Test 2: Successful"
+function GUIDswapToCurrTest ()  {
+  echo "$FUNCNAME Test 11: Given a current image build context that matches a previous version"
+  echo "$FUNCNAME Test 11:   ensure that Add removes the previous version from its 'allButCur'"
+  echo "$FUNCNAME Test 11:   location in the components GUID list and adds it as the 'cur' GUID."
+  echo "$FUNCNAME Test 11:   Be patient - creating and removing actual containers."
+
+  local -r GUIDlistDir="$TMPDIR"
+  local -r imageNameActual='dlw_test_image_actual'
+  local -r GUIDlistActual="$GUIDlistDir/$imageNameActual"
+  local -r imageNameExpected='dlw_test_image_expected'
+  local -r GUIDlistExpected="$GUIDlistDir/$imageNameExpected"
+
+  function TestContent () {
+    local -r GUIDlistFilePath="$1"
+    local -r ComponentName="$2"
+    local -r CONTENT="$3"
+    local -r imageGUIDrtnRef=$4
+    docker build -t $ComponentName - > /dev/null <<dlw_Test_Image
+FROM scratch
+ENV CONTENT_ENV $CONTENT
+dlw_Test_Image
+
+
+    if ! [ "$?" == '0' ]; then ScriptUnwind $LINENO "Docker build failed for Component Name: '$ComponentName', Content: '$CONTENT'."; fi 
+    if ! "$INC_Scripts/ImageGUIDlist.sh" 'Add'  "$GUIDlistFilePath" "$ComponentName"; then
+      ScriptUnwind $LINENO "GUID 'Add' failed.  GUID file path: '$GUIDlistFilePath', Component Name: '$ComponentName'."
+    fi
+    eval $imageGUIDrtnRef=\"\$\( docker inspect \-\-format\=\"\{\{\.Id\}\}\" \$ComponentName \)\"
+}
+  local imageGUID
+  # actual Add operations
+  TestContent "$GUIDlistActual" "$imageNameActual" 'content_1' 'imageGUID';
+  TestContent "$GUIDlistActual" "$imageNameActual" 'content_2' 'imageGUID';
+  local -r imageGUIDcontent_2="$imageGUID"
+  TestContent "$GUIDlistActual" "$imageNameActual" 'content_1' 'imageGUID';
+  # Above is eqivalent to below:
+  TestContent "$GUIDlistExpected" "$imageNameExpected" 'content_2' 'imageGUID';
+  TestContent "$GUIDlistExpected" "$imageNameExpected" 'content_1' 'imageGUID';
+
+  if ! cmp "$GUIDlistActual" "$GUIDlistExpected"; then 
+      ScriptUnwind $LINENO "Actual file differs from its anticipated one.  Actual: '$GUIDlistActual', Anticipated '$GUIDlistExpected'."
+  fi
+  if ! "$INC_Scripts/ImageGUIDlist.sh" 'allRemove'  "$GUIDlistActual"; then
+    ScriptUnwind $LINENO "Removal of Image GUID List: '$GUIDlistActual' failed.";
+  fi
+  if ! "$INC_Scripts/ImageGUIDlist.sh" 'allRemove'  "$GUIDlistExpected"; then
+    ScriptUnwind $LINENO "Removal of Image GUID List: '$GUIDlistExpected' failed.";
+  fi
+  if ! docker rmi $imageNameActual $imageNameExpected $imageGUIDcontent_2 > /dev/null; then
+    ScriptUnwind $LINENO "Removal of Image GUID List: '$imageNameActual $imageNameExpected $imageGUIDcontent_2' failed.";
+  fi
+
+  echo "$FUNCNAME Test 11: Successful"
 }
 
 function main () {
   GUIDlistRemoveTest
-  GUIDlistRemoveModifyDatePreserveTest
+  GUIDswapToCurrTest 
 }
 
 main

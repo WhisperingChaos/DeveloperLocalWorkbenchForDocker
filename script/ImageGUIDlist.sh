@@ -62,6 +62,13 @@ function Add () {
        # nothing really changed since last build :: don't 
        # update the Image GUID List file
        return 0;
+    else 
+       # due to Docker image caching, a once prior image can become the new current one
+       # when the build context artifacts assume a state that generates
+       # a prior image state.  Therefore, one needs to check all the GUIDs.
+      local -A GUIDlistMap
+      GUIDlistMap["$dockerImageKey"]='true'
+      GUIDlistRemoveScan "$1" 'GUIDlistMap'
     fi
     #  image GUID is different :: the build actually changed the contents of the
     #  image, so save this new GUID.
@@ -245,16 +252,29 @@ function GUIDlistRemoveScan () {
   local -r imageGUIDListFileName="$1"
   local -r imageGUIDMapNm="$2"
   local atLeastOne='false'
+  local noneRemoved='true'
   if ! local -r GUIDlistRemainFileNm="`mktemp --tmpdir="$TMPDIR"`"; then Unwind $LINENO; fi
   local entry
   while read entry; do
     local imageGUID="${entry:0:64}"
     eval local removeGUID=\"\$\{$imageGUIDMapNm\[\"\$imageGUID\"]\}\"
-    if [ "$removeGUID" == 'true' ]; then continue; fi
+    if [ "$removeGUID" == 'true' ]; then 
+      noneRemoved='false';
+      continue; 
+    fi
     atLeastOne='true'
     echo "$entry">>"$GUIDlistRemainFileNm"
   done < "$imageGUIDListFileName"
+  if $noneRemoved; then
+    # nothing removed from GUID List :: remove temporary file
+    # as it's simply a duplicate.
+    if ! rm "$GUIDlistRemainFileNm"; then Unwind $LINENO; fi
+    return 0
+  fi
+  # at least one GUID was removed.
   if $atLeastOne; then
+    # at least one GUID still exists :: replace current Image GUID List
+    # with the GUIDs that remain.
     if ! mv "$GUIDlistRemainFileNm" "$imageGUIDListFileName"; then Unwind $LINENO; fi
   else
    if ! rm "$imageGUIDListFileName";                   then Unwind $LINENO; fi
@@ -332,6 +352,7 @@ function Unwind (){
     allButCur)              AllExceptCurrent       "$2"           ;;
     allButCurRemove)        AllExceptCurrentRemove "$2"           ;;
     GUIDlistRemove)         GUIDlistRemove         "$2"           ;;
+    include)                return 0                              ;;
     *) Unwind $LINENO "Unknown method specified: '$1'"            ;;
   esac
   if [ $? -ne 0 ]; then Unwind $LINENO; fi
