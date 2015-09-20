@@ -911,7 +911,11 @@ function DockerTargetContainerGUIDGenerate (){
         # using 'docker inspect' to reveal the container's image GUID.
         # Diminishes performance, but one gets the correct answer.
         possibleImageGUID=$( docker inspect --format='{{.Image}}' ${psReport:$containerGUIDColOff:$GUIDlen})
+        # Containers may not have images.  This happens 
+        # when you force an image deletion. Therefore, 
+        # the format command may not return an image id.
         possibleImageGUID="${possibleImageGUID:0:12}"
+        if [ -z "$possibleImageGUID" ]; then continue; fi
         packet="${imageGUIDfilterMap["$possibleImageGUID"]}"      
         if [ -z "$packet" ]; then continue; fi
       fi
